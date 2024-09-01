@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/white"
+    tools:context=".fragment.FragmentRes" >
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+        <com.abdshammout.UBV.UltimateBreadcrumbsView
+            android:id="@+id/header"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="10dp"
+            app:backButtonBackground="@color/transparent"
+            app:activePathItemBackground="@color/transparent"
+            app:activePathItemTextColor="@color/steel_blue"
+            app:pathItemBackground="@color/transparent"
+            app:pathItemTextColor="@color/black" >
+        </com.abdshammout.UBV.UltimateBreadcrumbsView>
+        <TextView
+            android:id="@+id/button_update"
+            style="@style/RachelText.Image"
+            android:padding="10dp"
+            app:drawableTopCompat="@drawable/svg_res_update"
+            android:text="更新" />
+    </LinearLayout>
+    <com.yinlin.rachel.view.LineView
+        android:layout_width="match_parent"
+        android:layout_height="1dp" />
+    <com.xuexiang.xui.widget.statelayout.StatefulLayout
+        android:id="@+id/state"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        app:stf_inAnimation="@android:anim/slide_in_left"
+        app:stf_outAnimation="@android:anim/slide_out_right">
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="3dp" />
+    </com.xuexiang.xui.widget.statelayout.StatefulLayout>
+</LinearLayout>

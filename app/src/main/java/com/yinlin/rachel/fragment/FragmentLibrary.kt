@@ -1,0 +1,152 @@
+package com.yinlin.rachel.fragment
+
+import android.annotation.SuppressLint
+import android.view.View
+import androidx.recyclerview.widget.GridLayoutManager
+import com.xuexiang.xui.utils.XToastUtils
+import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog
+import com.yinlin.rachel.R
+import com.yinlin.rachel.RachelMessage
+import com.yinlin.rachel.data.MusicInfo
+import com.yinlin.rachel.data.Playlist
+import com.yinlin.rachel.databinding.FragmentLibraryBinding
+import com.yinlin.rachel.databinding.ItemMusicBinding
+import com.yinlin.rachel.load
+import com.yinlin.rachel.model.RachelAdapter
+import com.yinlin.rachel.model.RachelFragment
+import com.yinlin.rachel.model.RachelOnClickListener
+import com.yinlin.rachel.model.RachelPages
+import java.util.Arrays
+
+
+class FragmentLibrary(pages: RachelPages, private val musicInfos: MutableMap<String, MusicInfo>,
+    private val playlists: MutableMap<String, Playlist>) : RachelFragment<FragmentLibraryBinding>(pages) {
+    class Adapter(private val pages: RachelPages, private val fragment: FragmentLibrary)
+        : RachelAdapter<ItemMusicBinding, MusicInfo>(fragment.musicInfos.values.toMutableList()) {
+        internal var isManageMode = false
+        val checkStatus = BooleanArray(items.size)
+
+        override fun bindingClass() = ItemMusicBinding::class.java
+
+        override fun init(holder: RachelViewHolder<ItemMusicBinding>) {
+            holder.v.select.setOnCheckedChangeListener { _, isChecked ->
+                checkStatus[holder.bindingAdapterPosition] = isChecked
+            }
+        }
+
+        override fun update(v: ItemMusicBinding, item: MusicInfo, position: Int) {
+            v.name.text = item.name // 歌名
+            v.id.text = item.id // 编号
+            v.version.text = item.version // 版本
+            v.pic.load(pages.ril, item.recordPath) // 封面
+            // 选择器
+            v.select.visibility = if (isManageMode) View.VISIBLE else View.GONE
+            v.select.setCheckedSilent(checkStatus[position])
+        }
+
+        override fun onItemClicked(v: ItemMusicBinding, item: MusicInfo, position: Int) {
+            if (isManageMode) {
+                checkStatus[position] = !checkStatus[position]
+                notifyItemChanged(position)
+            } else {
+                pages.popSecond()
+                pages.sendMessage(RachelPages.music, RachelMessage.MUSIC_START_PLAYER,
+                    Playlist(pages.getResString(R.string.default_playlist_name), item.id!!))
+            }
+        }
+
+        @SuppressLint("NotifyDataSetChanged")
+        override fun onItemLongClicked(v: ItemMusicBinding, item: MusicInfo, position: Int) {
+            if (!isManageMode) {
+                checkStatus[position] = true
+                fragment.setManageMode(View.VISIBLE)
+                notifyDataSetChanged()
+            }
+        }
+
+        // 获取所有选中歌曲的编号
+        val checkIds: List<String> get() {
+            val arr = ArrayList<String>()
+            for ((index, item) in items.withIndex()) {
+                if (checkStatus[index]) arr += item.id!!
+            }
+            return arr
+        }
+    }
+
+    private var adapter = Adapter(pages, this)
+
+    override fun bindingClass() = FragmentLibraryBinding::class.java
+
+    override fun init() {
+        // 添加歌单
+        v.buttonPlaylist.setOnClickListener(RachelOnClickListener(View.OnClickListener {
+            if (playlists.isEmpty()) {
+                XToastUtils.warning("没有创建任何歌单")
+                return@OnClickListener
+            }
+            val selectIds = adapter.checkIds
+            if (selectIds.isEmpty()) {
+                XToastUtils.warning("请至少选择一首歌曲")
+                return@OnClickListener
+            }
+            // 获得所有歌单名供选择
+            MaterialDialog.Builder(pages.context).iconRes(R.mipmap.icon)
+                .title("添加到歌单").positiveText(R.string.ok).negativeText(R.string.cancel)
+                .items(playlists.keys).itemsCallbackSingleChoice(0) { _, _, _, text ->
+                    pages.popSecond()
+                    val playlist = playlists[text.toString()]
+                    val args = arrayOf(playlist, selectIds)
+                    val num = pages.sendMessageForResult(RachelPages.music, RachelMessage.MUSIC_ADD_MUSIC_INTO_PLAYLIST, args) as Int
+                    XToastUtils.success("已添加${num}首歌曲")
+                    true
+                }.show()
+        }))
+
+        // 删除
+        v.buttonDelete.setOnClickListener(RachelOnClickListener(View.OnClickListener {
+            val selectIds = adapter.checkIds
+            if (selectIds.isEmpty()) {
+                XToastUtils.warning("请至少选择一首歌曲")
+                return@OnClickListener
+            }
+            MaterialDialog.Builder(pages.context).title("此操作无法撤销")
+                .content("是否从曲库中卸载指定歌曲?")
+                .positiveText(R.string.yes).negativeText(R.string.no)
+                .onPositive { _, _ ->
+                    pages.popSecond()
+                    pages.sendMessage(RachelPages.music, RachelMessage.MUSIC_DELETE_MUSIC, selectIds)
+                    XToastUtils.success("已卸载${selectIds.size}首歌曲")
+                }.show()
+        }))
+
+        // 取消全选
+        v.buttonUnselect.setOnClickListener(RachelOnClickListener { exitManageMode() })
+
+        // 列表
+        v.list.layoutManager = GridLayoutManager(context, 3)
+        v.list.adapter = adapter
+    }
+
+    override fun back(): Boolean {
+        if (adapter.isManageMode) {
+            exitManageMode()
+            return false
+        }
+        return true
+    }
+
+    private fun setManageMode(visibility: Int) {
+        adapter.isManageMode = visibility == View.VISIBLE
+        v.buttonPlaylist.visibility = visibility
+        v.buttonDelete.visibility = visibility
+        v.buttonUnselect.visibility = visibility
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private fun exitManageMode() {
+        Arrays.fill(adapter.checkStatus, false)
+        setManageMode(View.GONE)
+        adapter.notifyDataSetChanged()
+    }
+}

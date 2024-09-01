@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="10dp"
+    android:background="@drawable/bg_dialog_white"
+    tools:context=".dialog.DialogLyricsEngine" >
+    <com.xuexiang.xui.widget.textview.autofit.AutoFitTextView
+        android:id="@+id/title"
+        style="@style/RachelText.X"
+        android:layout_marginHorizontal="10dp"
+        android:text="歌词引擎"
+        android:textColor="@color/steel_blue"
+        android:textSize="@dimen/xl" />
+    <com.yinlin.rachel.view.LineView
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginVertical="5dp" />
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:paddingTop="5dp"
+        android:layout_weight="1" />
+</LinearLayout>

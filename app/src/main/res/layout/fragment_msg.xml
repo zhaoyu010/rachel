@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.scwang.smart.refresh.layout.SmartRefreshLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".fragment.FragmentMsg">
+    <com.scwang.smart.refresh.header.ClassicsHeader
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:srlClassicsSpinnerStyle="FixedBehind"
+        app:srlDrawableArrowSize="20dp"
+        app:srlDrawableMarginRight="20dp"
+        app:srlDrawableProgressSize="20dp"
+        app:srlEnableLastTime="true"
+        app:srlFinishDuration="500"
+        app:srlTextSizeTime="@dimen/sm"
+        app:srlTextSizeTitle="@dimen/base"
+        app:srlTextTimeMarginTop="2dp" />
+    <com.xuexiang.xui.widget.statelayout.StatefulLayout
+        android:id="@+id/state"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        app:stf_inAnimation="@android:anim/slide_in_left"
+        app:stf_outAnimation="@android:anim/slide_out_right" >
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </com.xuexiang.xui.widget.statelayout.StatefulLayout>
+</com.scwang.smart.refresh.layout.SmartRefreshLayout>

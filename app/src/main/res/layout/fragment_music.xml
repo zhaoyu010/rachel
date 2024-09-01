@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    tools:context=".fragment.FragmentMusic">
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/header_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp"
+        android:background="@color/black_gray"
+        android:elevation="2dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+        <LinearLayout
+            android:id="@+id/linearLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="10dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent="0.45">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView
+                    android:id="@+id/extra"
+                    style="@style/RachelText.Image"
+                    android:layout_margin="5dp"
+                    android:text="曲库"
+                    android:textColor="@color/white"
+                    app:drawableTopCompat="@drawable/svg_library" />
+                <TextView
+                    android:id="@+id/classification"
+                    style="@style/RachelText.Image"
+                    android:layout_margin="5dp"
+                    android:text="歌单"
+                    android:textColor="@color/white"
+                    app:drawableTopCompat="@drawable/svg_playlist" />
+            </LinearLayout>
+            <com.xuexiang.xui.widget.textview.autofit.AutoFitTextView
+                android:id="@+id/title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:textColor="@color/steel_blue"
+                android:textSize="@dimen/xl" />
+            <com.xuexiang.xui.widget.textview.autofit.AutoFitTextView
+                android:id="@+id/singer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:textColor="@color/light_gray"
+                android:textSize="@dimen/sm" />
+        </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginTop="-10dp"
+        android:layout_marginEnd="-10dp"
+        android:adjustViewBounds="true"
+        android:elevation="4dp"
+        android:src="@drawable/rail"
+        app:layout_constraintBottom_toBottomOf="@id/record"
+        app:layout_constraintRight_toLeftOf="@id/record"
+        app:layout_constraintTop_toTopOf="@id/record_container" />
+    <ImageView
+        android:id="@+id/record_container"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:elevation="3dp"
+        android:src="@drawable/record"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_percent="0.55" />
+    <androidx.constraintlayout.widget.Placeholder
+        android:id="@+id/record_placeholder"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_percent="0.033" />
+    <com.xuexiang.xui.widget.imageview.RadiusImageView
+        android:id="@+id/record"
+        style="@style/RachelRoundImage"
+        android:elevation="5dp"
+        app:layout_constraintRight_toLeftOf="@id/record_placeholder"
+        app:layout_constraintTop_toBottomOf="@id/record_placeholder"
+        app:layout_constraintWidth_percent="0.403" />
+    <ImageView
+        android:id="@+id/bg"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:elevation="1dp"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/header_container" />
+    <com.yinlin.rachel.view.LyricsView
+        android:id="@+id/lyrics"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginVertical="10dp"
+        android:elevation="2dp"
+        app:layout_constraintBottom_toTopOf="@id/bottom_container"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/record_container" />
+    <LinearLayout
+        android:id="@+id/bottom_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:background="@drawable/bg_light_dark"
+        android:elevation="2dp"
+        android:orientation="vertical"
+        android:padding="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal">
+            <ImageButton
+                android:id="@+id/button_an"
+                style="@style/RachelGroupItem.X"
+                android:src="@drawable/svg_an_off" />
+            <ImageButton
+                android:id="@+id/button_mv"
+                style="@style/RachelGroupItem.X"
+                android:src="@drawable/svg_mv_off" />
+            <ImageButton
+                android:id="@+id/button_lyrics"
+                style="@style/RachelGroupItem.X"
+                android:src="@drawable/svg_lyrics" />
+            <ImageButton
+                android:id="@+id/button_comment"
+                style="@style/RachelGroupItem.X"
+                android:src="@drawable/svg_comment" />
+            <ImageButton
+                android:id="@+id/button_share"
+                style="@style/RachelGroupItem.X"
+                android:src="@drawable/svg_share" />
+            <ImageButton
+                android:id="@+id/button_info"
+                style="@style/RachelGroupItem.X"
+                android:src="@drawable/svg_info" />
+        </LinearLayout>
+        <com.yinlin.rachel.view.HotpotProgressView
+            android:id="@+id/progress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="15dp" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal">
+            <ImageButton
+                android:id="@+id/button_mode"
+                style="@style/RachelGroupItem.X"
+                android:src="@drawable/svg_music_order" />
+            <ImageButton
+                android:id="@+id/button_previous"
+                style="@style/RachelGroupItem.X"
+                android:src="@drawable/svg_music_previous" />
+            <ImageButton
+                android:id="@+id/button_play"
+                style="@style/RachelGroupItem.X"
+                android:src="@drawable/svg_music_pause" />
+            <ImageButton
+                android:id="@+id/button_next"
+                style="@style/RachelGroupItem.X"
+                android:src="@drawable/svg_music_next" />
+            <ImageButton
+                android:id="@+id/button_playlist"
+                style="@style/RachelGroupItem.X"
+                android:src="@drawable/svg_music_list" />
+        </LinearLayout>
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

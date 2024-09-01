@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">银临茶舍</string>
+    <string name="rachel_name">银临Rachel</string>
+    <string name="home_nav_msg">资讯</string>
+    <string name="home_nav_music">听歌</string>
+    <string name="home_nav_res">美图</string>
+    <string name="home_nav_group">水群</string>
+    <string name="home_nav_me">小银子</string>
+
+    <string name="default_playlist_name">试听列表</string>
+    <string name="no_audio_source">无音源</string>
+
+    <string name="locked">未解锁</string>
+    <string name="unlocked">已解锁</string>
+
+    <string name="default_id">未登录</string>
+    <string name="default_signature">泸沽烟水里的过客...</string>
+
+    <string name="ok">确定</string>
+    <string name="cancel">取消</string>
+    <string name="yes">是</string>
+    <string name="no">否</string>
+</resources>

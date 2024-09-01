@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:insetLeft="-1px"
+    android:insetTop="-1px"
+    android:insetRight="-1px">
+    <shape>
+        <solid android:color="@color/xui_config_color_white" />
+        <stroke
+            android:width="@dimen/xui_list_divider_height_table"
+            android:color="@color/xui_config_color_separator_dark_tablet" />
+    </shape>
+</inset>
