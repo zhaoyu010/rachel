@@ -7,7 +7,6 @@ import android.os.Handler
 import android.provider.MediaStore
 import com.google.gson.Gson
 import com.google.gson.JsonObject
-import com.xuexiang.xui.utils.XToastUtils
 import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog
 import com.yinlin.rachel.annotation.NewThread
 import okhttp3.Headers.Companion.toHeaders
@@ -18,7 +17,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 
 
 object Net {
-    const val DOWNLOAD_BUFFER_SIZE = 1024 * 64
+    private const val DOWNLOAD_BUFFER_SIZE = 1024 * 64
 
     private val client: OkHttpClient = OkHttpClient()
 
@@ -50,14 +49,13 @@ object Net {
     }
 
     @NewThread
-    fun downloadPicture(context: Context, url: String) {
+    fun downloadPicture(context: Context, url: String, callback: ((Boolean) -> Unit)?) {
         val dialog = MaterialDialog.Builder(context).iconRes(R.mipmap.icon)
             .title("下载中...").negativeText(R.string.cancel)
             .progress(false, 0, true).build()
         val handler = Handler(context.mainLooper)
         val thread = Thread {
-            val index = url.lastIndexOf('/')
-            val filename = if (index == -1) url else url.substring(index + 1)
+            val filename = url.substringAfterLast('/')
             var status = false
             try {
                 client.newCall(Request.Builder().url(url).build()).execute().use { response ->
@@ -90,9 +88,8 @@ object Net {
                     }
                 }
             } catch (ignored: Exception) { }
-            dialog.dismiss();
-            if (status) XToastUtils.success("下载成功");
-            else XToastUtils.error("下载失败");
+            dialog.dismiss()
+            callback?.invoke(status)
         }
         dialog.setOnCancelListener { thread.interrupt() }
         dialog.show()

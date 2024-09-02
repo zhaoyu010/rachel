@@ -4,7 +4,6 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.reflect.TypeToken
 import com.yinlin.rachel.Net
-import com.yinlin.rachel.api.Arg.Login
 import com.yinlin.rachel.data.ResFile
 import com.yinlin.rachel.data.ResFolder
 import com.yinlin.rachel.data.User
@@ -95,7 +94,7 @@ object API {
     }
 
     // 取用户信息
-    fun getUserInfo(arg: Login): User {
+    fun getUserInfo(arg: Arg.Login): User {
         try {
             val json = Net.post("$BASEURL/getUserInfo", Gson().toJson(arg), null)
             return Gson().fromJson(json, object : TypeToken<User>(){}.type) as User

@@ -4,7 +4,9 @@ import android.annotation.SuppressLint
 import android.view.View
 import androidx.recyclerview.widget.GridLayoutManager
 import com.xuexiang.xui.utils.XToastUtils
-import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog
+import com.yinlin.rachel.Dialog
+import com.yinlin.rachel.IMusicInfoMap
+import com.yinlin.rachel.IPlaylistMap
 import com.yinlin.rachel.R
 import com.yinlin.rachel.RachelMessage
 import com.yinlin.rachel.data.MusicInfo
@@ -14,13 +16,16 @@ import com.yinlin.rachel.databinding.ItemMusicBinding
 import com.yinlin.rachel.load
 import com.yinlin.rachel.model.RachelAdapter
 import com.yinlin.rachel.model.RachelFragment
-import com.yinlin.rachel.model.RachelOnClickListener
 import com.yinlin.rachel.model.RachelPages
+import com.yinlin.rachel.rachelClick
+import com.yinlin.rachel.warning
 import java.util.Arrays
 
 
-class FragmentLibrary(pages: RachelPages, private val musicInfos: MutableMap<String, MusicInfo>,
-    private val playlists: MutableMap<String, Playlist>) : RachelFragment<FragmentLibraryBinding>(pages) {
+class FragmentLibrary(pages: RachelPages,
+                      private val musicInfos: IMusicInfoMap,
+                      private val playlists: IPlaylistMap)
+    : RachelFragment<FragmentLibraryBinding>(pages) {
     class Adapter(private val pages: RachelPages, private val fragment: FragmentLibrary)
         : RachelAdapter<ItemMusicBinding, MusicInfo>(fragment.musicInfos.values.toMutableList()) {
         internal var isManageMode = false
@@ -80,48 +85,36 @@ class FragmentLibrary(pages: RachelPages, private val musicInfos: MutableMap<Str
 
     override fun init() {
         // 添加歌单
-        v.buttonPlaylist.setOnClickListener(RachelOnClickListener(View.OnClickListener {
-            if (playlists.isEmpty()) {
-                XToastUtils.warning("没有创建任何歌单")
-                return@OnClickListener
+        v.buttonPlaylist.rachelClick {
+            playlists.isNotEmpty().warning("没有创建任何歌单") {
+                val selectIds = adapter.checkIds // 获得所有歌单名供选择
+                selectIds.isNotEmpty().warning("请至少选择一首歌曲") {
+                    Dialog.choice(pages.context, "添加到歌单", playlists.keys) { _, _, _, text ->
+                        pages.popSecond()
+                        val playlist = playlists[text.toString()]
+                        val args = arrayOf(playlist, selectIds)
+                        val num = pages.sendMessageForResult(RachelPages.music, RachelMessage.MUSIC_ADD_MUSIC_INTO_PLAYLIST, args) as Int
+                        XToastUtils.success("已添加${num}首歌曲")
+                        true
+                    }
+                }
             }
-            val selectIds = adapter.checkIds
-            if (selectIds.isEmpty()) {
-                XToastUtils.warning("请至少选择一首歌曲")
-                return@OnClickListener
-            }
-            // 获得所有歌单名供选择
-            MaterialDialog.Builder(pages.context).iconRes(R.mipmap.icon)
-                .title("添加到歌单").positiveText(R.string.ok).negativeText(R.string.cancel)
-                .items(playlists.keys).itemsCallbackSingleChoice(0) { _, _, _, text ->
-                    pages.popSecond()
-                    val playlist = playlists[text.toString()]
-                    val args = arrayOf(playlist, selectIds)
-                    val num = pages.sendMessageForResult(RachelPages.music, RachelMessage.MUSIC_ADD_MUSIC_INTO_PLAYLIST, args) as Int
-                    XToastUtils.success("已添加${num}首歌曲")
-                    true
-                }.show()
-        }))
+        }
 
         // 删除
-        v.buttonDelete.setOnClickListener(RachelOnClickListener(View.OnClickListener {
+        v.buttonDelete.rachelClick {
             val selectIds = adapter.checkIds
-            if (selectIds.isEmpty()) {
-                XToastUtils.warning("请至少选择一首歌曲")
-                return@OnClickListener
-            }
-            MaterialDialog.Builder(pages.context).title("此操作无法撤销")
-                .content("是否从曲库中卸载指定歌曲?")
-                .positiveText(R.string.yes).negativeText(R.string.no)
-                .onPositive { _, _ ->
+            selectIds.isNotEmpty().warning("请至少选择一首歌曲") {
+                Dialog.confirm(pages.context, "是否从曲库中卸载指定歌曲?") { _, _ ->
                     pages.popSecond()
                     pages.sendMessage(RachelPages.music, RachelMessage.MUSIC_DELETE_MUSIC, selectIds)
                     XToastUtils.success("已卸载${selectIds.size}首歌曲")
-                }.show()
-        }))
+                }
+            }
+        }
 
         // 取消全选
-        v.buttonUnselect.setOnClickListener(RachelOnClickListener { exitManageMode() })
+        v.buttonUnselect.rachelClick { exitManageMode() }
 
         // 列表
         v.list.layoutManager = GridLayoutManager(context, 3)

@@ -12,6 +12,7 @@ import androidx.media3.exoplayer.source.ShuffleOrder.DefaultShuffleOrder
 import com.google.gson.reflect.TypeToken
 import com.xuexiang.xui.utils.XToastUtils
 import com.yinlin.rachel.Config
+import com.yinlin.rachel.MusicInfoMap
 import com.yinlin.rachel.R
 import com.yinlin.rachel.RachelFont
 import com.yinlin.rachel.RachelMessage
@@ -26,6 +27,7 @@ import com.yinlin.rachel.dialog.DialogCurrentPlaylist
 import com.yinlin.rachel.dialog.DialogLyricsEngine
 import com.yinlin.rachel.dialog.DialogMusicInfo
 import com.yinlin.rachel.div
+import com.yinlin.rachel.err
 import com.yinlin.rachel.load
 import com.yinlin.rachel.model.RachelFragment
 import com.yinlin.rachel.model.RachelMod
@@ -33,7 +35,9 @@ import com.yinlin.rachel.model.RachelOnClickListener
 import com.yinlin.rachel.model.RachelPages
 import com.yinlin.rachel.model.RachelRotateAnimator
 import com.yinlin.rachel.pathMusic
+import com.yinlin.rachel.rachelClick
 import com.yinlin.rachel.readJson
+import com.yinlin.rachel.warning
 
 
 class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(pages), Player.Listener {
@@ -41,8 +45,8 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
         const val UPDATE_FREQUENCY: Long = 100L // 更新频率
     }
 
-    private val musicInfos = HashMap<String, MusicInfo>() // 曲库集
-    private val playlists = Config.playlist.get() // 歌单集
+    private val musicInfos = MusicInfoMap() // 曲库集
+    private val playlists = Config.playlist // 歌单集
     private val loadMusics = ArrayList<String>() // 加载媒体集
     private var currentPlaylist: Playlist? = null // 当前播放列表
     private var savedMusic: MusicInfo? = null // 当前记录音乐
@@ -71,9 +75,9 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
         // 唱片
         recordAnimation = RachelRotateAnimator(v.record, 15000)
         // 曲库
-        v.extra.setOnClickListener(RachelOnClickListener { pages.gotoSecond(FragmentLibrary(pages, musicInfos, playlists)) })
+        v.extra.rachelClick { pages.gotoSecond(FragmentLibrary(pages, musicInfos, playlists)) }
         // 歌单
-        v.classification.setOnClickListener(RachelOnClickListener { pages.gotoSecond(FragmentPlaylist(pages, musicInfos, playlists, currentPlaylist)) })
+        v.classification.rachelClick { pages.gotoSecond(FragmentPlaylist(pages, musicInfos, playlists, currentPlaylist)) }
         // 样式
         v.title.typeface = RachelFont.bold
         // 进度条
@@ -87,7 +91,7 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
         val modeLoop = "loop"
         val modeRandom = "random"
         v.buttonMode.tag = modeOrder
-        v.buttonMode.setOnClickListener(RachelOnClickListener(300) { view: View ->
+        v.buttonMode.rachelClick(300) { view: View ->
             when (view.tag as String) {
                 modeOrder -> { // 顺序播放
                     view.tag = modeLoop
@@ -112,59 +116,58 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
                     player.shuffleModeEnabled = false
                 }
             }
-        })
+        }
         // 上一首
-        v.buttonPrevious.setOnClickListener(RachelOnClickListener(300) {
+        v.buttonPrevious.rachelClick(300) {
             if (isLoadMusic) player.seekToPreviousMediaItem()
-        })
+        }
         // 下一首
-        v.buttonNext.setOnClickListener(RachelOnClickListener(300) {
+        v.buttonNext.rachelClick(300) {
             if (isLoadMusic) player.seekToNextMediaItem()
-        })
+        }
         // 播放
-        v.buttonPlay.setOnClickListener(RachelOnClickListener(300) {
+        v.buttonPlay.rachelClick(300) {
             if (isLoadMusic) {
                 if (player.isPlaying) player.pause()
                 else player.play()
             }
-        })
+        }
         // 播放列表
-        v.buttonPlaylist.setOnClickListener(RachelOnClickListener {
+        v.buttonPlaylist.rachelClick {
             if (isLoadMusic && currentPlaylist != null) {
                 DialogCurrentPlaylist(this, currentPlaylist!!, musicInfos, currentMusic!!).show()
             }
-        })
+        }
         // AN
-        v.buttonAn.setOnClickListener(RachelOnClickListener(500) {
+        v.buttonAn.rachelClick(500) {
             currentMusic?.apply {
-                if (this.bgd!!) {
+                this.bgd?.warning("此歌曲不支持壁纸动画") {
                     val isBgd = v.bg.tag as Boolean
                     v.bg.load(pages.ril, if (isBgd) this.bgsPath else this.bgdPath)
                     v.bg.tag = !isBgd
                 }
-                else XToastUtils.warning("此歌曲不支持壁纸动画")
             }
-        })
+        }
         // MV
-        v.buttonMv.setOnClickListener(RachelOnClickListener { })
+        v.buttonMv.rachelClick { }
         // 歌词
-        v.buttonLyrics.setOnClickListener(RachelOnClickListener {
+        v.buttonLyrics.rachelClick {
             val fragment = this
             currentMusic?.lyrics?.items?.keys?.toMutableList()?.apply {
                 DialogLyricsEngine(fragment, this).show()
             }
-        })
+        }
         // 评论
-        v.buttonComment.setOnClickListener(RachelOnClickListener { })
+        v.buttonComment.rachelClick { }
         // 分享
-        v.buttonShare.setOnClickListener(RachelOnClickListener { })
+        v.buttonShare.rachelClick { }
         // 信息
-        v.buttonInfo.setOnClickListener(RachelOnClickListener {
+        v.buttonInfo.rachelClick {
             val fragment = this
             currentMusic?.apply {
                 DialogMusicInfo(fragment, this).show()
             }
-        })
+        }
     }
 
     override fun quit() {
@@ -196,7 +199,7 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
                 // UI更新
                 playlists.remove(playlist.name)
                 // 数据存储
-                Config.playlist.set(playlists)
+                Config.playlist = playlists
             }
             MUSIC_DELETE_MUSIC_FROM_PLAYLIST -> {
                 val args = arg as Array<*>
@@ -215,7 +218,7 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
                 // UI更新
                 playlist.items.removeAt(position)
                 // 数据存储
-                Config.playlist.set(playlists)
+                Config.playlist = playlists
             }
             MUSIC_DELETE_MUSIC -> {
                 stopPlayer() // 删除音乐前停止播放器
@@ -244,7 +247,7 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
             MUSIC_USE_LYRICS_ENGINE -> {
                 val engineName = arg as String
                 currentMusic?.lyrics?.apply {
-                    if (!v.lyrics.switchEngine(this, engineName)) XToastUtils.error("切换歌词引擎失败")
+                    v.lyrics.switchEngine(this, engineName).err("切换歌词引擎失败")
                 }
             }
             else -> {}
@@ -261,7 +264,7 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
                 // UI更新
                 playlists[newName] = Playlist(newName, ArrayList())
                 // 数据存储
-                Config.playlist.set(playlists)
+                Config.playlist = playlists
                 return true
             }
             MUSIC_RENAME_PLAYLIST -> {
@@ -276,7 +279,7 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
                 playlist.name = newName
                 playlists[newName] = playlist
                 // 数据存储
-                Config.playlist.set(playlists)
+                Config.playlist = playlists
                 return true
             }
             MUSIC_ADD_MUSIC_INTO_PLAYLIST -> {
@@ -298,7 +301,7 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
                     }
                 }
                 // 数据存储
-                if (num > 0) Config.playlist.set(playlists)
+                if (num > 0) Config.playlist = playlists
                 return num
             }
             else -> return null
@@ -313,7 +316,7 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
         // 加载歌词
         musicInfos[mediaItem.mediaId]?.apply {
             if (this.lyrics == null) this.lyrics = Lyrics(this.lyricsPath.readText())
-            if (!v.lyrics.loadLyrics(this.lyrics!!)) XToastUtils.error("没有合适的歌词引擎")
+            v.lyrics.loadLyrics(this.lyrics!!).err("没有合适的歌词引擎")
         }
 
         // 处于前台时更新前台信息

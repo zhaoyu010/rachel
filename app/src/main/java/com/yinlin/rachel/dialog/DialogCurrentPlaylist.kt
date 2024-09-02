@@ -5,6 +5,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.xuexiang.xui.utils.XToastUtils
 import com.yinlin.rachel.R
 import com.yinlin.rachel.RachelMessage
+import com.yinlin.rachel.IMusicInfoMap
 import com.yinlin.rachel.data.MusicInfo
 import com.yinlin.rachel.data.Playlist
 import com.yinlin.rachel.databinding.DialogCurrentPlaylistBinding
@@ -15,41 +16,42 @@ import com.yinlin.rachel.model.RachelAdapter
 import com.yinlin.rachel.model.RachelDialog
 import com.yinlin.rachel.model.RachelOnClickListener
 import com.yinlin.rachel.model.RachelPages
+import com.yinlin.rachel.rachelClick
+import com.yinlin.rachel.textColor
+import com.yinlin.rachel.warning
 
 
 class DialogCurrentPlaylist(fragment: FragmentMusic,
-    private val currentPlaylist: Playlist,
-    private val musicInfos: Map<String, MusicInfo>,
-    private val currentMusicInfo: MusicInfo)
+                            private val currentPlaylist: Playlist,
+                            private val musicInfos: IMusicInfoMap,
+                            private val currentMusicInfo: MusicInfo)
     : RachelDialog<DialogCurrentPlaylistBinding, FragmentMusic>(fragment, 0.6f) {
     class Adapter(private val dialog: DialogCurrentPlaylist)
         : RachelAdapter<ItemPlaylistBinding, String>(dialog.currentPlaylist.items) {
+        private val pages = dialog.root.pages
+
         override fun bindingClass() = ItemPlaylistBinding::class.java
 
         override fun update(v: ItemPlaylistBinding, item: String, position: Int) {
             val musicInfo: MusicInfo? = dialog.musicInfos[item]
             if (musicInfo == null) {
                 v.name.text = item
-                v.name.setTextColor(dialog.root.pages.getResColor(R.color.red))
+                v.name.textColor = pages.getResColor(R.color.red)
                 v.name.paintFlags = v.name.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
                 v.singer.text = ""
             } else {
                 v.name.text = musicInfo.name
-                v.name.setTextColor(dialog.root.pages.getResColor(if (dialog.currentMusicInfo === musicInfo) R.color.steel_blue else R.color.black))
+                v.name.textColor = pages.getResColor(if (dialog.currentMusicInfo === musicInfo) R.color.steel_blue else R.color.black)
                 v.name.paintFlags = v.name.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
                 v.singer.text = musicInfo.singer
-                v.singer.setTextColor(dialog.root.pages.getResColor(if (dialog.currentMusicInfo === musicInfo) R.color.steel_blue else R.color.black))
+                v.singer.textColor = pages.getResColor(if (dialog.currentMusicInfo === musicInfo) R.color.steel_blue else R.color.black)
             }
         }
 
         override fun onItemClicked(v: ItemPlaylistBinding, item: String, position: Int) {
-            val musicInfo: MusicInfo? = dialog.musicInfos[item]
-            if (musicInfo == null) {
-                XToastUtils.warning(dialog.root.pages.getResString(R.string.no_audio_source))
-            }
-            else {
+            dialog.musicInfos[item].warning(pages.getResString(R.string.no_audio_source)) {
                 dialog.dismiss()
-                dialog.root.pages.sendMessage(RachelPages.music, RachelMessage.MUSIC_GOTO_MUSIC, item)
+                pages.sendMessage(RachelPages.music, RachelMessage.MUSIC_GOTO_MUSIC, item)
             }
         }
     }
@@ -61,10 +63,10 @@ class DialogCurrentPlaylist(fragment: FragmentMusic,
     override fun init() {
         v.title.text = currentPlaylist.name
 
-        v.buttonStop.setOnClickListener(RachelOnClickListener {
+        v.buttonStop.rachelClick {
             dismiss()
             root.pages.sendMessage(RachelPages.music, RachelMessage.MUSIC_STOP_PLAYER)
-        })
+        }
 
         v.list.layoutManager = LinearLayoutManager(root.pages.context)
         v.list.adapter = adapter

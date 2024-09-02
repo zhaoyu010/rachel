@@ -7,10 +7,13 @@ import com.yinlin.rachel.annotation.NewThread
 import com.yinlin.rachel.api.API.login
 import com.yinlin.rachel.api.API.register
 import com.yinlin.rachel.api.Arg
+import com.yinlin.rachel.content
 import com.yinlin.rachel.databinding.FragmentLoginBinding
+import com.yinlin.rachel.err
 import com.yinlin.rachel.model.RachelFragment
 import com.yinlin.rachel.model.RachelOnClickListener
 import com.yinlin.rachel.model.RachelPages
+import com.yinlin.rachel.rachelClick
 import com.yinlin.rachel.toMD5
 
 
@@ -19,80 +22,73 @@ class FragmentLogin(pages: RachelPages) : RachelFragment<FragmentLoginBinding>(p
 
     override fun init() {
         // 没有账号
-        v.labelRegister.setOnClickListener(RachelOnClickListener {
+        v.labelRegister.rachelClick {
             v.loginContainer.collapse(false)
-            v.registerId.setText("")
-            v.registerPwd.setText("")
-            v.registerConfirmPwd.setText("")
-            v.registerInviter.setText("")
+            v.registerId.content = ""
+            v.registerPwd.content = ""
+            v.registerConfirmPwd.content = ""
+            v.registerInviter.content = ""
             v.registerContainer.expand(true)
-        })
+        }
         // 忘记密码
-        v.labelNopwd.setOnClickListener(RachelOnClickListener { })
+        v.labelNopwd.rachelClick { }
         // 登录
-        v.buttonLogin.setOnClickListener(RachelOnClickListener { login() })
+        v.buttonLogin.rachelClick { login() }
         // 返回登录
-        v.labelBackLogin.setOnClickListener(RachelOnClickListener {
+        v.labelBackLogin.rachelClick {
             v.registerContainer.collapse(false)
-            v.loginId.setText("")
-            v.loginPwd.setText("")
+            v.loginId.content = ""
+            v.loginId.content = ""
+            v.loginPwd.content = ""
             v.loginContainer.expand(true)
-        })
+        }
         // 注册
-        v.buttonRegister.setOnClickListener(RachelOnClickListener { register() })
+        v.buttonRegister.rachelClick { register() }
     }
 
     override fun back(): Boolean = true
 
     @NewThread
     fun login() {
-        val id: String? = v.loginId.text?.toString()
-        val pwd: String? = v.loginPwd.text?.toString()
-        if (id.isNullOrEmpty() || pwd.isNullOrEmpty()) {
-            XToastUtils.error("ID或密码不能为空")
-            return
-        }
-        val pwdMd5 = pwd.toMD5()
-        Thread {
-            val result = login(Arg.Login(id, pwdMd5))
-            post {
-                if (result.ok) {
-                    Config.user_id.set(id)
-                    Config.user_pwd.set(pwdMd5)
-                    pages.popSecond()
-                    pages.sendMessage(RachelPages.me, RachelMessage.ME_UPDATE_USER_INFO)
+        val id = v.loginId.content
+        val pwd = v.loginPwd.content
+        (id.isNotEmpty() && pwd.isNotEmpty()).err("ID或密码不能为空") {
+            val pwdMd5 = pwd.toMD5()
+            Thread {
+                val result = login(Arg.Login(id, pwdMd5))
+                post {
+                    result.ok.err(result.value) {
+                        Config.user_id = id
+                        Config.user_pwd = pwdMd5
+                        pages.popSecond()
+                        pages.sendMessage(RachelPages.me, RachelMessage.ME_REQUEST_USER_INFO)
+                    }
                 }
-                else XToastUtils.error(result.value)
-            }
-        }.start()
+            }.start()
+        }
     }
 
     @NewThread
     fun register() {
-        val id = v.registerId.text?.toString()
-        val pwd = v.registerPwd.text?.toString()
-        val confirmPwd = v.registerConfirmPwd.text?.toString()
-        val inviter = v.registerInviter.text?.toString() ?: ""
-        if (id.isNullOrEmpty() || pwd.isNullOrEmpty() || confirmPwd.isNullOrEmpty()) {
-            XToastUtils.error("ID或密码不能为空")
-            return
-        }
-        if (pwd != confirmPwd) {
-            XToastUtils.error("两次输入的密码不相同")
-            return
-        }
-        Thread {
-            val result = register(Arg.Register(id, pwd.toMD5(), inviter))
-            post {
-                if (result.ok) {
-                    XToastUtils.success(result.value)
-                    v.registerContainer.collapse(false)
-                    v.loginId.setText(id)
-                    v.loginPwd.setText("")
-                    v.loginContainer.expand(true)
-                }
-                else XToastUtils.error(result.value)
+        val id = v.registerId.content
+        val pwd = v.registerPwd.content
+        val confirmPwd = v.registerConfirmPwd.content
+        val inviter = v.registerInviter.content
+        (id.isNotEmpty() && pwd.isNotEmpty() && confirmPwd.isNotEmpty()).err("ID或密码不能为空") {
+            (pwd == confirmPwd).err("两次输入的密码不相同") {
+                Thread {
+                    val result = register(Arg.Register(id, pwd.toMD5(), inviter))
+                    post {
+                        result.ok.err(result.value) {
+                            XToastUtils.success(result.value)
+                            v.registerContainer.collapse(false)
+                            v.loginId.content = id
+                            v.loginPwd.content = ""
+                            v.loginContainer.expand(true)
+                        }
+                    }
+                }.start()
             }
-        }.start()
+        }
     }
 }

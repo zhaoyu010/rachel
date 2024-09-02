@@ -94,7 +94,7 @@ class FragmentMsg(pages: RachelPages) : RachelFragment<FragmentMsgBinding>(pages
     fun loadMsg() {
         v.state.showLoading("正在读取最新资讯...")
         Thread {
-            val msgInfos = WeiboAPI.extract(Config.weibo_users.get())
+            val msgInfos = WeiboAPI.extract(Config.weibo_users)
             post {
                 if (msgInfos.isEmpty()) v.state.showOffline { v.container.autoRefresh() }
                 else v.state.showContent()

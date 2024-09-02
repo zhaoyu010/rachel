@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
+import com.yinlin.rachel.rachelClick
 
 
 abstract class RachelAdapter<Binding : ViewBinding, Item>(val items: MutableList<Item>)
@@ -29,10 +30,10 @@ abstract class RachelAdapter<Binding : ViewBinding, Item>(val items: MutableList
         } catch (ignored: Exception) { }
         val holder = RachelViewHolder(v!!)
         val root: View = v.root
-        root.setOnClickListener(RachelOnClickListener(300) {
+        root.rachelClick(300) {
             val position = holder.getBindingAdapterPosition()
             onItemClicked(holder.v, items[position], position)
-        })
+        }
         root.setOnLongClickListener {
             val position = holder.getBindingAdapterPosition()
             onItemLongClicked(holder.v, items[position], position)

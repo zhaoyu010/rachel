@@ -17,5 +17,6 @@ enum class RachelMessage {
 
 
     // FragmentMe
+    ME_REQUEST_USER_INFO, // void
     ME_UPDATE_USER_INFO, // void
 }

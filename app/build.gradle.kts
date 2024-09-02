@@ -11,8 +11,8 @@ android {
         applicationId = "com.yinlin.rachel"
         minSdk = 29
         targetSdk = 34
-        versionCode = 106
-        versionName = "1.0.6-alpha"
+        versionCode = 110
+        versionName = "1.1.0-alpha"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

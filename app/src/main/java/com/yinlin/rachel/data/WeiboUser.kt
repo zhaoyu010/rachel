@@ -1,6 +1,7 @@
 package com.yinlin.rachel.data
 
 import com.google.gson.Gson
+import com.yinlin.rachel.IWeiboUserMap
 
 @JvmRecord
 data class WeiboUser(val name: String, val containerId: String) {
@@ -11,7 +12,7 @@ data class WeiboUser(val name: String, val containerId: String) {
             "3965226022" to WeiboUser("银临的小银库", "1076033965226022")
         ))
 
-        fun getNames(map: Map<String, WeiboUser>): List<String> {
+        fun getNames(map: IWeiboUserMap): List<String> {
             val names = ArrayList<String>()
             for (item in map.values) names.add(item.name)
             return names

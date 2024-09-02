@@ -10,10 +10,11 @@
 *.tar.gz
 *.rar
 
-*.key
+*.jks
 
 .idea/
 .gradle/
 gradle/
 app/build/
+app/release
 app/src/test/

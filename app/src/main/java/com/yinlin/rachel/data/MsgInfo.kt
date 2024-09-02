@@ -23,9 +23,10 @@ class MsgInfo(val name: String, val avatar: String, val text: String, val time: 
 
         constructor(parcel: Parcel) : this() {
             type = if (parcel.readInt() == 0) MsgType.PICTURE else MsgType.VIDEO
-            thumb = parcel.readString()!!
-            showBounds = parcel.readParcelable(Rect::class.java.classLoader)!!
-            source = parcel.readString()!!
+            thumb = parcel.readString() ?: ""
+            @Suppress("DEPRECATION")
+            showBounds = parcel.readParcelable(Rect::class.java.classLoader) ?: Rect()
+            source = parcel.readString() ?: ""
         }
 
         override fun writeToParcel(parcel: Parcel, flags: Int) {

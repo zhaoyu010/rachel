@@ -3,7 +3,6 @@ package com.yinlin.rachel
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.tencent.mmkv.MMKV
-import com.yinlin.rachel.data.Playlist
 import com.yinlin.rachel.data.User
 import com.yinlin.rachel.data.WeiboUser
 import java.lang.reflect.Type
@@ -43,11 +42,29 @@ object Config {
     lateinit var kv: MMKV
 
     // 登录相关
-    val user_id = StringMeta("user_id", "")
-    val user_pwd = StringMeta("user_pwd", "")
-    val user = JsonMeta<User>("user", "{}", object : TypeToken<User>(){}.type)
+    val user_id_meta = StringMeta("user_id", "")
+    var user_id: String
+        get() = user_id_meta.get()
+        set(value) { user_id_meta.set(value) }
+
+    val user_pwd_meta = StringMeta("user_pwd", "")
+    var user_pwd: String
+        get() = user_pwd_meta.get()
+        set(value) { user_pwd_meta.set(value) }
+
+    val user_meta = JsonMeta<User>("user", "{}", object : TypeToken<User>(){}.type)
+    var user: User
+        get() = user_meta.get()
+        set(value) { user_meta.set(value) }
 
     // 登录无关
-    val playlist = JsonMeta<MutableMap<String, Playlist>>("playlist", "{}", object : TypeToken<MutableMap<String, Playlist>>(){}.type)
-    val weibo_users = JsonMeta<MutableMap<String, WeiboUser>>("weibo_users", WeiboUser.getDefaultWeiboUsers(), object : TypeToken<MutableMap<String, WeiboUser>>(){}.type)
+    val playlist_meta = JsonMeta<IPlaylistMap>("playlist", "{}", object : TypeToken<PlaylistMap>(){}.type)
+    var playlist: IPlaylistMap
+        get() = playlist_meta.get()
+        set(value) { playlist_meta.set(value) }
+
+    val weibo_users_meta = JsonMeta<IWeiboUserMap>("weibo_users", WeiboUser.getDefaultWeiboUsers(), object : TypeToken<WeiboUserMap>(){}.type)
+    var weibo_users: IWeiboUserMap
+        get() = weibo_users_meta.get()
+        set(value) { weibo_users_meta.set(value) }
 }

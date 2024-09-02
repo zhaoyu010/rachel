@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:scrollbars="none"
+    android:paddingVertical="10dp"
+    android:paddingHorizontal="15dp"
+    android:background="@color/white"
+    tools:context=".fragment.FragmentSettings" >
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+        <TextView
+            android:id="@+id/tv_account"
+            style="@style/RachelText"
+            android:layout_marginVertical="10dp"
+            android:text=" - 账号设置"
+            android:textColor="@color/steel_blue"
+            android:textSize="@dimen/base" />
+        <com.xuexiang.xui.widget.textview.supertextview.SuperTextView
+            style="@style/RachelSettingsItem"
+            app:sLeftTextString="头像" >
+            <com.xuexiang.xui.widget.imageview.RadiusImageView
+                android:id="@+id/avatar"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_toStartOf="@id/sRightImgId"
+                android:layout_centerVertical="true"
+                android:layout_margin="10dp"
+                app:riv_is_circle="true" />
+        </com.xuexiang.xui.widget.textview.supertextview.SuperTextView>
+        <com.xuexiang.xui.widget.textview.supertextview.SuperTextView
+            android:id="@+id/id"
+            style="@style/RachelSettingsItem"
+            app:sLeftTextString="ID" />
+        <com.xuexiang.xui.widget.textview.supertextview.SuperTextView
+            style="@style/RachelSettingsItem"
+            app:sLeftTextString="个性签名" >
+            <com.xuexiang.xui.widget.textview.autofit.AutoFitTextView
+                android:id="@+id/signature"
+                style="@style/RachelText.X"
+                android:layout_toEndOf="@id/sLeftViewId"
+                android:layout_toStartOf="@id/sRightViewId"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="50dp"
+                android:textColor="@color/gray"
+                android:maxLines="2" />
+        </com.xuexiang.xui.widget.textview.supertextview.SuperTextView>
+        <com.xuexiang.xui.widget.textview.supertextview.SuperTextView
+            style="@style/RachelSettingsItem"
+            app:sLeftTextString="背景墙" >
+            <com.xuexiang.xui.widget.imageview.RadiusImageView
+                android:id="@+id/wall"
+                android:layout_width="80dp"
+                android:layout_height="60dp"
+                android:layout_toStartOf="@id/sRightImgId"
+                android:layout_centerVertical="true"
+                android:layout_margin="10dp" />
+        </com.xuexiang.xui.widget.textview.supertextview.SuperTextView>
+        <com.xuexiang.xui.widget.textview.supertextview.SuperTextView
+            android:id="@+id/inviter"
+            style="@style/RachelSettingsItem"
+            app:sLeftTextString="邀请人"
+            app:sRightIconRes="@null" />
+        <com.xuexiang.xui.widget.textview.supertextview.SuperTextView
+            android:id="@+id/logoff"
+            style="@style/RachelSettingsItem"
+            app:sLeftTextString="退出登录"
+            app:sLeftTextColor="@color/dark_red"
+            app:sLeftTextSize="@dimen/base" />
+
+        <TextView
+            android:id="@+id/tv_msg"
+            style="@style/RachelText"
+            android:layout_marginVertical="10dp"
+            android:text=" - 资讯设置"
+            android:textColor="@color/steel_blue"
+            android:textSize="@dimen/base" />
+        <com.xuexiang.xui.widget.textview.supertextview.SuperTextView
+            android:id="@+id/weibo"
+            style="@style/RachelSettingsItem"
+            app:sLeftTextString="微博 API" />
+        <com.yinlin.rachel.view.TagView
+            android:id="@+id/weibo_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/tv_res"
+            style="@style/RachelText"
+            android:layout_marginVertical="10dp"
+            android:text=" - 美图设置"
+            android:textColor="@color/steel_blue"
+            android:textSize="@dimen/base" />
+
+        <TextView
+            android:id="@+id/tv_music"
+            style="@style/RachelText"
+            android:layout_marginVertical="10dp"
+            android:text=" - 听歌设置"
+            android:textColor="@color/steel_blue"
+            android:textSize="@dimen/base" />
+    </LinearLayout>
+</ScrollView>

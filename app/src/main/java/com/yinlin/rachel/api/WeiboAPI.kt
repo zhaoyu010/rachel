@@ -1,8 +1,10 @@
 package com.yinlin.rachel.api
 
 import com.yinlin.rachel.Net
+import com.yinlin.rachel.IMsgInfoList
+import com.yinlin.rachel.IWeiboUserMap
+import com.yinlin.rachel.MsgInfoList
 import com.yinlin.rachel.data.MsgInfo
-import com.yinlin.rachel.data.WeiboUser
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -27,7 +29,7 @@ object WeiboAPI {
         return null
     }
 
-    fun extractSingle(uid: String, containerId: String, array: MutableList<MsgInfo>) {
+    private fun extractSingle(uid: String, containerId: String, array: IMsgInfoList) {
         try {
             val url = "https://m.weibo.cn/api/container/getIndex?type=uid&value=$uid&containerid=$containerId"
             val json = Net.get(url, null)
@@ -90,8 +92,8 @@ object WeiboAPI {
         catch (ignored: Exception) { }
     }
 
-    fun extract(weiboUsers: Map<String, WeiboUser>): List<MsgInfo> {
-        val array: MutableList<MsgInfo> = ArrayList()
+    fun extract(weiboUsers: IWeiboUserMap): IMsgInfoList {
+        val array = MsgInfoList()
         for ((key, value) in weiboUsers) extractSingle(key, value.containerId, array)
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
         array.sortWith { o1: MsgInfo, o2: MsgInfo ->

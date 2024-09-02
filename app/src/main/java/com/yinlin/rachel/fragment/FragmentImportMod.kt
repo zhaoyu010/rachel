@@ -13,6 +13,7 @@ import com.yinlin.rachel.model.RachelMod
 import com.yinlin.rachel.model.RachelOnClickListener
 import com.yinlin.rachel.model.RachelPages
 import com.yinlin.rachel.pathMusic
+import com.yinlin.rachel.rachelClick
 
 
 class FragmentImportMod(pages: RachelPages, private val uri: Uri) : RachelFragment<FragmentImportModBinding>(pages) {
@@ -39,7 +40,7 @@ class FragmentImportMod(pages: RachelPages, private val uri: Uri) : RachelFragme
             )
             val totalNum = metadata.totalCount
             v.tvTotalNum.text = totalNum.toString()
-            v.buttonOk.setOnClickListener(RachelOnClickListener {
+            v.buttonOk.rachelClick {
                 // 如果播放器开启则先停止
                 pages.sendMessage(RachelPages.music, RachelMessage.MUSIC_STOP_PLAYER)
                 setButtonStatus("导入中...", R.color.orange)
@@ -68,7 +69,7 @@ class FragmentImportMod(pages: RachelPages, private val uri: Uri) : RachelFragme
                     }
                     else setButtonStatus("导入失败", R.color.red)
                 }.start()
-            })
+            }
         } catch (e: Exception) {
             releaser?.close()
             setButtonStatus("导入失败", R.color.red)

@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.abdshammout.UBV.OnClickListenerBreadcrumbs
 import com.abdshammout.UBV.model.PathItem
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.xuexiang.xui.utils.XToastUtils
 import com.xuexiang.xui.widget.imageview.preview.PreviewBuilder
 import com.xuexiang.xui.widget.imageview.preview.enitity.IPreviewInfo
 import com.yinlin.rachel.Net
@@ -18,6 +19,7 @@ import com.yinlin.rachel.data.ResFile
 import com.yinlin.rachel.data.ResFolder
 import com.yinlin.rachel.databinding.FragmentResBinding
 import com.yinlin.rachel.databinding.ItemResBinding
+import com.yinlin.rachel.err
 import com.yinlin.rachel.model.RachelAdapter
 import com.yinlin.rachel.model.RachelFragment
 import com.yinlin.rachel.model.RachelImageLoader
@@ -25,6 +27,7 @@ import com.yinlin.rachel.model.RachelOnClickListener
 import com.yinlin.rachel.model.RachelPages
 import com.yinlin.rachel.model.RachelPreviewInfo
 import com.yinlin.rachel.load
+import com.yinlin.rachel.rachelClick
 
 
 class FragmentRes(pages: RachelPages) : RachelFragment<FragmentResBinding>(pages) {
@@ -37,12 +40,12 @@ class FragmentRes(pages: RachelPages) : RachelFragment<FragmentResBinding>(pages
         override fun init(holder: RachelViewHolder<ItemResBinding>) {
             val v = holder.v
             val context = fragment.pages.context
-            v.downloadHd.setOnClickListener(RachelOnClickListener {
-                items[holder.bindingAdapterPosition].thumbUrl?.apply { Net.downloadPicture(context, this) }
-            })
-            v.download4k.setOnClickListener(RachelOnClickListener {
-                items[holder.bindingAdapterPosition].sourceUrl?.apply { Net.downloadPicture(context, this) }
-            })
+            v.downloadHd.rachelClick {
+                items[holder.bindingAdapterPosition].thumbUrl?.apply { Net.downloadPicture(context, this, ::processDownloadResult) }
+            }
+            v.download4k.rachelClick {
+                items[holder.bindingAdapterPosition].sourceUrl?.apply { Net.downloadPicture(context, this, ::processDownloadResult) }
+            }
         }
 
         override fun update(v: ItemResBinding, item: ResFile, position: Int) {
@@ -82,6 +85,10 @@ class FragmentRes(pages: RachelPages) : RachelFragment<FragmentResBinding>(pages
                 notifyDataSetChanged()
             }
         }
+
+        private fun processDownloadResult(status: Boolean) {
+            status.err("下载失败") { XToastUtils.success("下载成功") }
+        }
     }
 
     private var rootRes = ResFolder.emptyRes
@@ -111,7 +118,7 @@ class FragmentRes(pages: RachelPages) : RachelFragment<FragmentResBinding>(pages
         v.list.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
         v.list.adapter = adapter
         // 刷新
-        v.buttonUpdate.setOnClickListener(RachelOnClickListener { updateRes() })
+        v.buttonUpdate.rachelClick { updateRes() }
         // 首次加载
         updateRes()
     }

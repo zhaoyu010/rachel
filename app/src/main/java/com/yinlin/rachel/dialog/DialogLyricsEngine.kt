@@ -12,6 +12,8 @@ import com.yinlin.rachel.interceptScroll
 import com.yinlin.rachel.model.RachelAdapter
 import com.yinlin.rachel.model.RachelDialog
 import com.yinlin.rachel.model.RachelPages
+import com.yinlin.rachel.textColor
+import com.yinlin.rachel.warning
 
 
 class DialogLyricsEngine(fragment: FragmentMusic, private val engineNames: MutableList<String>)
@@ -24,18 +26,18 @@ class DialogLyricsEngine(fragment: FragmentMusic, private val engineNames: Mutab
             v.name.text = item
             if (dialog.root.v.lyrics.hasEngine(item)) {
                 v.locked.text = dialog.root.pages.getResString(R.string.unlocked)
-                v.locked.setTextColor(dialog.root.pages.getResColor(R.color.sea_green))
+                v.locked.textColor = dialog.root.pages.getResColor(R.color.sea_green)
             } else {
                 v.locked.text = dialog.root.pages.getResString(R.string.locked)
-                v.locked.setTextColor(dialog.root.pages.getResColor(R.color.red))
+                v.locked.textColor = dialog.root.pages.getResColor(R.color.red)
             }
         }
 
         override fun onItemClicked(v: ItemLyricsEngineBinding, item: String, position: Int) {
             dialog.dismiss()
-            if (dialog.root.v.lyrics.hasEngine(item))
+            dialog.root.v.lyrics.hasEngine(item).warning("未解锁该歌词引擎") {
                 dialog.root.pages.sendMessage(RachelPages.music, RachelMessage.MUSIC_USE_LYRICS_ENGINE, item)
-            else XToastUtils.warning("未解锁该歌词引擎")
+            }
         }
     }
 
