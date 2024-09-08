@@ -3,6 +3,7 @@ package com.yinlin.rachel.fragment
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.view.View
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.abdshammout.UBV.OnClickListenerBreadcrumbs
 import com.abdshammout.UBV.model.PathItem
@@ -20,14 +21,16 @@ import com.yinlin.rachel.data.ResFolder
 import com.yinlin.rachel.databinding.FragmentResBinding
 import com.yinlin.rachel.databinding.ItemResBinding
 import com.yinlin.rachel.err
+import com.yinlin.rachel.load
 import com.yinlin.rachel.model.RachelAdapter
 import com.yinlin.rachel.model.RachelFragment
 import com.yinlin.rachel.model.RachelImageLoader
-import com.yinlin.rachel.model.RachelOnClickListener
 import com.yinlin.rachel.model.RachelPages
 import com.yinlin.rachel.model.RachelPreviewInfo
-import com.yinlin.rachel.load
 import com.yinlin.rachel.rachelClick
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class FragmentRes(pages: RachelPages) : RachelFragment<FragmentResBinding>(pages) {
@@ -133,15 +136,14 @@ class FragmentRes(pages: RachelPages) : RachelFragment<FragmentResBinding>(pages
 
     @NewThread
     fun updateRes() {
-        v.state.showLoading("正在更新美图数据源...")
-        Thread {
-            rootRes = API.resInfo()
-            post {
-                if (rootRes.items.isEmpty()) v.state.showOffline { updateRes() }
-                else v.state.showContent()
-                while (v.header.itemCount > 0) v.header.back()
-                adapter.setRes(-1, rootRes)
-            }
-        }.start()
+        lifecycleScope.launch {
+            pages.loadingDialog.show()
+            rootRes = withContext(Dispatchers.IO) { API.ResAPI.getInfo() }
+            pages.loadingDialog.dismiss()
+            if (rootRes.items.isEmpty()) v.state.showOffline { updateRes() }
+            else v.state.showContent()
+            while (v.header.itemCount > 0) v.header.back()
+            adapter.setRes(-1, rootRes)
+        }
     }
 }

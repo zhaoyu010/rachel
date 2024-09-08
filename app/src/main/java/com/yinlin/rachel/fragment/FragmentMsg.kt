@@ -4,8 +4,10 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.graphics.Rect
+import android.text.Html.ImageGetter
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.xuexiang.xui.widget.imageview.nine.ItemImageClickListener
@@ -13,18 +15,22 @@ import com.xuexiang.xui.widget.imageview.nine.NineGridImageViewAdapter
 import com.xuexiang.xui.widget.imageview.preview.PreviewBuilder
 import com.yinlin.rachel.Config
 import com.yinlin.rachel.R
-import com.yinlin.rachel.RachelFont
 import com.yinlin.rachel.annotation.NewThread
 import com.yinlin.rachel.api.WeiboAPI
+import com.yinlin.rachel.bold
 import com.yinlin.rachel.clearAddAll
 import com.yinlin.rachel.data.MsgInfo
 import com.yinlin.rachel.databinding.FragmentMsgBinding
 import com.yinlin.rachel.databinding.ItemMsgBinding
+import com.yinlin.rachel.load
 import com.yinlin.rachel.model.RachelAdapter
 import com.yinlin.rachel.model.RachelFragment
 import com.yinlin.rachel.model.RachelImageLoader
 import com.yinlin.rachel.model.RachelPages
-import com.yinlin.rachel.load
+import com.yinlin.rachel.rachelClick
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.sufficientlysecure.htmltextview.HtmlHttpImageGetter
 
 
@@ -48,15 +54,29 @@ class FragmentMsg(pages: RachelPages) : RachelFragment<FragmentMsgBinding>(pages
         }
     }
 
-    class Adapter(context: Context) : RachelAdapter<ItemMsgBinding, MsgInfo>() {
-        private val rilNet = RachelImageLoader(context, R.drawable.placeholder_pic, DiskCacheStrategy.ALL)
+    class Adapter(private val pages: RachelPages) : RachelAdapter<ItemMsgBinding, MsgInfo>() {
+        private val rilNet = RachelImageLoader(pages.context, R.drawable.placeholder_pic, DiskCacheStrategy.ALL)
+        private lateinit var imageGetter: ImageGetter
 
         override fun bindingClass() = ItemMsgBinding::class.java
 
         override fun init(holder: RachelViewHolder<ItemMsgBinding>) {
             val v = holder.v
-            v.name.typeface = RachelFont.bold
+            v.name.bold = true
             v.pics.setAdapter(ImageAdapter(rilNet))
+            v.text.setOnClickATagListener { _, _, href ->
+                href?.apply {
+                    val url = if (href.startsWith("http") || href.startsWith("www")) href
+                    else if (href.startsWith("/status/")) "${WeiboAPI.BASEURL}${href}"
+                    else ""
+                    if (url != "") pages.gotoSecond(FragmentWebpage(pages, url))
+                }
+                true
+            }
+            v.details.rachelClick {
+                pages.gotoSecond(FragmentWebpage(pages, "${WeiboAPI.DETAILS_URL}${items[holder.bindingAdapterPosition].id}"))
+            }
+            imageGetter = HtmlHttpImageGetter(v.text)
         }
 
         override fun update(v: ItemMsgBinding, item: MsgInfo, position: Int) {
@@ -64,12 +84,12 @@ class FragmentMsg(pages: RachelPages) : RachelFragment<FragmentMsgBinding>(pages
             v.avatar.load(rilNet, item.avatar)
             v.time.text = item.time
             v.location.text = item.location
-            v.text.setHtml(item.text, HtmlHttpImageGetter(v.text))
+            v.text.setHtml(item.text, imageGetter)
             v.pics.setImagesData(item.pictures)
         }
     }
 
-    private val adapter = Adapter(pages.context)
+    private val adapter = Adapter(pages)
 
     override fun bindingClass() = FragmentMsgBinding::class.java
 
@@ -79,10 +99,13 @@ class FragmentMsg(pages: RachelPages) : RachelFragment<FragmentMsgBinding>(pages
         v.list.adapter = adapter
 
         // 下拉刷新
-        v.container.setOnRefreshListener { loadMsg() }
+        v.container.setOnRefreshListener {
+            v.container.finishRefresh()
+            loadMsg()
+        }
 
         // 首次刷新
-        v.container.autoRefresh()
+        loadMsg()
     }
 
     override fun back(): Boolean {
@@ -92,16 +115,14 @@ class FragmentMsg(pages: RachelPages) : RachelFragment<FragmentMsgBinding>(pages
 
     @NewThread @SuppressLint("NotifyDataSetChanged")
     fun loadMsg() {
-        v.state.showLoading("正在读取最新资讯...")
-        Thread {
-            val msgInfos = WeiboAPI.extract(Config.weibo_users)
-            post {
-                if (msgInfos.isEmpty()) v.state.showOffline { v.container.autoRefresh() }
-                else v.state.showContent()
-                adapter.items.clearAddAll(msgInfos)
-                adapter.notifyDataSetChanged()
-                if (v.container.isRefreshing) v.container.finishRefresh()
-            }
-        }.start()
+        lifecycleScope.launch {
+            pages.loadingDialog.show()
+            val msgInfos = withContext(Dispatchers.IO) { WeiboAPI.extract(Config.weibo_users) }
+            pages.loadingDialog.dismiss()
+            if (msgInfos.isEmpty()) v.state.showOffline { loadMsg() }
+            else v.state.showContent()
+            adapter.items.clearAddAll(msgInfos)
+            adapter.notifyDataSetChanged()
+        }
     }
 }

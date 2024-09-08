@@ -3,6 +3,7 @@ package com.yinlin.rachel.fragment
 import android.net.Uri
 import android.view.View
 import androidx.annotation.OptIn
+import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
@@ -10,13 +11,22 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ShuffleOrder.DefaultShuffleOrder
 import com.google.gson.reflect.TypeToken
-import com.xuexiang.xui.utils.XToastUtils
 import com.yinlin.rachel.Config
 import com.yinlin.rachel.MusicInfoMap
 import com.yinlin.rachel.R
-import com.yinlin.rachel.RachelFont
 import com.yinlin.rachel.RachelMessage
-import com.yinlin.rachel.RachelMessage.*
+import com.yinlin.rachel.RachelMessage.MUSIC_ADD_MUSIC_INTO_PLAYLIST
+import com.yinlin.rachel.RachelMessage.MUSIC_CREATE_PLAYLIST
+import com.yinlin.rachel.RachelMessage.MUSIC_DELETE_MUSIC
+import com.yinlin.rachel.RachelMessage.MUSIC_DELETE_MUSIC_FROM_PLAYLIST
+import com.yinlin.rachel.RachelMessage.MUSIC_DELETE_PLAYLIST
+import com.yinlin.rachel.RachelMessage.MUSIC_GOTO_MUSIC
+import com.yinlin.rachel.RachelMessage.MUSIC_NOTIFY_ADD_MUSIC
+import com.yinlin.rachel.RachelMessage.MUSIC_RENAME_PLAYLIST
+import com.yinlin.rachel.RachelMessage.MUSIC_START_PLAYER
+import com.yinlin.rachel.RachelMessage.MUSIC_STOP_PLAYER
+import com.yinlin.rachel.RachelMessage.MUSIC_USE_LYRICS_ENGINE
+import com.yinlin.rachel.bold
 import com.yinlin.rachel.clear
 import com.yinlin.rachel.data.Lyrics
 import com.yinlin.rachel.data.MusicInfo
@@ -31,13 +41,15 @@ import com.yinlin.rachel.err
 import com.yinlin.rachel.load
 import com.yinlin.rachel.model.RachelFragment
 import com.yinlin.rachel.model.RachelMod
-import com.yinlin.rachel.model.RachelOnClickListener
 import com.yinlin.rachel.model.RachelPages
 import com.yinlin.rachel.model.RachelRotateAnimator
 import com.yinlin.rachel.pathMusic
 import com.yinlin.rachel.rachelClick
 import com.yinlin.rachel.readJson
 import com.yinlin.rachel.warning
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(pages), Player.Listener {
@@ -57,10 +69,27 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
 
     override fun bindingClass() = FragmentMusicBinding::class.java
 
-    @OptIn(UnstableApi::class)
     override fun init() {
         // 加载曲库
-        loadMusicInfos()
+        lifecycleScope.launch {
+            pages.loadingDialog.show()
+            withContext(Dispatchers.IO) {
+                pathMusic.listFiles { file ->
+                    file.isFile() && file.getName().lowercase().endsWith(RachelMod.RES_INFO)
+                }?.apply {
+                    for (f in this) {
+                        val info: MusicInfo = f.readJson(object : TypeToken<MusicInfo>(){}.type)
+                        if (info.isCorrect) musicInfos[info.id!!] = info
+                    }
+                }
+            }
+            pages.loadingDialog.dismiss()
+            initView()
+        }
+    }
+
+    @OptIn(UnstableApi::class)
+    private fun initView() {
         // 播放器
         player.addListener(this)
         player.repeatMode = Player.REPEAT_MODE_ALL
@@ -79,7 +108,7 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
         // 歌单
         v.classification.rachelClick { pages.gotoSecond(FragmentPlaylist(pages, musicInfos, playlists, currentPlaylist)) }
         // 样式
-        v.title.typeface = RachelFont.bold
+        v.title.bold = true
         // 进度条
         v.progress.setOnProgressChangedListener { percent ->
             // 计算按下位置占总进度条的百分比, 来同比例到时长上
@@ -346,18 +375,6 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
         } else {
             v.buttonPlay.load(pages.ril, R.drawable.svg_music_pause)
             if (isForeground) endTimeUpdate()
-        }
-    }
-
-    // 加载曲库
-    private fun loadMusicInfos() {
-        pathMusic.listFiles { file ->
-            file.isFile() && file.getName().lowercase().endsWith(RachelMod.RES_INFO)
-        }?.apply {
-            for (f in this) {
-                val info: MusicInfo = f.readJson(object : TypeToken<MusicInfo>(){}.type)
-                if (info.isCorrect) musicInfos[info.id!!] = info
-            }
         }
     }
 

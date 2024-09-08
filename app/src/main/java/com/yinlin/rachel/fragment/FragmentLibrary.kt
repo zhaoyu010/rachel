@@ -84,39 +84,9 @@ class FragmentLibrary(pages: RachelPages,
     override fun bindingClass() = FragmentLibraryBinding::class.java
 
     override fun init() {
-        // 添加歌单
-        v.buttonPlaylist.rachelClick {
-            playlists.isNotEmpty().warning("没有创建任何歌单") {
-                val selectIds = adapter.checkIds // 获得所有歌单名供选择
-                selectIds.isNotEmpty().warning("请至少选择一首歌曲") {
-                    Dialog.choice(pages.context, "添加到歌单", playlists.keys) { _, _, _, text ->
-                        pages.popSecond()
-                        val playlist = playlists[text.toString()]
-                        val args = arrayOf(playlist, selectIds)
-                        val num = pages.sendMessageForResult(RachelPages.music, RachelMessage.MUSIC_ADD_MUSIC_INTO_PLAYLIST, args) as Int
-                        XToastUtils.success("已添加${num}首歌曲")
-                        true
-                    }
-                }
-            }
-        }
-
-        // 删除
-        v.buttonDelete.rachelClick {
-            val selectIds = adapter.checkIds
-            selectIds.isNotEmpty().warning("请至少选择一首歌曲") {
-                Dialog.confirm(pages.context, "是否从曲库中卸载指定歌曲?") { _, _ ->
-                    pages.popSecond()
-                    pages.sendMessage(RachelPages.music, RachelMessage.MUSIC_DELETE_MUSIC, selectIds)
-                    XToastUtils.success("已卸载${selectIds.size}首歌曲")
-                }
-            }
-        }
-
-        // 取消全选
+        v.buttonPlaylist.rachelClick { addMusicIntoPlaylist() }
+        v.buttonDelete.rachelClick { deleteMusic() }
         v.buttonUnselect.rachelClick { exitManageMode() }
-
-        // 列表
         v.list.layoutManager = GridLayoutManager(context, 3)
         v.list.adapter = adapter
     }
@@ -141,5 +111,34 @@ class FragmentLibrary(pages: RachelPages,
         Arrays.fill(adapter.checkStatus, false)
         setManageMode(View.GONE)
         adapter.notifyDataSetChanged()
+    }
+
+    // 添加到歌单
+    private fun addMusicIntoPlaylist() {
+        playlists.isNotEmpty().warning("没有创建任何歌单") {
+            val selectIds = adapter.checkIds // 获得所有歌单名供选择
+            selectIds.isNotEmpty().warning("请至少选择一首歌曲") {
+                Dialog.choice(pages.context, "添加到歌单", playlists.keys) { _, _, _, text ->
+                    pages.popSecond()
+                    val playlist = playlists[text.toString()]
+                    val args = arrayOf(playlist, selectIds)
+                    val num = pages.sendMessageForResult(RachelPages.music, RachelMessage.MUSIC_ADD_MUSIC_INTO_PLAYLIST, args) as Int
+                    XToastUtils.success("已添加${num}首歌曲")
+                    true
+                }
+            }
+        }
+    }
+
+    // 删除歌曲
+    private fun deleteMusic() {
+        val selectIds = adapter.checkIds
+        selectIds.isNotEmpty().warning("请至少选择一首歌曲") {
+            Dialog.confirm(pages.context, "是否从曲库中卸载指定歌曲?") { _, _ ->
+                pages.popSecond()
+                pages.sendMessage(RachelPages.music, RachelMessage.MUSIC_DELETE_MUSIC, selectIds)
+                XToastUtils.success("已卸载${selectIds.size}首歌曲")
+            }
+        }
     }
 }

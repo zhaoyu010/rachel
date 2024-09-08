@@ -14,7 +14,8 @@
     <string name="unlocked">已解锁</string>
 
     <string name="default_id">未登录</string>
-    <string name="default_signature">泸沽烟水里的过客...</string>
+    <string name="default_title">小银子</string>
+    <string name="default_signature">泸沽烟水里的过客…</string>
 
     <string name="ok">确定</string>
     <string name="cancel">取消</string>

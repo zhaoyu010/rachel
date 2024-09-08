@@ -48,6 +48,7 @@
                 android:layout_toStartOf="@id/sRightViewId"
                 android:layout_centerVertical="true"
                 android:layout_marginStart="50dp"
+                android:textAlignment="textEnd"
                 android:textColor="@color/gray"
                 android:maxLines="2" />
         </com.xuexiang.xui.widget.textview.supertextview.SuperTextView>
@@ -57,7 +58,7 @@
             <com.xuexiang.xui.widget.imageview.RadiusImageView
                 android:id="@+id/wall"
                 android:layout_width="80dp"
-                android:layout_height="60dp"
+                android:layout_height="45dp"
                 android:layout_toStartOf="@id/sRightImgId"
                 android:layout_centerVertical="true"
                 android:layout_margin="10dp" />

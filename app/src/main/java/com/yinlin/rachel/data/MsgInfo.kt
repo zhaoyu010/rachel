@@ -6,7 +6,7 @@ import android.os.Parcelable
 import com.xuexiang.xui.widget.imageview.preview.enitity.IPreviewInfo
 
 
-class MsgInfo(val name: String, val avatar: String, val text: String, val time: String, val location: String) {
+class MsgInfo(val name: String, val avatar: String, val text: String, val time: String, val location: String, val id: String) {
     val pictures = ArrayList<Picture>()
 
     enum class MsgType { PICTURE, VIDEO }

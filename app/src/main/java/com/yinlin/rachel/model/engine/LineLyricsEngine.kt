@@ -6,6 +6,7 @@ import android.graphics.Paint
 import androidx.annotation.ColorRes
 import com.yinlin.rachel.R
 import com.yinlin.rachel.RachelFont
+import com.yinlin.rachel.bold
 import com.yinlin.rachel.toDP
 import java.util.regex.Pattern
 
@@ -18,7 +19,7 @@ class LineLyricsEngine(context: Context) : LyricsEngine {
         private val maxTextHeight = 36.toDP(context)
 
         init {
-            typeface = if (isBold) RachelFont.bold else RachelFont.normal
+            bold = isBold
             style = Style.FILL_AND_STROKE
             strokeWidth = 1f
             color = context.getColor(textColor)

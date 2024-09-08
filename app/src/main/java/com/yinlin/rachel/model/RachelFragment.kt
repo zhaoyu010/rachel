@@ -9,7 +9,8 @@ import androidx.viewbinding.ViewBinding
 import com.yinlin.rachel.RachelMessage
 
 abstract class RachelFragment<Binding : ViewBinding>(val pages: RachelPages) : Fragment() {
-    lateinit var v: Binding
+    private var _binding: Binding? = null
+    val v: Binding get() = _binding!!
 
     protected abstract fun bindingClass(): Class<Binding>
     protected open fun init() { }
@@ -25,7 +26,7 @@ abstract class RachelFragment<Binding : ViewBinding>(val pages: RachelPages) : F
             val cls: Class<Binding> = bindingClass()
             val method = cls.getMethod("inflate", LayoutInflater::class.java, ViewGroup::class.java, Boolean::class.javaPrimitiveType)
             @Suppress("UNCHECKED_CAST")
-            v = method.invoke(null, inflater, parent, false) as Binding
+            _binding = method.invoke(null, inflater, parent, false) as Binding
         }
         catch (ignored: Exception) { }
         return v.root
@@ -46,6 +47,7 @@ abstract class RachelFragment<Binding : ViewBinding>(val pages: RachelPages) : F
     final override fun onDestroyView() {
         super.onDestroyView()
         quit()
+        _binding = null
     }
 
     fun post(r: Runnable) = pages.handler.post(r)

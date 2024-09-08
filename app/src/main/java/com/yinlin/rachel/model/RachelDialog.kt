@@ -17,7 +17,8 @@ abstract class RachelDialog<Binding : ViewBinding, F : RachelFragment<*>>
     protected open fun init() { }
     protected open fun quit() { }
 
-    lateinit var v: Binding
+    private var _binding: Binding? = null
+    val v: Binding get() = _binding!!
 
     final override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,14 +26,17 @@ abstract class RachelDialog<Binding : ViewBinding, F : RachelFragment<*>>
             val cls: Class<Binding> = bindingClass()
             val method = cls.getMethod("inflate", LayoutInflater::class.java)
             @Suppress("UNCHECKED_CAST")
-            v = method.invoke(null, layoutInflater) as Binding
+            _binding = method.invoke(null, layoutInflater) as Binding
         }
         catch (ignored: Exception) { }
         val view = v.root
         setContentView(view)
-        setOnDismissListener { quit() }
+        setOnDismissListener {
+            quit()
+            _binding = null
+        }
         if (maxHeightPercent > 0f) {
-            val screenHeight = root.requireContext().resources.displayMetrics.heightPixels
+            val screenHeight = root.pages.context.resources.displayMetrics.heightPixels
             val maxHeight = (screenHeight * maxHeightPercent).toInt()
             val behavior = BottomSheetBehavior.from(view.parent as View)
             behavior.maxHeight = maxHeight

@@ -1,40 +1,31 @@
 package com.yinlin.rachel.fragment
 
-import android.content.Context
-import android.graphics.Bitmap
-import android.net.Uri
-import android.text.InputType
-import android.widget.ImageView
-import androidx.fragment.app.Fragment
-import com.bumptech.glide.Glide
+import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.luck.picture.lib.basic.PictureSelector
-import com.luck.picture.lib.config.SelectMimeType
-import com.luck.picture.lib.config.SelectModeConfig
-import com.luck.picture.lib.entity.LocalMedia
-import com.luck.picture.lib.interfaces.OnResultCallbackListener
 import com.xuexiang.xui.utils.XToastUtils
-import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog
-import com.yalantis.ucrop.UCrop
-import com.yalantis.ucrop.UCropImageEngine
-import com.yalantis.ucrop.model.AspectRatio
 import com.yinlin.rachel.Config
 import com.yinlin.rachel.Dialog
 import com.yinlin.rachel.R
-import com.yinlin.rachel.RachelFont
 import com.yinlin.rachel.RachelMessage
 import com.yinlin.rachel.annotation.NewThread
+import com.yinlin.rachel.api.API
+import com.yinlin.rachel.api.Arg
 import com.yinlin.rachel.api.WeiboAPI
+import com.yinlin.rachel.bold
+import com.yinlin.rachel.clear
 import com.yinlin.rachel.data.WeiboUser
 import com.yinlin.rachel.databinding.FragmentSettingsBinding
 import com.yinlin.rachel.err
 import com.yinlin.rachel.load
 import com.yinlin.rachel.model.RachelFragment
-import com.yinlin.rachel.model.RachelImageEngine
 import com.yinlin.rachel.model.RachelImageLoader
 import com.yinlin.rachel.model.RachelPages
+import com.yinlin.rachel.model.RachelPictureSelector
 import com.yinlin.rachel.rachelClick
 import com.yinlin.rachel.warning
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class FragmentSettings(pages: RachelPages) : RachelFragment<FragmentSettingsBinding>(pages) {
@@ -42,63 +33,43 @@ class FragmentSettings(pages: RachelPages) : RachelFragment<FragmentSettingsBind
 
     override fun bindingClass() = FragmentSettingsBinding::class.java
 
+    private val isLogin: Boolean get() = !Config.user_id_meta.isDefault() && !Config.user_pwd_meta.isDefault()
+
     override fun init() {
         /*    ----    账号设置    ----    */
-        v.tvAccount.typeface = RachelFont.bold
+        v.tvAccount.bold = true
+
         // 更换头像
         v.avatar.rachelClick {
-            PictureSelector.create(pages.context).openGallery(SelectMimeType.ofImage())
-                .setImageEngine(RachelImageEngine.instance)
-                .setCropEngine { fragment: Fragment, srcUri: Uri?, destinationUri: Uri?, dataSource: ArrayList<String?>?, requestCode: Int ->
-                    val uCrop = UCrop.of(
-                        srcUri!!, destinationUri!!, dataSource
-                    )
-                    uCrop.setImageEngine(object : UCropImageEngine {
-                        override fun loadImage(
-                            context: Context,
-                            url: String,
-                            imageView: ImageView
-                        ) {
-                            Glide.with(context).load(url).into(imageView)
-                        }
-
-                        override fun loadImage(
-                            context: Context,
-                            url: Uri,
-                            maxWidth: Int,
-                            maxHeight: Int,
-                            call: UCropImageEngine.OnCallbackListener<Bitmap>
-                        ) {
-                        }
-                    })
-                    val options = UCrop.Options()
-                    @Suppress("DEPRECATION")
-                    options.setCompressionFormat(Bitmap.CompressFormat.WEBP)
-                    options.setAspectRatioOptions(0, AspectRatio("方形", 1f, 1f))
-                    uCrop.withOptions(options)
-                    uCrop.start(fragment.requireActivity(), fragment, requestCode)
+            isLogin.warning("请先登录") {
+                RachelPictureSelector.single(pages.context, 128, 128, true) {
+                    filename -> updateAvatar(filename)
                 }
-                .setSelectionMode(SelectModeConfig.SINGLE)
-                .forResult(object : OnResultCallbackListener<LocalMedia> {
-                    override fun onResult(result: ArrayList<LocalMedia>) {
-                        if (result.size == 1) {
-                            val media = result[0]
-                            println("Path: " + media.path)
-                            println("RealPath: " + media.realPath)
-                            println("OriginalPath: " + media.originalPath)
-                            println("CutPath: " + media.cutPath)
-                        }
-                    }
-                    override fun onCancel() {}
-                })
+            }
+        }
+        // 更新个性签名
+        v.signature.rachelClick {
+            isLogin.warning("请先登录") {
+                Dialog.input(pages.context, "请输入个性签名", 64) { _, input -> updateSignature(input.toString()) }
+            }
+        }
+        // 更新背景墙
+        v.wall.rachelClick {
+            isLogin.warning("请先登录") {
+                RachelPictureSelector.single(pages.context, 560, 315, false) {
+                    filename -> updateWall(filename)
+                }
+            }
         }
         // 退出登录
         v.logoff.setOnSuperTextViewClickListener {
-            if (isLogin) Dialog.confirm(pages.context, "是否退出登录") { _, _ -> logoff() }
+            isLogin.warning("请先登录") {
+                Dialog.confirm(pages.context, "是否退出登录") { _, _ -> logoff() }
+            }
         }
 
         /*    ----    资讯设置    ----    */
-        v.tvMsg.setTypeface(RachelFont.bold)
+        v.tvMsg.bold = true
         // 添加微博用户
         v.weibo.setOnSuperTextViewClickListener {
             Dialog.input(pages.context, "请输入微博用户的uid(非昵称)", 20) { _, input ->
@@ -118,10 +89,10 @@ class FragmentSettings(pages: RachelPages) : RachelFragment<FragmentSettingsBind
         }
 
         /*    ----    美图设置    ----    */
-        v.tvRes.setTypeface(RachelFont.bold)
+        v.tvRes.bold = true
 
         /*    ----    听歌设置    ----    */
-        v.tvMusic.setTypeface(RachelFont.bold)
+        v.tvMusic.bold = true
 
         updateInfo()
     }
@@ -132,14 +103,16 @@ class FragmentSettings(pages: RachelPages) : RachelFragment<FragmentSettingsBind
         v.id.setRightString(Config.user_id)
         val user = Config.user
         if (user.isActive) {
-            v.avatar.load(rilNet, user.avatarPath)
+            v.avatar.load(rilNet, user.avatarPath, Config.cache_key_avatar.get())
             v.signature.text = user.signature
             v.inviter.setRightString(user.inviter)
-            v.wall.load(rilNet, user.wallPath)
+            v.wall.load(rilNet, user.wallPath, Config.cache_key_wall.get())
         }
         else {
             v.avatar.load(pages.ril, R.drawable.placeholder_pic)
             v.signature.text = pages.getResString(R.string.default_signature)
+            v.inviter.setRightString("")
+            v.wall.clear(rilNet)
         }
         v.weiboList.clearAndAddTags(WeiboUser.getNames(Config.weibo_users))
     }
@@ -152,20 +125,58 @@ class FragmentSettings(pages: RachelPages) : RachelFragment<FragmentSettingsBind
         pages.sendMessage(RachelPages.me, RachelMessage.ME_UPDATE_USER_INFO)
     }
 
+    // 添加微博用户
     @NewThread
     private fun addWeiboUser(uid: String) {
-        Thread {
-            val result: Array<String>? = WeiboAPI.extractContainerId(uid)
-            post {
-                result.err("解析微博用户失败") {
-                    val weiboUsers = Config.weibo_users
-                    weiboUsers[it[0]] = WeiboUser(it[1], it[2])
-                    Config.weibo_users = weiboUsers
-                    v.weiboList.clearAndAddTags(WeiboUser.getNames(weiboUsers))
-                }
+        lifecycleScope.launch {
+            val result = withContext(Dispatchers.IO) { WeiboAPI.extractContainerId(uid) }
+            result.err("解析微博用户失败") {
+                val weiboUsers = Config.weibo_users
+                weiboUsers[it[0]] = WeiboUser(it[1], it[2])
+                Config.weibo_users = weiboUsers
+                v.weiboList.clearAndAddTags(WeiboUser.getNames(weiboUsers))
             }
-        }.start()
+        }
     }
 
-    private val isLogin: Boolean get() = !Config.user_id_meta.isDefault() && !Config.user_pwd_meta.isDefault()
+    // 更新头像
+    @NewThread
+    private fun updateAvatar(filename: String) {
+        lifecycleScope.launch {
+            val result = withContext(Dispatchers.IO) { API.UserAPI.updateAvatar(Config.user_id, Config.user_pwd, filename) }
+            result.ok.err(result.value) {
+                XToastUtils.success(result.value)
+                Config.cache_key_avatar.update()
+                v.avatar.load(rilNet, Config.user.avatarPath, Config.cache_key_avatar.get())
+                pages.sendMessage(RachelPages.me, RachelMessage.ME_REQUEST_USER_INFO)
+            }
+        }
+    }
+
+    // 更新个性签名
+    @NewThread
+    private fun updateSignature(signature: String) {
+        lifecycleScope.launch {
+            val result = withContext(Dispatchers.IO) { API.UserAPI.updateSignature(Arg.Signature(Config.user_id, Config.user_pwd, signature)) }
+            result.ok.err(result.value) {
+                XToastUtils.success(result.value)
+                v.signature.text = signature
+                pages.sendMessage(RachelPages.me, RachelMessage.ME_REQUEST_USER_INFO)
+            }
+        }
+    }
+
+    // 更新背景墙
+    @NewThread
+    private fun updateWall(wall: String) {
+        lifecycleScope.launch {
+            val result = withContext(Dispatchers.IO) { API.UserAPI.updateWall(Config.user_id, Config.user_pwd, wall) }
+            result.ok.err(result.value) {
+                XToastUtils.success(result.value)
+                Config.cache_key_wall.update()
+                v.wall.load(rilNet, Config.user.wallPath, Config.cache_key_wall.get())
+                pages.sendMessage(RachelPages.me, RachelMessage.ME_REQUEST_USER_INFO)
+            }
+        }
+    }
 }

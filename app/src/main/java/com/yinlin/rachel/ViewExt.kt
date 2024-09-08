@@ -2,6 +2,7 @@ package com.yinlin.rachel
 
 import android.annotation.SuppressLint
 import android.graphics.Color
+import android.graphics.Paint
 import android.graphics.drawable.ColorDrawable
 import android.view.View
 import android.widget.ImageView
@@ -16,21 +17,10 @@ import com.yinlin.rachel.model.RachelImageLoader
 import com.yinlin.rachel.model.RachelOnClickListener
 import java.io.File
 
+
 var View.backgroundColor: Int
     get() = background?.let { (it as? ColorDrawable)?.color ?: Color.TRANSPARENT } ?: Color.TRANSPARENT
     set(value) { setBackgroundColor(value) }
-
-var TextInputEditText.content: String
-    get() = text?.toString() ?: ""
-    set(value) { setText(value) }
-
-var AppCompatTextView.textColor: Int @ColorInt
-    get() = currentTextColor
-    set(value) { setTextColor(value) }
-
-var TextView.textColor: Int @ColorInt
-get() = currentTextColor
-    set(value) { setTextColor(value) }
 
 fun View.rachelClick(listener: View.OnClickListener) = setOnClickListener(RachelOnClickListener(listener))
 fun View.rachelClick(delay: Long, listener: View.OnClickListener) = setOnClickListener(RachelOnClickListener(delay, listener))
@@ -43,6 +33,28 @@ fun View.interceptScroll() {
     }
 }
 
+var TextInputEditText.content: String
+    get() = text?.toString() ?: ""
+    set(value) { setText(value) }
+
+var AppCompatTextView.textColor: Int @ColorInt
+    get() = currentTextColor
+    set(value) { setTextColor(value) }
+var AppCompatTextView.bold: Boolean
+    get() = typeface == RachelFont.bold
+    set(value) { typeface = if (value) RachelFont.bold else RachelFont.normal }
+
+var TextView.textColor: Int @ColorInt
+    get() = currentTextColor
+    set(value) { setTextColor(value) }
+var TextView.bold: Boolean
+    get() = typeface == RachelFont.bold
+    set(value) { typeface = if (value) RachelFont.bold else RachelFont.normal }
+
+var Paint.bold: Boolean
+    get() = typeface == RachelFont.bold
+    set(value) { typeface = if (value) RachelFont.bold else RachelFont.normal }
+
 fun ImageView.load(loader: RachelImageLoader, @RawRes @DrawableRes resourceId: Int) {
     loader.glide.load(resourceId).apply(loader.options).into(this)
 }
@@ -51,7 +63,7 @@ fun ImageView.load(loader: RachelImageLoader, path: String) {
     loader.glide.load(path).apply(loader.options).into(this)
 }
 
-fun ImageView.load(loader: RachelImageLoader, path: String, sign: Int) {
+fun ImageView.load(loader: RachelImageLoader, path: String, sign: Any) {
     loader.glide.load(path).signature(ObjectKey(sign)).apply(loader.options).into(this)
 }
 
@@ -59,7 +71,7 @@ fun ImageView.load(loader: RachelImageLoader, file: File) {
     loader.glide.load(file).apply(loader.options).into(this)
 }
 
-fun ImageView.load(loader: RachelImageLoader, file: File, sign: Int) {
+fun ImageView.load(loader: RachelImageLoader, file: File, sign: Any) {
     loader.glide.load(file).signature(ObjectKey(sign)).apply(loader.options).into(this)
 }
 

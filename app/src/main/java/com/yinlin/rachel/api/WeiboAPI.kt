@@ -12,6 +12,9 @@ import java.util.Locale
 
 
 object WeiboAPI {
+    const val BASEURL = "https://m.weibo.cn"
+    const val DETAILS_URL = "https://m.weibo.cn/detail/"
+
     fun extractContainerId(uid: String): Array<String>? {
         try {
             val url = "https://m.weibo.cn/api/container/getIndex?type=uid&value=$uid"
@@ -39,7 +42,9 @@ object WeiboAPI {
                 val cardType = card["card_type"].asInt
                 if (cardType != 9) continue  // 非微博类型
 
-                val blogs = card.getAsJsonObject("mblog")
+                var blogs = card.getAsJsonObject("mblog")
+                // 提取ID
+                val blogId = blogs["id"].asString
                 // 提取名称和头像
                 val user = blogs.getAsJsonObject("user")
                 val userName = user["screen_name"].asString
@@ -61,7 +66,10 @@ object WeiboAPI {
                 }
                 // 提取内容
                 val text = blogs["text"].asString
-                val info = MsgInfo(userName, avatar, text, formattedTime, location)
+                val info = MsgInfo(userName, avatar, text, formattedTime, location, blogId)
+                if (blogs.has("retweeted_status")) {
+                    blogs = blogs.get("retweeted_status").asJsonObject // 转发微博
+                }
                 // 图片微博
                 if (blogs.has("pics")) {
                     for (picItem in blogs.getAsJsonArray("pics")) {

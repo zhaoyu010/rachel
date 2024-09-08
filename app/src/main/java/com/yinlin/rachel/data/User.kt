@@ -18,6 +18,8 @@ class User {
     var signature: String? = null
     // 头衔
     var title: String? = null
+    // 头衔所在组
+    var titleGroup: Int? = null
     // 等级
     var level: Int? = null
     // 银币

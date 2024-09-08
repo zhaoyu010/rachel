@@ -11,9 +11,12 @@ import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog
 import com.yinlin.rachel.annotation.NewThread
 import okhttp3.Headers.Companion.toHeaders
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.File
 
 
 object Net {
@@ -39,6 +42,28 @@ object Net {
             val builder = Request.Builder().url(url)
             headers?.apply { builder.headers(this.toHeaders()) }
             builder.post(data.toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull()))
+            val request = builder.build()
+            client.newCall(request).execute().use { response ->
+                return Gson().fromJson(response.body?.string(), JsonObject::class.java)
+            }
+        }
+        catch (ignored: Exception) { }
+        return null
+    }
+
+    fun postForm(url: String, files: Map<String, String>, content: Map<String, String>?, headers: Map<String, String>?): JsonObject? {
+        try {
+            val builder = Request.Builder().url(url)
+            headers?.apply { builder.headers(this.toHeaders()) }
+            val bodyBuilder = MultipartBody.Builder().setType(MultipartBody.FORM)
+            content?.apply {
+                for ((key, value) in content) bodyBuilder.addFormDataPart(key, value)
+            }
+            for ((key, value) in files) {
+                val file = File(value)
+                if (file.exists()) bodyBuilder.addFormDataPart(key, file.name, file.asRequestBody("file/raw".toMediaTypeOrNull()))
+            }
+            builder.post(bodyBuilder.build())
             val request = builder.build()
             client.newCall(request).execute().use { response ->
                 return Gson().fromJson(response.body?.string(), JsonObject::class.java)

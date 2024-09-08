@@ -39,6 +39,14 @@ object Config {
         override fun setDefault() { kv.encode(name, defJson) }
     }
 
+    class CacheKeyMeta(name: String) : Meta<Long>(name, System.currentTimeMillis()), CheckDefault {
+        override fun set(value: Long) { kv.encode(name, value) }
+        override fun get() = kv.decodeLong(name, defValue!!)
+        override fun setDefault() { kv.encode(name, defValue!!) }
+        override fun isDefault() = get() == defValue
+        fun update() = set(System.currentTimeMillis())
+    }
+
     lateinit var kv: MMKV
 
     // 登录相关
@@ -67,4 +75,8 @@ object Config {
     var weibo_users: IWeiboUserMap
         get() = weibo_users_meta.get()
         set(value) { weibo_users_meta.set(value) }
+
+    // 图片缓存键
+    var cache_key_avatar = CacheKeyMeta("cache_key_avatar")
+    var cache_key_wall = CacheKeyMeta("cache_key_wall")
 }

@@ -1,6 +1,6 @@
 package com.yinlin.rachel.dialog
 
-import com.yinlin.rachel.RachelFont
+import com.yinlin.rachel.bold
 import com.yinlin.rachel.data.MusicInfo
 import com.yinlin.rachel.databinding.DialogMusicInfoBinding
 import com.yinlin.rachel.fragment.FragmentMusic
@@ -15,7 +15,7 @@ class DialogMusicInfo(fragment: FragmentMusic, private val musicInfo: MusicInfo)
 
     override fun init() {
         v.name.text = musicInfo.name
-        v.name.typeface = RachelFont.bold
+        v.name.bold = true
         v.version.text = "v ${musicInfo.version}"
         v.id.text = "ID: ${musicInfo.id}"
         v.pic.load(root.pages.ril, musicInfo.recordPath)

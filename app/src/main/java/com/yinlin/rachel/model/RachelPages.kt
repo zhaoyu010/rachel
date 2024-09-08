@@ -12,6 +12,8 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import com.chaychan.library.BottomBarLayout
 import com.chaychan.library.TabData
+import com.xuexiang.xui.utils.WidgetUtils
+import com.xuexiang.xui.widget.dialog.LoadingDialog
 import com.yinlin.rachel.RachelMessage
 import com.yinlin.rachel.R
 import com.yinlin.rachel.fragment.FragmentGroup
@@ -46,8 +48,13 @@ class RachelPages(activity: FragmentActivity, private val bbl: BottomBarLayout,
     private var isSecond: Boolean = false
     val handler: Handler = Handler(activity.mainLooper)
     val ril: RachelImageLoader = RachelImageLoader(activity)
+    val loadingDialog: LoadingDialog = WidgetUtils.getLoadingDialog(activity, "加载中...")
 
     init {
+        loadingDialog.setIconScale(0.4f)
+        loadingDialog.setLoadingSpeed(8)
+        loadingDialog.setCancelable(false)
+
         val tabSource: MutableList<TabData> = ArrayList()
         for (item in items) tabSource.add(TabData(item.title, item.iconNormal, item.iconActive))
         bbl.setData(tabSource)

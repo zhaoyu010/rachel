@@ -1,10 +1,9 @@
 package com.yinlin.rachel.dialog
 
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.xuexiang.xui.utils.XToastUtils
 import com.yinlin.rachel.R
-import com.yinlin.rachel.RachelFont
 import com.yinlin.rachel.RachelMessage
+import com.yinlin.rachel.bold
 import com.yinlin.rachel.databinding.DialogLyricsEngineBinding
 import com.yinlin.rachel.databinding.ItemLyricsEngineBinding
 import com.yinlin.rachel.fragment.FragmentMusic
@@ -46,7 +45,7 @@ class DialogLyricsEngine(fragment: FragmentMusic, private val engineNames: Mutab
     override fun bindingClass() = DialogLyricsEngineBinding::class.java
 
     override fun init() {
-        v.title.typeface = RachelFont.bold
+        v.title.bold = true
 
         v.list.layoutManager = LinearLayoutManager(root.pages.context)
         v.list.adapter = adapter

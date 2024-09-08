@@ -2,13 +2,11 @@ package com.yinlin.rachel.fragment
 
 import android.annotation.SuppressLint
 import android.graphics.Paint
-import android.text.InputType
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.gson.reflect.TypeToken
 import com.xuexiang.xui.utils.XToastUtils
-import com.xuexiang.xui.widget.dialog.materialdialog.DialogAction
 import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog
-import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog.SingleButtonCallback
 import com.xuexiang.xui.widget.dialog.materialdialog.simplelist.MaterialSimpleListAdapter
 import com.xuexiang.xui.widget.dialog.materialdialog.simplelist.MaterialSimpleListItem
 import com.xuexiang.xui.widget.tabbar.TabSegment
@@ -23,7 +21,6 @@ import com.yinlin.rachel.annotation.NewThread
 import com.yinlin.rachel.api.API
 import com.yinlin.rachel.api.Arg
 import com.yinlin.rachel.clearAddAll
-import com.yinlin.rachel.data.MusicInfo
 import com.yinlin.rachel.data.Playlist
 import com.yinlin.rachel.databinding.FragmentPlaylistBinding
 import com.yinlin.rachel.databinding.ItemPlaylistBinding
@@ -32,11 +29,13 @@ import com.yinlin.rachel.encodeBase64
 import com.yinlin.rachel.err
 import com.yinlin.rachel.model.RachelAdapter
 import com.yinlin.rachel.model.RachelFragment
-import com.yinlin.rachel.model.RachelOnClickListener
 import com.yinlin.rachel.model.RachelPages
 import com.yinlin.rachel.rachelClick
 import com.yinlin.rachel.textColor
 import com.yinlin.rachel.warning
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class FragmentPlaylist(pages: RachelPages, musicInfos: IMusicInfoMap,
@@ -198,29 +197,29 @@ class FragmentPlaylist(pages: RachelPages, musicInfos: IMusicInfoMap,
 
     @NewThread
     private fun uploadPlaylist() {
-        Thread {
-            val result = API.uploadPlaylist(Arg.UploadPlaylist(Config.user_id, Config.user_pwd, playlists.encodeBase64()))
-            post {
-                result.ok.err(result.value) { XToastUtils.success(result.value) }
+        lifecycleScope.launch {
+            val result = withContext(Dispatchers.IO) {
+                API.UserAPI.uploadPlaylist(Arg.Playlist(Config.user_id, Config.user_pwd, playlists.encodeBase64()))
             }
-        }.start()
+            result.ok.err(result.value) { XToastUtils.success(result.value) }
+        }
     }
 
     @NewThread
     private fun downloadPlaylist() {
-        Thread {
-            val result = API.downloadPlaylist(Arg.Login(Config.user_id, Config.user_pwd))
-            post {
-                result.ok.err(result.value1) {
-                    (result.value2.decodeBase64(object : TypeToken<PlaylistMap>(){}.type) as IPlaylistMap?)?.apply {
-                        pages.sendMessage(RachelPages.music, RachelMessage.MUSIC_STOP_PLAYER)
-                        Config.playlist = this
-                        playlists.clearAddAll(this)
-                        updatePlaylist()
-                        XToastUtils.success(result.value1)
-                    }
+        lifecycleScope.launch {
+            val result = withContext(Dispatchers.IO) {
+                API.UserAPI.downloadPlaylist(Arg.Login(Config.user_id, Config.user_pwd))
+            }
+            result.ok.err(result.value1) {
+                (result.value2.decodeBase64(object : TypeToken<PlaylistMap>(){}.type) as IPlaylistMap?)?.apply {
+                    pages.sendMessage(RachelPages.music, RachelMessage.MUSIC_STOP_PLAYER)
+                    Config.playlist = this
+                    playlists.clearAddAll(this)
+                    updatePlaylist()
+                    XToastUtils.success(result.value1)
                 }
             }
-        }.start()
+        }
     }
 }

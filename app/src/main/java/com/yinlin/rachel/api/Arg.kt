@@ -6,5 +6,7 @@ object Arg {
     @JvmRecord
     data class Register(val id: String, val pwd: String, val inviter: String)
     @JvmRecord
-    data class UploadPlaylist(val id: String, val pwd: String, val playlist: String)
+    data class Playlist(val id: String, val pwd: String, val playlist: String)
+    @JvmRecord
+    data class Signature(val id: String, val pwd: String, val signature: String)
 }
