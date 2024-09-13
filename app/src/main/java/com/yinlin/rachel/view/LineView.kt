@@ -15,9 +15,7 @@ class LineView(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : View
     constructor(context: Context): this(context, null)
 
     init {
-        context.obtainStyledAttributes(attrs, R.styleable.LineView, defStyleAttr, 0).use { arr ->
-            paint.color = arr.getColor(R.styleable.LineView_color, context.getColor(R.color.light_gray))
-        }
+        paint.color = context.getColor(R.color.light_gray)
     }
 
     override fun onDraw(canvas: Canvas) {

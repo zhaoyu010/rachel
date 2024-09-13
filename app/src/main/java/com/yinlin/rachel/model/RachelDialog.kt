@@ -22,13 +22,10 @@ abstract class RachelDialog<Binding : ViewBinding, F : RachelFragment<*>>
 
     final override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        try {
-            val cls: Class<Binding> = bindingClass()
-            val method = cls.getMethod("inflate", LayoutInflater::class.java)
-            @Suppress("UNCHECKED_CAST")
-            _binding = method.invoke(null, layoutInflater) as Binding
-        }
-        catch (ignored: Exception) { }
+        val cls: Class<Binding> = bindingClass()
+        val method = cls.getMethod("inflate", LayoutInflater::class.java)
+        @Suppress("UNCHECKED_CAST")
+        _binding = method.invoke(null, layoutInflater) as Binding
         val view = v.root
         setContentView(view)
         setOnDismissListener {

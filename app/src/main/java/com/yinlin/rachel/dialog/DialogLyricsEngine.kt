@@ -1,6 +1,7 @@
 package com.yinlin.rachel.dialog
 
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.xuexiang.xui.utils.XToastUtils
 import com.yinlin.rachel.R
 import com.yinlin.rachel.RachelMessage
 import com.yinlin.rachel.bold
@@ -12,7 +13,6 @@ import com.yinlin.rachel.model.RachelAdapter
 import com.yinlin.rachel.model.RachelDialog
 import com.yinlin.rachel.model.RachelPages
 import com.yinlin.rachel.textColor
-import com.yinlin.rachel.warning
 
 
 class DialogLyricsEngine(fragment: FragmentMusic, private val engineNames: MutableList<String>)
@@ -34,9 +34,10 @@ class DialogLyricsEngine(fragment: FragmentMusic, private val engineNames: Mutab
 
         override fun onItemClicked(v: ItemLyricsEngineBinding, item: String, position: Int) {
             dialog.dismiss()
-            dialog.root.v.lyrics.hasEngine(item).warning("未解锁该歌词引擎") {
+            if (dialog.root.v.lyrics.hasEngine(item)) {
                 dialog.root.pages.sendMessage(RachelPages.music, RachelMessage.MUSIC_USE_LYRICS_ENGINE, item)
             }
+            else XToastUtils.warning("未解锁该歌词引擎")
         }
     }
 

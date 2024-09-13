@@ -9,4 +9,8 @@ object Arg {
     data class Playlist(val id: String, val pwd: String, val playlist: String)
     @JvmRecord
     data class Signature(val id: String, val pwd: String, val signature: String)
+    @JvmRecord
+    data class ProcessMail(val id: String, val pwd: String, val mid: Long, val confirm: Boolean, val arg: String?)
+    @JvmRecord
+    data class DeleteMail(val id: String, val pwd: String, val mid: Long)
 }

@@ -5,10 +5,16 @@ import android.os.Parcel
 import android.os.Parcelable
 import com.xuexiang.xui.widget.imageview.preview.enitity.IPreviewInfo
 
-
-class MsgInfo(val name: String, val avatar: String, val text: String, val time: String, val location: String, val id: String) {
-    val pictures = ArrayList<Picture>()
-
+@JvmRecord
+data class MsgInfo(
+    val name: String,
+    val avatar: String,
+    val text: String,
+    val time: String,
+    val location: String,
+    val id: String,
+    val pictures: MutableList<Picture> = ArrayList(),
+) {
     enum class MsgType { PICTURE, VIDEO }
 
     class Picture(private var type: MsgType = MsgType.PICTURE,

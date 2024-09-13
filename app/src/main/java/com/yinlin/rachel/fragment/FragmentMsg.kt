@@ -99,10 +99,7 @@ class FragmentMsg(pages: RachelPages) : RachelFragment<FragmentMsgBinding>(pages
         v.list.adapter = adapter
 
         // 下拉刷新
-        v.container.setOnRefreshListener {
-            v.container.finishRefresh()
-            loadMsg()
-        }
+        v.container.setOnRefreshListener { loadMsg() }
 
         // 首次刷新
         loadMsg()
@@ -118,6 +115,7 @@ class FragmentMsg(pages: RachelPages) : RachelFragment<FragmentMsgBinding>(pages
         lifecycleScope.launch {
             pages.loadingDialog.show()
             val msgInfos = withContext(Dispatchers.IO) { WeiboAPI.extract(Config.weibo_users) }
+            if (v.container.isRefreshing) v.container.finishRefresh()
             pages.loadingDialog.dismiss()
             if (msgInfos.isEmpty()) v.state.showOffline { loadMsg() }
             else v.state.showContent()

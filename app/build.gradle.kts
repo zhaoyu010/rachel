@@ -11,8 +11,8 @@ android {
         applicationId = "com.yinlin.rachel"
         minSdk = 29
         targetSdk = 34
-        versionCode = 111
-        versionName = "1.1.1-alpha"
+        versionCode = 113
+        versionName = "1.1.3-alpha"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -50,6 +50,7 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("androidx.activity:activity:1.8.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation("androidx.exifinterface:exifinterface:1.3.6")
     implementation("androidx.media3:media3-exoplayer:1.3.1")
     implementation("androidx.media3:media3-exoplayer-dash:1.3.1")
     implementation("androidx.media3:media3-ui:1.3.1")
@@ -66,6 +67,8 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
     implementation("com.tencent:mmkv:1.3.9")
+    implementation("com.tencent.tav:libpag:4.4.1-harfbuzz")
+
 
     implementation("io.github.lucksiege:pictureselector:v3.11.2")
     implementation("io.github.lucksiege:ucrop:v3.11.2")

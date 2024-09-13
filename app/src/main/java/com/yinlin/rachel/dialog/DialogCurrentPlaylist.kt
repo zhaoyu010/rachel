@@ -14,11 +14,9 @@ import com.yinlin.rachel.fragment.FragmentMusic
 import com.yinlin.rachel.interceptScroll
 import com.yinlin.rachel.model.RachelAdapter
 import com.yinlin.rachel.model.RachelDialog
-import com.yinlin.rachel.model.RachelOnClickListener
 import com.yinlin.rachel.model.RachelPages
 import com.yinlin.rachel.rachelClick
 import com.yinlin.rachel.textColor
-import com.yinlin.rachel.warning
 
 
 class DialogCurrentPlaylist(fragment: FragmentMusic,
@@ -49,10 +47,11 @@ class DialogCurrentPlaylist(fragment: FragmentMusic,
         }
 
         override fun onItemClicked(v: ItemPlaylistBinding, item: String, position: Int) {
-            dialog.musicInfos[item].warning(pages.getResString(R.string.no_audio_source)) {
+            if (dialog.musicInfos[item] != null) {
                 dialog.dismiss()
                 pages.sendMessage(RachelPages.music, RachelMessage.MUSIC_GOTO_MUSIC, item)
             }
+            else XToastUtils.warning(pages.getResString(R.string.no_audio_source))
         }
     }
 

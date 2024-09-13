@@ -2,6 +2,7 @@ package com.yinlin.rachel.model
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.os.Build
 import android.widget.ImageView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
@@ -59,8 +60,13 @@ object RachelPictureSelector {
             .setImageEngine(RachelImageEngine.instance)
             .setCropEngine { fragment, srcUri, destinationUri, dataSource, requestCode ->
                 val options = UCrop.Options()
-                @Suppress("DEPRECATION")
-                options.setCompressionFormat(Bitmap.CompressFormat.WEBP)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    options.setCompressionFormat(Bitmap.CompressFormat.WEBP_LOSSY)
+                }
+                else {
+                    @Suppress("DEPRECATION")
+                    options.setCompressionFormat(Bitmap.CompressFormat.WEBP)
+                }
                 options.setCompressionQuality(100)
                 options.withAspectRatio(width.toFloat(), height.toFloat())
                 options.withMaxResultSize(width, height)

@@ -2,9 +2,11 @@ package com.yinlin.rachel.data
 
 import com.yinlin.rachel.api.API
 
-class User {
+@JvmRecord
+data class User(
+    val isBroken: Boolean = false,
     // 邀请人
-    var inviter: String? = null
+    val inviter: String? = null,
     // 权限
     // 1
     // 2
@@ -13,22 +15,22 @@ class User {
     // 16
     // 32
     // 64
-    var privilege: Int? = null
+    val privilege: Int = 0,
     // 个性签名
-    var signature: String? = null
+    val signature: String = "",
     // 头衔
-    var title: String? = null
+    val title: String = "",
     // 头衔所在组
-    var titleGroup: Int? = null
+    val titleGroup: Int = 0,
     // 等级
-    var level: Int? = null
+    val level: Int = 0,
     // 银币
-    var coin: Int? = null
+    val coin: Int = 0,
     // 头像
-    var avatar: String? = null
+    val avatar: String = "",
     // 背景墙
-    var wall: String? = null
+    val wall: String = "",
+) {
     val avatarPath: String get() = API.BASEURL + avatar
     val wallPath: String get() = API.BASEURL + wall
-    val isActive: Boolean get() = level != null && coin != null
 }

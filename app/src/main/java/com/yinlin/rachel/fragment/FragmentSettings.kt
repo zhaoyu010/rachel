@@ -15,14 +15,12 @@ import com.yinlin.rachel.bold
 import com.yinlin.rachel.clear
 import com.yinlin.rachel.data.WeiboUser
 import com.yinlin.rachel.databinding.FragmentSettingsBinding
-import com.yinlin.rachel.err
 import com.yinlin.rachel.load
 import com.yinlin.rachel.model.RachelFragment
 import com.yinlin.rachel.model.RachelImageLoader
 import com.yinlin.rachel.model.RachelPages
 import com.yinlin.rachel.model.RachelPictureSelector
 import com.yinlin.rachel.rachelClick
-import com.yinlin.rachel.warning
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -41,31 +39,35 @@ class FragmentSettings(pages: RachelPages) : RachelFragment<FragmentSettingsBind
 
         // 更换头像
         v.avatar.rachelClick {
-            isLogin.warning("请先登录") {
-                RachelPictureSelector.single(pages.context, 128, 128, true) {
+            if (isLogin) {
+                RachelPictureSelector.single(pages.context, 256, 256, true) {
                     filename -> updateAvatar(filename)
                 }
             }
+            else XToastUtils.warning("请先登录")
         }
         // 更新个性签名
         v.signature.rachelClick {
-            isLogin.warning("请先登录") {
+            if (isLogin) {
                 Dialog.input(pages.context, "请输入个性签名", 64) { _, input -> updateSignature(input.toString()) }
             }
+            else XToastUtils.warning("请先登录")
         }
         // 更新背景墙
         v.wall.rachelClick {
-            isLogin.warning("请先登录") {
-                RachelPictureSelector.single(pages.context, 560, 315, false) {
+            if (isLogin) {
+                RachelPictureSelector.single(pages.context, 910, 512, false) {
                     filename -> updateWall(filename)
                 }
             }
+            else XToastUtils.warning("请先登录")
         }
         // 退出登录
         v.logoff.setOnSuperTextViewClickListener {
-            isLogin.warning("请先登录") {
+            if (isLogin) {
                 Dialog.confirm(pages.context, "是否退出登录") { _, _ -> logoff() }
             }
+            else XToastUtils.warning("请先登录")
         }
 
         /*    ----    资讯设置    ----    */
@@ -75,7 +77,8 @@ class FragmentSettings(pages: RachelPages) : RachelFragment<FragmentSettingsBind
             Dialog.input(pages.context, "请输入微博用户的uid(非昵称)", 20) { _, input ->
                 val uid = input.toString()
                 val weiboUser: WeiboUser? = Config.weibo_users[uid]
-                (weiboUser == null).warning(weiboUser!!.name + " 已存在") { addWeiboUser(uid) }
+                if (weiboUser != null) XToastUtils.warning(weiboUser.name + " 已存在")
+                else addWeiboUser(uid)
             }
         }
         // 删除微博用户
@@ -102,17 +105,17 @@ class FragmentSettings(pages: RachelPages) : RachelFragment<FragmentSettingsBind
     private fun updateInfo() {
         v.id.setRightString(Config.user_id)
         val user = Config.user
-        if (user.isActive) {
-            v.avatar.load(rilNet, user.avatarPath, Config.cache_key_avatar.get())
-            v.signature.text = user.signature
-            v.inviter.setRightString(user.inviter)
-            v.wall.load(rilNet, user.wallPath, Config.cache_key_wall.get())
-        }
-        else {
+        if (user.isBroken) {
             v.avatar.load(pages.ril, R.drawable.placeholder_pic)
             v.signature.text = pages.getResString(R.string.default_signature)
             v.inviter.setRightString("")
             v.wall.clear(rilNet)
+        }
+        else {
+            v.avatar.load(rilNet, user.avatarPath, Config.cache_key_avatar.get())
+            v.signature.text = user.signature
+            v.inviter.setRightString(user.inviter ?: "")
+            v.wall.load(rilNet, user.wallPath, Config.cache_key_wall.get())
         }
         v.weiboList.clearAndAddTags(WeiboUser.getNames(Config.weibo_users))
     }
@@ -129,13 +132,19 @@ class FragmentSettings(pages: RachelPages) : RachelFragment<FragmentSettingsBind
     @NewThread
     private fun addWeiboUser(uid: String) {
         lifecycleScope.launch {
-            val result = withContext(Dispatchers.IO) { WeiboAPI.extractContainerId(uid) }
-            result.err("解析微博用户失败") {
+            pages.loadingDialog.show()
+            val result = withContext(Dispatchers.IO) {
+                val result = WeiboAPI.extractContainerId(uid)
+                withContext(Dispatchers.Main) { pages.loadingDialog.dismiss() }
+                result
+            }
+            if (result != null) {
                 val weiboUsers = Config.weibo_users
-                weiboUsers[it[0]] = WeiboUser(it[1], it[2])
+                weiboUsers[result[0]] = WeiboUser(result[1], result[2])
                 Config.weibo_users = weiboUsers
                 v.weiboList.clearAndAddTags(WeiboUser.getNames(weiboUsers))
             }
+            else XToastUtils.error("解析微博用户失败")
         }
     }
 
@@ -143,13 +152,19 @@ class FragmentSettings(pages: RachelPages) : RachelFragment<FragmentSettingsBind
     @NewThread
     private fun updateAvatar(filename: String) {
         lifecycleScope.launch {
-            val result = withContext(Dispatchers.IO) { API.UserAPI.updateAvatar(Config.user_id, Config.user_pwd, filename) }
-            result.ok.err(result.value) {
+            pages.loadingDialog.show()
+            val result = withContext(Dispatchers.IO) {
+                val result = API.UserAPI.updateAvatar(Config.user_id, Config.user_pwd, filename)
+                withContext(Dispatchers.Main) { pages.loadingDialog.dismiss() }
+                result
+            }
+            if (result.ok) {
                 XToastUtils.success(result.value)
                 Config.cache_key_avatar.update()
                 v.avatar.load(rilNet, Config.user.avatarPath, Config.cache_key_avatar.get())
                 pages.sendMessage(RachelPages.me, RachelMessage.ME_REQUEST_USER_INFO)
             }
+            else XToastUtils.error(result.value)
         }
     }
 
@@ -157,12 +172,18 @@ class FragmentSettings(pages: RachelPages) : RachelFragment<FragmentSettingsBind
     @NewThread
     private fun updateSignature(signature: String) {
         lifecycleScope.launch {
-            val result = withContext(Dispatchers.IO) { API.UserAPI.updateSignature(Arg.Signature(Config.user_id, Config.user_pwd, signature)) }
-            result.ok.err(result.value) {
+            pages.loadingDialog.show()
+            val result = withContext(Dispatchers.IO) {
+                val result = API.UserAPI.updateSignature(Arg.Signature(Config.user_id, Config.user_pwd, signature))
+                withContext(Dispatchers.Main) { pages.loadingDialog.dismiss() }
+                result
+            }
+            if (result.ok) {
                 XToastUtils.success(result.value)
                 v.signature.text = signature
                 pages.sendMessage(RachelPages.me, RachelMessage.ME_REQUEST_USER_INFO)
             }
+            else XToastUtils.error(result.value)
         }
     }
 
@@ -170,13 +191,19 @@ class FragmentSettings(pages: RachelPages) : RachelFragment<FragmentSettingsBind
     @NewThread
     private fun updateWall(wall: String) {
         lifecycleScope.launch {
-            val result = withContext(Dispatchers.IO) { API.UserAPI.updateWall(Config.user_id, Config.user_pwd, wall) }
-            result.ok.err(result.value) {
+            pages.loadingDialog.show()
+            val result = withContext(Dispatchers.IO) {
+                val result = API.UserAPI.updateWall(Config.user_id, Config.user_pwd, wall)
+                withContext(Dispatchers.Main) { pages.loadingDialog.dismiss() }
+                result
+            }
+            if (result.ok) {
                 XToastUtils.success(result.value)
                 Config.cache_key_wall.update()
                 v.wall.load(rilNet, Config.user.wallPath, Config.cache_key_wall.get())
                 pages.sendMessage(RachelPages.me, RachelMessage.ME_REQUEST_USER_INFO)
             }
+            else XToastUtils.error(result.value)
         }
     }
 }

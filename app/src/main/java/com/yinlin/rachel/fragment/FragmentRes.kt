@@ -20,7 +20,6 @@ import com.yinlin.rachel.data.ResFile
 import com.yinlin.rachel.data.ResFolder
 import com.yinlin.rachel.databinding.FragmentResBinding
 import com.yinlin.rachel.databinding.ItemResBinding
-import com.yinlin.rachel.err
 import com.yinlin.rachel.load
 import com.yinlin.rachel.model.RachelAdapter
 import com.yinlin.rachel.model.RachelFragment
@@ -90,7 +89,8 @@ class FragmentRes(pages: RachelPages) : RachelFragment<FragmentResBinding>(pages
         }
 
         private fun processDownloadResult(status: Boolean) {
-            status.err("下载失败") { XToastUtils.success("下载成功") }
+            if (status) XToastUtils.success("下载成功")
+            else XToastUtils.error("下载失败")
         }
     }
 

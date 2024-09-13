@@ -21,14 +21,11 @@ abstract class RachelAdapter<Binding : ViewBinding, Item>(val items: MutableList
     constructor(): this(ArrayList())
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RachelViewHolder<Binding> {
-        var v: Binding? = null
-        try {
-            val cls: Class<Binding> = bindingClass()
-            val method = cls.getMethod("inflate", LayoutInflater::class.java, ViewGroup::class.java, Boolean::class.javaPrimitiveType)
-            @Suppress("UNCHECKED_CAST")
-            v = method.invoke(null, LayoutInflater.from(parent.context), parent, false) as Binding
-        } catch (ignored: Exception) { }
-        val holder = RachelViewHolder(v!!)
+        val cls: Class<Binding> = bindingClass()
+        val method = cls.getMethod("inflate", LayoutInflater::class.java, ViewGroup::class.java, Boolean::class.javaPrimitiveType)
+        @Suppress("UNCHECKED_CAST")
+        val v = method.invoke(null, LayoutInflater.from(parent.context), parent, false) as Binding
+        val holder = RachelViewHolder(v)
         val root: View = v.root
         root.rachelClick(300) {
             val position = holder.getBindingAdapterPosition()

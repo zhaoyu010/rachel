@@ -16,7 +16,7 @@ import com.xuexiang.xui.utils.WidgetUtils
 import com.xuexiang.xui.widget.dialog.LoadingDialog
 import com.yinlin.rachel.RachelMessage
 import com.yinlin.rachel.R
-import com.yinlin.rachel.fragment.FragmentGroup
+import com.yinlin.rachel.fragment.FragmentDiscovery
 import com.yinlin.rachel.fragment.FragmentMe
 import com.yinlin.rachel.fragment.FragmentMsg
 import com.yinlin.rachel.fragment.FragmentMusic
@@ -37,7 +37,7 @@ class RachelPages(activity: FragmentActivity, private val bbl: BottomBarLayout,
         val msg = Item(0, FragmentMsg::class.java, "资讯", R.drawable.msg_normal, R.drawable.msg_active)
         val res = Item(1, FragmentRes::class.java, "美图", R.drawable.res_normal, R.drawable.res_active)
         val music = Item(2, FragmentMusic::class.java, "听歌", R.drawable.music_normal, R.drawable.music_active)
-        val group = Item(3, FragmentGroup::class.java, "水群", R.drawable.group_normal, R.drawable.group_active)
+        val discovery = Item(3, FragmentDiscovery::class.java, "发现", R.drawable.discovery_normal, R.drawable.discovery_active)
         val me = Item(4, FragmentMe::class.java, "小银子", if (isLuckyDog) R.drawable.dog_normal else R.drawable.me_normal, if (isLuckyDog) R.drawable.dog_active else R.drawable.me_active)
     }
 

@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.reflect.TypeToken
 import com.yinlin.rachel.Net
+import com.yinlin.rachel.data.Mail
 import com.yinlin.rachel.data.ResFile
 import com.yinlin.rachel.data.ResFolder
 import com.yinlin.rachel.data.User
@@ -110,7 +111,7 @@ object API {
                 return Gson().fromJson(json, object : TypeToken<User>(){}.type) as User
             }
             catch (ignored: Exception) { }
-            return User()
+            return User(true)
         }
 
         // 更新头像
@@ -149,6 +150,36 @@ object API {
         fun signIn(arg: Arg.Login): Result<String> {
             try {
                 val json = Net.post("$BASEURL/signIn", Gson().toJson(arg), null)
+                return Result(json!!["ok"].asBoolean, json["msg"].asString)
+            }
+            catch (ignored: Exception) { }
+            return Result(false, "网络异常")
+        }
+
+        // 查询邮件
+        fun getMail(arg: Arg.Login): List<Mail> {
+            try {
+                val json = Net.post("$BASEURL/getMail", Gson().toJson(arg), null)
+                if (json!!["ok"].asBoolean) return Gson().fromJson(json["mails"], object : TypeToken<List<Mail>>(){}.type)
+            }
+            catch (ignored: Exception) { }
+            return emptyList()
+        }
+
+        // 处理邮件
+        fun processMail(arg: Arg.ProcessMail): Result<String> {
+            try {
+                val json = Net.post("$BASEURL/processMail", Gson().toJson(arg), null)
+                return Result(json!!["ok"].asBoolean, json["msg"].asString)
+            }
+            catch (ignored: Exception) { }
+            return Result(false, "网络异常")
+        }
+
+        // 删除邮件
+        fun deleteMail(arg: Arg.DeleteMail): Result<String> {
+            try {
+                val json = Net.post("$BASEURL/deleteMail", Gson().toJson(arg), null)
                 return Result(json!!["ok"].asBoolean, json["msg"].asString)
             }
             catch (ignored: Exception) { }

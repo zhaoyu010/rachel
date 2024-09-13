@@ -112,7 +112,7 @@ object RachelMod {
                 if (!infoFile.exists()) continue
                 val musicInfo: MusicInfo = infoFile.readJson(object : TypeToken<MusicInfo>(){}.type)
                 if (!musicInfo.isCorrect || musicInfo.id != id) continue
-                metadata.items[id] = MusicItem(musicInfo.name!!, musicInfo.version!!)
+                metadata.items[id] = MusicItem(musicInfo.name, musicInfo.version)
             }
             // 遍历
             val files = folder.listFiles { obj: File -> obj.isFile }

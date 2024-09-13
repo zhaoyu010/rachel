@@ -1,6 +1,7 @@
 package com.yinlin.rachel
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.drawable.ColorDrawable
@@ -41,19 +42,26 @@ var AppCompatTextView.textColor: Int @ColorInt
     get() = currentTextColor
     set(value) { setTextColor(value) }
 var AppCompatTextView.bold: Boolean
-    get() = typeface == RachelFont.bold
-    set(value) { typeface = if (value) RachelFont.bold else RachelFont.normal }
+    get() = typeface == (context.applicationContext as RachelApplication).fontBold
+    set(value) {
+        val app = context.applicationContext as RachelApplication
+        typeface = if (value) app.fontBold else app.fontNormal
+    }
 
 var TextView.textColor: Int @ColorInt
     get() = currentTextColor
     set(value) { setTextColor(value) }
 var TextView.bold: Boolean
-    get() = typeface == RachelFont.bold
-    set(value) { typeface = if (value) RachelFont.bold else RachelFont.normal }
+    get() = typeface == (context.applicationContext as RachelApplication).fontBold
+    set(value) {
+        val app = context.applicationContext as RachelApplication
+        typeface = if (value) app.fontBold else app.fontNormal
+    }
 
-var Paint.bold: Boolean
-    get() = typeface == RachelFont.bold
-    set(value) { typeface = if (value) RachelFont.bold else RachelFont.normal }
+fun Paint.bold(context: Context, isBold: Boolean) {
+    val app = context.applicationContext as RachelApplication
+    typeface = if (isBold) app.fontBold else app.fontNormal
+}
 
 fun ImageView.load(loader: RachelImageLoader, @RawRes @DrawableRes resourceId: Int) {
     loader.glide.load(resourceId).apply(loader.options).into(this)

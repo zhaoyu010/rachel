@@ -4,39 +4,10 @@ import android.content.Context
 import android.util.Base64
 import android.util.TypedValue
 import com.google.gson.Gson
-import com.xuexiang.xui.utils.XToastUtils
 import java.lang.reflect.Type
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.util.Locale
-
-fun Boolean.err(msg: String) {
-    if (!this) XToastUtils.error(msg)
-}
-
-inline fun Boolean.err(msg: String, block: () -> Unit) {
-    if (this) block()
-    else XToastUtils.error(msg)
-}
-
-inline fun <T> T?.err(msg: String, block: (T) -> Unit) {
-    if (this != null) block(this)
-    else XToastUtils.error(msg)
-}
-
-fun Boolean.warning(msg: String) {
-    if (!this) XToastUtils.warning(msg)
-}
-
-inline fun Boolean.warning(msg: String, block: () -> Unit) {
-    if (this) block()
-    else XToastUtils.warning(msg)
-}
-
-inline fun <T> T?.warning(msg: String, block: (T) -> Unit) {
-    if (this != null) block(this)
-    else XToastUtils.warning(msg)
-}
 
 fun Long.toStringTime(): String {
     val second = (this / 1000).toInt()

@@ -22,13 +22,10 @@ abstract class RachelFragment<Binding : ViewBinding>(val pages: RachelPages) : F
     open fun messageForResult(msg: RachelMessage, arg: Any?): Any? = null
 
     final override fun onCreateView(inflater: LayoutInflater, parent: ViewGroup?, bundle: Bundle?): View {
-        try {
-            val cls: Class<Binding> = bindingClass()
-            val method = cls.getMethod("inflate", LayoutInflater::class.java, ViewGroup::class.java, Boolean::class.javaPrimitiveType)
-            @Suppress("UNCHECKED_CAST")
-            _binding = method.invoke(null, inflater, parent, false) as Binding
-        }
-        catch (ignored: Exception) { }
+        val cls: Class<Binding> = bindingClass()
+        val method = cls.getMethod("inflate", LayoutInflater::class.java, ViewGroup::class.java, Boolean::class.javaPrimitiveType)
+        @Suppress("UNCHECKED_CAST")
+        _binding = method.invoke(null, inflater, parent, false) as Binding
         return v.root
     }
 

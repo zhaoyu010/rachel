@@ -17,8 +17,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var pages: RachelPages
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+        super.onCreate(null)
         enableEdgeToEdge()
+        initTextFont()
+
         v = ActivityMainBinding.inflate(layoutInflater)
         val view = v.root
         setContentView(view)
@@ -28,7 +30,7 @@ class MainActivity : AppCompatActivity() {
             insets
         }
         pages = RachelPages(this, v.bbl, arrayOf(
-            RachelPages.msg, RachelPages.res, RachelPages.music, RachelPages.group, RachelPages.me
+            RachelPages.msg, RachelPages.res, RachelPages.music, RachelPages.discovery, RachelPages.me
         ), RachelPages.msg, R.id.frame, R.id.frame_child)
 
         detectImportMod(intent)
@@ -44,6 +46,14 @@ class MainActivity : AppCompatActivity() {
     @Deprecated("Deprecated in Java") @Suppress("DEPRECATION")
     override fun onBackPressed() {
         if (pages.goBack()) super.onBackPressed()
+    }
+
+    private fun initTextFont() {
+        val configuration = resources.configuration
+        configuration.densityDpi = 480
+        configuration.fontScale = 1.15f
+        @Suppress("DEPRECATION")
+        resources.updateConfiguration(configuration, resources.displayMetrics)
     }
 
     private fun detectImportMod(intent: Intent?) {

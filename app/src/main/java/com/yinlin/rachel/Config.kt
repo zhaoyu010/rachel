@@ -60,7 +60,7 @@ object Config {
         get() = user_pwd_meta.get()
         set(value) { user_pwd_meta.set(value) }
 
-    val user_meta = JsonMeta<User>("user", "{}", object : TypeToken<User>(){}.type)
+    val user_meta = JsonMeta<User>("user", "{ \"isBroken\": true }", object : TypeToken<User>(){}.type)
     var user: User
         get() = user_meta.get()
         set(value) { user_meta.set(value) }

@@ -8,7 +8,7 @@ import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog
 object Dialog {
     fun confirm(context: Context, content: String, callback: MaterialDialog.SingleButtonCallback) {
         MaterialDialog.Builder(context).iconRes(R.mipmap.icon)
-            .title("注意").content(content)
+            .title("二次确认").content(content)
             .positiveText(R.string.yes).negativeText(R.string.no)
             .onPositive(callback).show()
     }

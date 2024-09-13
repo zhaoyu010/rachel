@@ -7,7 +7,6 @@ import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.content.ContextCompat
 import com.yinlin.rachel.R
-import com.yinlin.rachel.RachelFont
 import com.yinlin.rachel.bold
 import com.yinlin.rachel.toSP
 
@@ -19,20 +18,17 @@ class TitleView(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : App
     )
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private var text: String
+    private var text: String = "小银子"
 
     constructor(context: Context, attrs: AttributeSet?): this(context, attrs, 0)
     constructor(context: Context): this(context, null)
 
     init {
-        context.obtainStyledAttributes(attrs, R.styleable.TitleView, defStyleAttr, 0).use { arr ->
-            paint.color = arr.getColor(R.styleable.TitleView_contentColor, context.getColor(R.color.white))
-            if (!isInEditMode) paint.bold = true
-            paint.textAlign = Paint.Align.CENTER
-            paint.textSize = 10f.toSP(context)
-            text = arr.getString(R.styleable.TitleView_text) ?: "小银子"
-            setImageResource(levelMap[1])
-        }
+        paint.color = context.getColor(R.color.dark)
+        if (!isInEditMode) paint.bold(context, true)
+        paint.textAlign = Paint.Align.CENTER
+        paint.textSize = 10f.toSP(context)
+        setImageResource(levelMap[1])
     }
 
     override fun onDraw(canvas: Canvas) {

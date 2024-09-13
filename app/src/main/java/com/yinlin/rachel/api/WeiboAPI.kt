@@ -74,11 +74,11 @@ object WeiboAPI {
                 if (blogs.has("pics")) {
                     for (picItem in blogs.getAsJsonArray("pics")) {
                         val pic = picItem.asJsonObject
-                        info.pictures.add(MsgInfo.Picture(
+                        info.pictures += MsgInfo.Picture(
                             MsgInfo.MsgType.PICTURE,
                             pic["url"].asString,
                             pic.getAsJsonObject("large")["url"].asString
-                        ))
+                        )
                     }
                 } else if (blogs.has("page_info")) {
                     val pageInfo = blogs.getAsJsonObject("page_info")
@@ -87,11 +87,11 @@ object WeiboAPI {
                         val videoUrl = if (urls.has("mp4_720p_mp4")) urls["mp4_720p_mp4"].asString
                         else if (urls.has("mp4_hd_mp4")) urls["mp4_hd_mp4"].asString
                         else urls["mp4_ld_mp4"].asString
-                        info.pictures.add(MsgInfo.Picture(
+                        info.pictures += MsgInfo.Picture(
                             MsgInfo.MsgType.VIDEO,
                             pageInfo.getAsJsonObject("page_pic")["url"].asString,
                             videoUrl
-                        ))
+                        )
                     }
                 }
                 array += info

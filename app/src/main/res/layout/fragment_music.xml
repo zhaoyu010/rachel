@@ -101,11 +101,11 @@
         android:id="@+id/bg"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:elevation="1dp"
-        android:scaleType="fitXY"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/header_container" />
+        app:layout_constraintTop_toBottomOf="@id/header_container"
+        android:elevation="1dp"
+        android:scaleType="fitXY" />
     <com.yinlin.rachel.view.LyricsView
         android:id="@+id/lyrics"
         android:layout_width="match_parent"

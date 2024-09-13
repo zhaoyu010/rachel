@@ -13,7 +13,7 @@ import com.yinlin.rachel.api.API
 import com.yinlin.rachel.api.Arg
 import com.yinlin.rachel.bold
 import com.yinlin.rachel.databinding.FragmentMeBinding
-import com.yinlin.rachel.err
+import com.yinlin.rachel.dialog.DialogAbout
 import com.yinlin.rachel.load
 import com.yinlin.rachel.model.RachelFragment
 import com.yinlin.rachel.model.RachelImageLoader
@@ -36,23 +36,47 @@ class FragmentMe(pages: RachelPages) : RachelFragment<FragmentMeBinding>(pages) 
         v.tvLevel.bold = true
         v.tvCoin.bold = true
 
+        // 扫码
+        v.buttonScan.rachelClick {
+
+        }
+
+        // 名片
+        v.buttonProfile.rachelClick {
+
+        }
+
         // 设置
         v.buttonSettings.rachelClick { pages.gotoSecond(FragmentSettings(pages)) }
 
-        // 下拉刷新
-        v.container.setOnRefreshListener {
-            if (isLogin) {
-                v.container.finishRefresh()
-                requestUserInfo()
-            }
-            else pages.gotoSecond(FragmentLogin(pages))
-        }
-
-        // 检查更新
+        // 更新
         v.buttonUpdate.rachelClick { checkUpdate() }
 
+        // 关于
+        v.buttonAbout.rachelClick { DialogAbout(this).show() }
+
         // 签到
-        v.buttonSignIn.rachelClick { signIn() }
+        v.buttonSignIn.rachelClick {
+            if (isLogin) signIn()
+            else XToastUtils.warning("请先登录")
+        }
+
+        // 好友
+        v.buttonFriend.rachelClick {
+
+        }
+
+        // 邮箱
+        v.buttonMail.rachelClick {
+            if (isLogin) pages.gotoSecond(FragmentMail(pages))
+            else XToastUtils.warning("请先登录")
+        }
+
+        // 下拉刷新
+        v.container.setOnRefreshListener {
+            if (isLogin) { requestUserInfo() }
+            else pages.gotoSecond(FragmentLogin(pages))
+        }
 
         // 首次刷新
         if (isLogin) requestUserInfo()
@@ -68,23 +92,23 @@ class FragmentMe(pages: RachelPages) : RachelFragment<FragmentMeBinding>(pages) 
 
     private fun updateUserInfo() {
         val user = Config.user
-        if (user.isActive) {  // 更新 UI
-            v.id.text = Config.user_id
-            v.title.setTitle(user.titleGroup!!, user.title!!)
-            v.signature.text = user.signature
-            v.level.text = user.level.toString()
-            v.coin.text = user.coin.toString()
-            v.avatar.load(rilNet, user.avatarPath, Config.cache_key_avatar.get())
-            v.wall.load(rilNet, user.wallPath, Config.cache_key_wall.get())
-        }
-        else {
+        if (user.isBroken) {  // 更新 UI
             v.id.text = pages.getResString(R.string.default_id)
             v.title.setTitle(1, pages.getResString(R.string.default_title))
             v.signature.text = pages.getResString(R.string.default_signature)
             v.level.text = "1"
             v.coin.text = "0"
-            v.avatar.load(pages.ril, R.drawable.placeholder_pic)
+            v.avatar.setImageDrawable(ColorDrawable(pages.getResColor(R.color.white)))
             v.wall.setImageDrawable(ColorDrawable(pages.getResColor(R.color.dark)))
+        }
+        else {
+            v.id.text = Config.user_id
+            v.title.setTitle(user.titleGroup, user.title)
+            v.signature.text = user.signature
+            v.level.text = user.level.toString()
+            v.coin.text = user.coin.toString()
+            v.avatar.load(rilNet, user.avatarPath, Config.cache_key_avatar.get())
+            v.wall.load(rilNet, user.wallPath, Config.cache_key_wall.get())
         }
     }
 
@@ -95,6 +119,7 @@ class FragmentMe(pages: RachelPages) : RachelFragment<FragmentMeBinding>(pages) 
             lifecycleScope.launch {
                 pages.loadingDialog.show()
                 Config.user = withContext(Dispatchers.IO) { API.UserAPI.getInfo(Arg.Login(Config.user_id, Config.user_pwd)) }
+                if (v.container.isRefreshing) v.container.finishRefresh()
                 pages.loadingDialog.dismiss()
                 updateUserInfo()
             }
@@ -110,26 +135,26 @@ class FragmentMe(pages: RachelPages) : RachelFragment<FragmentMeBinding>(pages) 
             val result = withContext(Dispatchers.IO) { API.SysAPI.getServerVersionCode() }
             pages.loadingDialog.dismiss()
             val content = "APP版本:${srcVersion}\n服务器版本:${result.value1}\n最低兼容版本:${result.value2}"
-            result.ok.err(content) {
+            if (result.ok) {
                 if (srcVersion == result.value1) XToastUtils.success(content)
                 else XToastUtils.warning(content)
             }
+            else XToastUtils.error(content)
         }
     }
 
     // 签到
     @NewThread
     private fun signIn() {
-        if (isLogin) {
-            lifecycleScope.launch {
-                pages.loadingDialog.show()
-                val result = withContext(Dispatchers.IO) { API.UserAPI.signIn(Arg.Login(Config.user_id, Config.user_pwd)) }
-                pages.loadingDialog.dismiss()
-                result.ok.err(result.value) {
-                    requestUserInfo()
-                    XToastUtils.success(result.value)
-                }
+        lifecycleScope.launch {
+            pages.loadingDialog.show()
+            val result = withContext(Dispatchers.IO) { API.UserAPI.signIn(Arg.Login(Config.user_id, Config.user_pwd)) }
+            pages.loadingDialog.dismiss()
+            if (result.ok) {
+                requestUserInfo()
+                XToastUtils.success(result.value)
             }
+            else XToastUtils.error(result.value)
         }
     }
 }

@@ -24,9 +24,9 @@ class DialogMusicInfo(fragment: FragmentMusic, private val musicInfo: MusicInfo)
         v.composer.text = "作曲: ${musicInfo.composer}"
         v.album.text = "专辑分类: ${musicInfo.album}"
         v.author.text = "MOD作者: ${musicInfo.author}"
-        v.an.isChecked = musicInfo.bgd!!
+        v.an.isChecked = musicInfo.bgd
         v.an.isEnabled = false
-        v.mv.isChecked = musicInfo.video!!
+        v.mv.isChecked = musicInfo.video
         v.mv.isEnabled = false
         musicInfo.lyrics?.apply { v.lyrics.text = this.plaintext }
         v.lyricsContainer.interceptScroll()

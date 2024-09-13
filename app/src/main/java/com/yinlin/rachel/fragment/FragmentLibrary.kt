@@ -18,7 +18,6 @@ import com.yinlin.rachel.model.RachelAdapter
 import com.yinlin.rachel.model.RachelFragment
 import com.yinlin.rachel.model.RachelPages
 import com.yinlin.rachel.rachelClick
-import com.yinlin.rachel.warning
 import java.util.Arrays
 
 
@@ -56,7 +55,7 @@ class FragmentLibrary(pages: RachelPages,
             } else {
                 pages.popSecond()
                 pages.sendMessage(RachelPages.music, RachelMessage.MUSIC_START_PLAYER,
-                    Playlist(pages.getResString(R.string.default_playlist_name), item.id!!))
+                    Playlist(pages.getResString(R.string.default_playlist_name), item.id))
             }
         }
 
@@ -73,7 +72,7 @@ class FragmentLibrary(pages: RachelPages,
         val checkIds: List<String> get() {
             val arr = ArrayList<String>()
             for ((index, item) in items.withIndex()) {
-                if (checkStatus[index]) arr += item.id!!
+                if (checkStatus[index]) arr += item.id
             }
             return arr
         }
@@ -115,9 +114,9 @@ class FragmentLibrary(pages: RachelPages,
 
     // 添加到歌单
     private fun addMusicIntoPlaylist() {
-        playlists.isNotEmpty().warning("没有创建任何歌单") {
+        if (playlists.isNotEmpty()) {
             val selectIds = adapter.checkIds // 获得所有歌单名供选择
-            selectIds.isNotEmpty().warning("请至少选择一首歌曲") {
+            if (selectIds.isNotEmpty()) {
                 Dialog.choice(pages.context, "添加到歌单", playlists.keys) { _, _, _, text ->
                     pages.popSecond()
                     val playlist = playlists[text.toString()]
@@ -127,18 +126,21 @@ class FragmentLibrary(pages: RachelPages,
                     true
                 }
             }
+            else XToastUtils.warning("请至少选择一首歌曲")
         }
+        else XToastUtils.warning("没有创建任何歌单")
     }
 
     // 删除歌曲
     private fun deleteMusic() {
         val selectIds = adapter.checkIds
-        selectIds.isNotEmpty().warning("请至少选择一首歌曲") {
+        if (selectIds.isNotEmpty()) {
             Dialog.confirm(pages.context, "是否从曲库中卸载指定歌曲?") { _, _ ->
                 pages.popSecond()
                 pages.sendMessage(RachelPages.music, RachelMessage.MUSIC_DELETE_MUSIC, selectIds)
                 XToastUtils.success("已卸载${selectIds.size}首歌曲")
             }
         }
+        else XToastUtils.warning("请至少选择一首歌曲")
     }
 }

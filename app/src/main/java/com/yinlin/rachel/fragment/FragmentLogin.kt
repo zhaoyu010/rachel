@@ -9,7 +9,6 @@ import com.yinlin.rachel.api.API
 import com.yinlin.rachel.api.Arg
 import com.yinlin.rachel.content
 import com.yinlin.rachel.databinding.FragmentLoginBinding
-import com.yinlin.rachel.err
 import com.yinlin.rachel.model.RachelFragment
 import com.yinlin.rachel.model.RachelPages
 import com.yinlin.rachel.rachelClick
@@ -54,7 +53,7 @@ class FragmentLogin(pages: RachelPages) : RachelFragment<FragmentLoginBinding>(p
     fun login() {
         val id = v.loginId.content
         val pwd = v.loginPwd.content
-        (id.isNotEmpty() && pwd.isNotEmpty()).err("ID或密码不能为空") {
+        if (id.isNotEmpty() && pwd.isNotEmpty()) {
             val pwdMd5 = pwd.toMD5()
             lifecycleScope.launch {
                 pages.loadingDialog.show()
@@ -63,14 +62,16 @@ class FragmentLogin(pages: RachelPages) : RachelFragment<FragmentLoginBinding>(p
                     withContext(Dispatchers.Main) { pages.loadingDialog.dismiss() }
                     result
                 }
-                result.ok.err(result.value) {
+                if (result.ok) {
                     Config.user_id = id
                     Config.user_pwd = pwdMd5
                     pages.popSecond()
                     pages.sendMessage(RachelPages.me, RachelMessage.ME_REQUEST_USER_INFO)
                 }
+                else XToastUtils.error(result.value)
             }
         }
+        else XToastUtils.warning("ID或密码不能为空")
     }
 
     @NewThread
@@ -79,24 +80,27 @@ class FragmentLogin(pages: RachelPages) : RachelFragment<FragmentLoginBinding>(p
         val pwd = v.registerPwd.content
         val confirmPwd = v.registerConfirmPwd.content
         val inviter = v.registerInviter.content
-        (id.isNotEmpty() && pwd.isNotEmpty() && confirmPwd.isNotEmpty()).err("ID或密码不能为空") {
-            (pwd == confirmPwd).err("两次输入的密码不相同") {
+        if (id.isNotEmpty() && pwd.isNotEmpty() && confirmPwd.isNotEmpty() && inviter.isNotEmpty()) {
+            if (pwd == confirmPwd) {
                 lifecycleScope.launch {
                     pages.loadingDialog.show()
                     val result = withContext(Dispatchers.IO) {
                         val result = API.UserAPI.register(Arg.Register(id, pwd.toMD5(), inviter))
-                        pages.loadingDialog.dismiss()
+                        withContext(Dispatchers.Main) { pages.loadingDialog.dismiss() }
                         result
                     }
-                    result.ok.err(result.value) {
+                    if (result.ok) {
                         XToastUtils.success(result.value)
                         v.registerContainer.collapse(false)
                         v.loginId.content = id
                         v.loginPwd.content = ""
                         v.loginContainer.expand(true)
                     }
+                    else XToastUtils.error(result.value)
                 }
             }
+            else XToastUtils.warning("两次输入的密码不相同")
         }
+        else XToastUtils.warning("ID、密码、邀请人均不能为空")
     }
 }

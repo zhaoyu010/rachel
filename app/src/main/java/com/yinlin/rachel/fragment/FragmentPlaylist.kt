@@ -26,13 +26,11 @@ import com.yinlin.rachel.databinding.FragmentPlaylistBinding
 import com.yinlin.rachel.databinding.ItemPlaylistBinding
 import com.yinlin.rachel.decodeBase64
 import com.yinlin.rachel.encodeBase64
-import com.yinlin.rachel.err
 import com.yinlin.rachel.model.RachelAdapter
 import com.yinlin.rachel.model.RachelFragment
 import com.yinlin.rachel.model.RachelPages
 import com.yinlin.rachel.rachelClick
 import com.yinlin.rachel.textColor
-import com.yinlin.rachel.warning
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -154,12 +152,12 @@ class FragmentPlaylist(pages: RachelPages, musicInfos: IMusicInfoMap,
             "重命名" -> Dialog.input(pages.context, "请输入歌单名称", 10) { _, input ->
                 val newName = input.toString()
                 val args = arrayOf(adapter.selectedPlaylist, newName)
-                (pages.sendMessageForResult(RachelPages.music, RachelMessage.MUSIC_RENAME_PLAYLIST, args) as Boolean)
-                    .warning("歌单已存在或名称不合法") {
-                        XToastUtils.success("修改成功")
-                        v.tab.getTab(v.tab.selectedIndex).text = newName
-                        v.tab.notifyDataChanged()
-                    }
+                if (pages.sendMessageForResult(RachelPages.music, RachelMessage.MUSIC_RENAME_PLAYLIST, args) as Boolean) {
+                    XToastUtils.success("修改成功")
+                    v.tab.getTab(v.tab.selectedIndex).text = newName
+                    v.tab.notifyDataChanged()
+                }
+                else XToastUtils.warning("歌单已存在或名称不合法")
             }
             "删除" -> Dialog.confirm(pages.context, "是否删除歌单\"${adapter.selectedPlaylist!!.name}\"") { _, _ ->
                 pages.sendMessage(RachelPages.music, RachelMessage.MUSIC_DELETE_PLAYLIST, adapter.selectedPlaylist)
@@ -187,12 +185,12 @@ class FragmentPlaylist(pages: RachelPages, musicInfos: IMusicInfoMap,
     }
 
     private fun createPlaylist(newName: String) {
-        (pages.sendMessageForResult(RachelPages.music, RachelMessage.MUSIC_CREATE_PLAYLIST, newName) as Boolean)
-            .warning("歌单已存在或名称不合法") {
+        if (pages.sendMessageForResult(RachelPages.music, RachelMessage.MUSIC_CREATE_PLAYLIST, newName) as Boolean) {
             XToastUtils.success("创建成功")
             v.tab.addTab(TabSegment.Tab(newName))
             v.tab.selectTab(playlists.size - 1)
         }
+        else XToastUtils.warning("歌单已存在或名称不合法")
     }
 
     @NewThread
@@ -201,7 +199,8 @@ class FragmentPlaylist(pages: RachelPages, musicInfos: IMusicInfoMap,
             val result = withContext(Dispatchers.IO) {
                 API.UserAPI.uploadPlaylist(Arg.Playlist(Config.user_id, Config.user_pwd, playlists.encodeBase64()))
             }
-            result.ok.err(result.value) { XToastUtils.success(result.value) }
+            if (result.ok) XToastUtils.success(result.value)
+            else XToastUtils.error(result.value)
         }
     }
 
@@ -211,7 +210,7 @@ class FragmentPlaylist(pages: RachelPages, musicInfos: IMusicInfoMap,
             val result = withContext(Dispatchers.IO) {
                 API.UserAPI.downloadPlaylist(Arg.Login(Config.user_id, Config.user_pwd))
             }
-            result.ok.err(result.value1) {
+            if (result.ok) {
                 (result.value2.decodeBase64(object : TypeToken<PlaylistMap>(){}.type) as IPlaylistMap?)?.apply {
                     pages.sendMessage(RachelPages.music, RachelMessage.MUSIC_STOP_PLAYER)
                     Config.playlist = this
@@ -220,6 +219,7 @@ class FragmentPlaylist(pages: RachelPages, musicInfos: IMusicInfoMap,
                     XToastUtils.success(result.value1)
                 }
             }
+            else XToastUtils.error(result.value1)
         }
     }
 }

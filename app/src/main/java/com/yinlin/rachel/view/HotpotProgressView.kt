@@ -8,7 +8,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import com.yinlin.rachel.R
-import com.yinlin.rachel.RachelFont
+import com.yinlin.rachel.bold
 import com.yinlin.rachel.model.RachelFrequencyCounter
 import com.yinlin.rachel.toDP
 import com.yinlin.rachel.toSP
@@ -38,19 +38,17 @@ class HotpotProgressView(context: Context, attrs: AttributeSet?, defStyleAttr: I
     constructor(context: Context): this(context, null)
 
     init {
-        context.obtainStyledAttributes(attrs, R.styleable.HotpotProgressView, defStyleAttr, 0).use { arr ->
-            paintTotal.color = arr.getColor(R.styleable.HotpotProgressView_totalColor, context.getColor(R.color.gray))
-            paintPlayed.color = arr.getColor(R.styleable.HotpotProgressView_playedColor, context.getColor(R.color.steel_blue))
-            paintHotpot.color = arr.getColor(R.styleable.HotpotProgressView_hotpotColor, context.getColor(R.color.music_hotpot))
-            paintText.color = arr.getColor(R.styleable.HotpotProgressView_textColor, context.getColor(R.color.white))
-            paintText.textSize = arr.getDimensionPixelSize(R.styleable.HotpotProgressView_textSize, 12.toSP(context)).toFloat()
-            if (!isInEditMode) paintText.typeface = RachelFont.normal
-            progressHeight = arr.getDimensionPixelSize(R.styleable.HotpotProgressView_progressHeight, 10.toDP(context))
-            gap = arr.getDimensionPixelSize(R.styleable.HotpotProgressView_gap, 5.toDP(context))
-            val fontMetrics: Paint.FontMetrics = paintText.getFontMetrics()
-            textHeight = fontMetrics.descent - fontMetrics.ascent
-            updateCounter = RachelFrequencyCounter(arr.getInteger(R.styleable.HotpotProgressView_updateFrequency, 4))
-        }
+        paintTotal.color = context.getColor(R.color.gray)
+        paintPlayed.color = context.getColor(R.color.steel_blue)
+        paintHotpot.color = context.getColor(R.color.music_hotpot)
+        paintText.color = context.getColor(R.color.white)
+        paintText.textSize = 12f.toSP(context)
+        if (!isInEditMode) paintText.bold(context, false)
+        progressHeight = 10.toDP(context)
+        gap = 5.toDP(context)
+        val fontMetrics: Paint.FontMetrics = paintText.getFontMetrics()
+        textHeight = fontMetrics.descent - fontMetrics.ascent
+        updateCounter = RachelFrequencyCounter(4)
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) =

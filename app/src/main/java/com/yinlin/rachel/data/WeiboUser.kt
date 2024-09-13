@@ -4,7 +4,10 @@ import com.google.gson.Gson
 import com.yinlin.rachel.IWeiboUserMap
 
 @JvmRecord
-data class WeiboUser(val name: String, val containerId: String) {
+data class WeiboUser(
+    val name: String,
+    val containerId: String
+) {
     companion object {
         fun getDefaultWeiboUsers(): String = Gson().toJson(linkedMapOf(
             "2266537042" to WeiboUser("银临Rachel", "1076032266537042"),
