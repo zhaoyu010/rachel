@@ -11,7 +11,6 @@ import com.yinlin.rachel.Dialog
 import com.yinlin.rachel.R
 import com.yinlin.rachel.annotation.NewThread
 import com.yinlin.rachel.api.API
-import com.yinlin.rachel.api.Arg
 import com.yinlin.rachel.bold
 import com.yinlin.rachel.clearAddAll
 import com.yinlin.rachel.data.Mail
@@ -30,9 +29,7 @@ class FragmentMail(pages: RachelPages) : RachelFragment<FragmentMailBinding>(pag
     class Adapter(private val pages: RachelPages, private val fragment: FragmentMail) : RachelAdapter<ItemMailBinding, Mail>() {
         override fun bindingClass() = ItemMailBinding::class.java
 
-        override fun init(holder: RachelViewHolder<ItemMailBinding>) {
-            val v = holder.v
-            v.label.labelTextFont = "fonts/hyyx.ttf"
+        override fun init(holder: RachelViewHolder<ItemMailBinding>, v: ItemMailBinding) {
             v.title.bold = true
             v.buttonYes.rachelClick {
                 val position = holder.bindingAdapterPosition
@@ -129,7 +126,7 @@ class FragmentMail(pages: RachelPages) : RachelFragment<FragmentMailBinding>(pag
             fragment.lifecycleScope.launch {
                 pages.loadingDialog.show()
                 val result = withContext(Dispatchers.IO) {
-                    val result = API.UserAPI.processMail(Arg.ProcessMail(Config.user_id, Config.user_pwd, mail.mid, confirm, mail.info))
+                    val result = API.UserAPI.processMail(Config.user_id, Config.user_pwd, mail.mid, confirm, mail.info)
                     withContext(Dispatchers.Main) { pages.loadingDialog.dismiss() }
                     result
                 }
@@ -147,7 +144,7 @@ class FragmentMail(pages: RachelPages) : RachelFragment<FragmentMailBinding>(pag
             fragment.lifecycleScope.launch {
                 pages.loadingDialog.show()
                 val result = withContext(Dispatchers.IO) {
-                    val result = API.UserAPI.deleteMail(Arg.DeleteMail(Config.user_id, Config.user_pwd, mail.mid))
+                    val result = API.UserAPI.deleteMail(Config.user_id, Config.user_pwd, mail.mid)
                     withContext(Dispatchers.Main) { pages.loadingDialog.dismiss() }
                     result
                 }
@@ -168,6 +165,8 @@ class FragmentMail(pages: RachelPages) : RachelFragment<FragmentMailBinding>(pag
     override fun init() {
         // 列表
         v.list.layoutManager = LinearLayoutManager(pages.context)
+        v.list.recycledViewPool.setMaxRecycledViews(0, 10)
+        v.list.setHasFixedSize(true)
         v.list.adapter = adapter
 
         // 下拉刷新
@@ -184,7 +183,7 @@ class FragmentMail(pages: RachelPages) : RachelFragment<FragmentMailBinding>(pag
         lifecycleScope.launch {
             pages.loadingDialog.show()
             val mails = withContext(Dispatchers.IO) {
-                val mails = API.UserAPI.getMail(Arg.Login(Config.user_id, Config.user_pwd))
+                val mails = API.UserAPI.getMail(Config.user_id, Config.user_pwd)
                 withContext(Dispatchers.Main) {
                     if (v.container.isRefreshing) v.container.finishRefresh()
                     pages.loadingDialog.dismiss()

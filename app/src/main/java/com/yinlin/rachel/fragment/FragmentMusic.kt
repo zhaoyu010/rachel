@@ -56,7 +56,7 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
         const val UPDATE_FREQUENCY: Long = 100L // 更新频率
     }
 
-    private val musicInfos = MusicInfoMap() // 曲库集
+    val musicInfos = MusicInfoMap() // 曲库集
     private val playlists = Config.playlist // 歌单集
     private val loadMusics = ArrayList<String>() // 加载媒体集
     private var currentPlaylist: Playlist? = null // 当前播放列表
@@ -65,6 +65,10 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
     private lateinit var recordAnimation: RachelRotateAnimator // 唱片旋转动画
     private lateinit var onTimeUpdate: Runnable
     private val player = ExoPlayer.Builder(pages.context).build()
+
+    private val dialogCurrentPlaylist = DialogCurrentPlaylist(this)
+    private val dialogMusicInfo = DialogMusicInfo(this)
+    private val dialogLyricsEngine = DialogLyricsEngine(this)
 
     override fun bindingClass() = FragmentMusicBinding::class.java
 
@@ -78,7 +82,7 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
                 }?.apply {
                     for (f in this) {
                         try {
-                            val info: MusicInfo = f.readJson(object : TypeToken<MusicInfo>(){}.type)
+                            val info: MusicInfo = f.readJson()
                             if (info.isCorrect) musicInfos[info.id] = info
                         }
                         catch (ignored: Exception) { }
@@ -92,6 +96,11 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
 
     @OptIn(UnstableApi::class)
     private fun initView() {
+        // 对话框
+        dialogCurrentPlaylist.init()
+        dialogMusicInfo.init()
+        dialogLyricsEngine.init()
+
         // 播放器
         player.addListener(this)
         player.repeatMode = Player.REPEAT_MODE_ALL
@@ -106,9 +115,9 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
         // 唱片
         recordAnimation = RachelRotateAnimator(v.record, 15000)
         // 曲库
-        v.extra.rachelClick { pages.gotoSecond(FragmentLibrary(pages, musicInfos, playlists)) }
+        v.extra.rachelClick { pages.navigate(FragmentLibrary(pages, musicInfos, playlists)) }
         // 歌单
-        v.classification.rachelClick { pages.gotoSecond(FragmentPlaylist(pages, musicInfos, playlists, currentPlaylist)) }
+        v.classification.rachelClick { pages.navigate(FragmentPlaylist(pages, musicInfos, playlists, currentPlaylist)) }
         // 样式
         v.title.bold = true
         // 进度条
@@ -166,7 +175,7 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
         // 播放列表
         v.buttonPlaylist.rachelClick {
             if (isLoadMusic && currentPlaylist != null) {
-                DialogCurrentPlaylist(this, currentPlaylist!!, musicInfos, currentMusic!!).show()
+                dialogCurrentPlaylist.update(currentPlaylist!!, currentMusic!!).show()
             }
         }
         // AN
@@ -184,9 +193,8 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
         v.buttonMv.rachelClick { }
         // 歌词
         v.buttonLyrics.rachelClick {
-            val fragment = this
             currentMusic?.lyrics?.items?.keys?.toMutableList()?.apply {
-                DialogLyricsEngine(fragment, this).show()
+                dialogLyricsEngine.update(this).show()
             }
         }
         // 评论
@@ -195,14 +203,14 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
         v.buttonShare.rachelClick { }
         // 信息
         v.buttonInfo.rachelClick {
-            val fragment = this
-            currentMusic?.apply {
-                DialogMusicInfo(fragment, this).show()
-            }
+            currentMusic?.apply { dialogMusicInfo.update(this).show() }
         }
     }
 
     override fun quit() {
+        dialogLyricsEngine.release()
+        dialogCurrentPlaylist.release()
+        dialogMusicInfo.release()
         endTimeUpdate()
         player.removeListener(this)
         player.release()
@@ -271,7 +279,7 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
             MUSIC_NOTIFY_ADD_MUSIC -> {
                 for (id in arg as List<*>) {
                     // 更新UI
-                    val info: MusicInfo = (pathMusic / (id as String + RachelMod.RES_INFO)).readJson(object : TypeToken<MusicInfo>(){}.type)
+                    val info: MusicInfo = (pathMusic / (id as String + RachelMod.RES_INFO)).readJson()
                     if (info.isCorrect) musicInfos[info.id] = info
                     else musicInfos.remove(id)
                 }

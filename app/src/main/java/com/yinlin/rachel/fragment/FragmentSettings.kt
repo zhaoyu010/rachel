@@ -9,7 +9,6 @@ import com.yinlin.rachel.R
 import com.yinlin.rachel.RachelMessage
 import com.yinlin.rachel.annotation.NewThread
 import com.yinlin.rachel.api.API
-import com.yinlin.rachel.api.Arg
 import com.yinlin.rachel.api.WeiboAPI
 import com.yinlin.rachel.bold
 import com.yinlin.rachel.clear
@@ -124,7 +123,7 @@ class FragmentSettings(pages: RachelPages) : RachelFragment<FragmentSettingsBind
         Config.user_id_meta.setDefault()
         Config.user_pwd_meta.setDefault()
         Config.user_meta.setDefault()
-        pages.popSecond()
+        pages.pop()
         pages.sendMessage(RachelPages.me, RachelMessage.ME_UPDATE_USER_INFO)
     }
 
@@ -174,7 +173,7 @@ class FragmentSettings(pages: RachelPages) : RachelFragment<FragmentSettingsBind
         lifecycleScope.launch {
             pages.loadingDialog.show()
             val result = withContext(Dispatchers.IO) {
-                val result = API.UserAPI.updateSignature(Arg.Signature(Config.user_id, Config.user_pwd, signature))
+                val result = API.UserAPI.updateSignature(Config.user_id, Config.user_pwd, signature)
                 withContext(Dispatchers.Main) { pages.loadingDialog.dismiss() }
                 result
             }

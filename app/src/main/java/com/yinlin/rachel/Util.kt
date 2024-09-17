@@ -1,26 +1,23 @@
 package com.yinlin.rachel
 
 import android.content.Context
-import android.util.Base64
 import android.util.TypedValue
 import com.google.gson.Gson
-import java.lang.reflect.Type
+import com.google.gson.JsonElement
+import com.google.gson.reflect.TypeToken
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.util.Locale
 
+val gson = Gson()
+inline fun <reified T> JsonElement?.to(): T = gson.fromJson(this, object : TypeToken<T>(){}.type)
+inline fun <reified T> String.to(): T = gson.fromJson(this, object : TypeToken<T>(){}.type)
+inline fun <reified T> T.json(): String = gson.toJson(this, object : TypeToken<T>(){}.type)
+inline fun <reified K, reified V> jsonMap(vararg pairs: Pair<K, V>): String = mapOf(*pairs).json()
+
 fun Long.toStringTime(): String {
     val second = (this / 1000).toInt()
     return String.format(Locale.ENGLISH,"%02d:%02d", second / 60, second % 60)
-}
-
-fun String.toLongTime(): Long {
-    var second: Long = 0
-    try {
-        val parts = this.split(":")
-        second = parts[0].toLong() * 60 + parts[1].toLong()
-    } catch (ignored: Exception) { }
-    return second * 1000
 }
 
 fun String.toMD5(): String {
@@ -38,22 +35,6 @@ fun String.toMD5(): String {
     }
     catch (ignored: Exception) { }
     return ""
-}
-
-fun Any.encodeBase64(): String {
-    try {
-        val src = Gson().toJson(this)
-        return Base64.encodeToString(src.toByteArray(StandardCharsets.UTF_8), Base64.DEFAULT)
-    } catch (ignored: Exception) { }
-    return ""
-}
-
-fun <T> String.decodeBase64(type: Type): T? {
-    try {
-        val src = String(Base64.decode(this, Base64.DEFAULT), StandardCharsets.UTF_8)
-        return Gson().fromJson(src, type)
-    } catch (ignored: Exception) { }
-    return null
 }
 
 fun Float.toDP(context: Context) = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, this, context.resources.displayMetrics)

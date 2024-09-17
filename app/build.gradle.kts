@@ -11,19 +11,33 @@ android {
         applicationId = "com.yinlin.rachel"
         minSdk = 29
         targetSdk = 34
-        versionCode = 113
-        versionName = "1.1.3-alpha"
+        versionCode = 114
+        versionName = "1.1.4-alpha"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        register("release") {
+            keyAlias = "rachel"
+            keyPassword = "rachel1211"
+            storeFile = file("key.jks")
+            storePassword = "rachel1211"
+        }
+    }
+
     buildTypes {
+        debug {
+            signingConfig = signingConfigs.getByName("release")
+        }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 

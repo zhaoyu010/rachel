@@ -1,10 +1,11 @@
 package com.yinlin.rachel.model
 
-import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.yinlin.rachel.data.MusicInfo
 import com.yinlin.rachel.div
+import com.yinlin.rachel.json
 import com.yinlin.rachel.readJson
+import com.yinlin.rachel.to
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.File
@@ -59,7 +60,7 @@ object RachelMod {
                 val magic = ByteArray(MOD_MAGIC.size)
                 stream.read(magic)
                 if (!magic.contentEquals(MOD_MAGIC)) return metadata
-                metadata = Gson().fromJson(stream.readUTF(), object : TypeToken<Metadata?>() {}.type)
+                metadata = stream.readUTF().to()
             }
             catch (ignored: Exception) { }
             return metadata
@@ -110,7 +111,7 @@ object RachelMod {
             for (id in ids) {
                 val infoFile = folder / (id + RES_INFO)
                 if (!infoFile.exists()) continue
-                val musicInfo: MusicInfo = infoFile.readJson(object : TypeToken<MusicInfo>(){}.type)
+                val musicInfo: MusicInfo = infoFile.readJson()
                 if (!musicInfo.isCorrect || musicInfo.id != id) continue
                 metadata.items[id] = MusicItem(musicInfo.name, musicInfo.version)
             }
@@ -151,7 +152,7 @@ object RachelMod {
             try {
                 DataOutputStream(rawStream).use { stream ->
                     stream.write(MOD_MAGIC)
-                    stream.writeUTF(Gson().toJson(metadata))
+                    stream.writeUTF(metadata.json())
                     stream.writeInt(metadata.items.size)
                     val buffer = ByteArray(MOD_BUFFER_SIZE)
                     var index = 0

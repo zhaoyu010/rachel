@@ -8,14 +8,15 @@ import com.yinlin.rachel.bold
 import com.yinlin.rachel.databinding.DialogAboutBinding
 import com.yinlin.rachel.fragment.FragmentMe
 import com.yinlin.rachel.interceptScroll
-import com.yinlin.rachel.model.RachelDialog
+import com.yinlin.rachel.model.RachelBottomDialog
 import com.yinlin.rachel.rachelClick
 
 
-class DialogAbout(fragment: FragmentMe) : RachelDialog<DialogAboutBinding, FragmentMe>(fragment, 0.9f) {
+class DialogAbout(fragment: FragmentMe) : RachelBottomDialog<DialogAboutBinding, FragmentMe>(fragment, 0.9f) {
     override fun bindingClass() = DialogAboutBinding::class.java
 
     override fun init() {
+        super.init()
         v.pic.rachelClick {
             try {
                 val url = "mqqapi://card/show_pslcard?src_type=internal&version=1&uin=828049503&card_type=group&source=qrcode"
@@ -42,6 +43,7 @@ class DialogAbout(fragment: FragmentMe) : RachelDialog<DialogAboutBinding, Fragm
         v.text14.rachelClick(listener)
         v.text15.rachelClick(listener)
         v.text16.rachelClick(listener)
+        v.text17.rachelClick(listener)
         v.contentContainer.interceptScroll()
     }
 
@@ -52,5 +54,10 @@ class DialogAbout(fragment: FragmentMe) : RachelDialog<DialogAboutBinding, Fragm
         } catch (e: Exception) {
             XToastUtils.error("未安装QQ")
         }
+    }
+
+    fun update(): DialogAbout {
+        v.contentContainer.scrollTo(0, 0)
+        return this
     }
 }

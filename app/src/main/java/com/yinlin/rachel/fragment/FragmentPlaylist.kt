@@ -14,18 +14,14 @@ import com.yinlin.rachel.Config
 import com.yinlin.rachel.Dialog
 import com.yinlin.rachel.IMusicInfoMap
 import com.yinlin.rachel.IPlaylistMap
-import com.yinlin.rachel.PlaylistMap
 import com.yinlin.rachel.R
 import com.yinlin.rachel.RachelMessage
 import com.yinlin.rachel.annotation.NewThread
 import com.yinlin.rachel.api.API
-import com.yinlin.rachel.api.Arg
 import com.yinlin.rachel.clearAddAll
 import com.yinlin.rachel.data.Playlist
 import com.yinlin.rachel.databinding.FragmentPlaylistBinding
 import com.yinlin.rachel.databinding.ItemPlaylistBinding
-import com.yinlin.rachel.decodeBase64
-import com.yinlin.rachel.encodeBase64
 import com.yinlin.rachel.model.RachelAdapter
 import com.yinlin.rachel.model.RachelFragment
 import com.yinlin.rachel.model.RachelPages
@@ -65,7 +61,7 @@ class FragmentPlaylist(pages: RachelPages, musicInfos: IMusicInfoMap,
             // 删除歌单中的歌曲
             val musicInfo = musicInfos[item]
             // 若无音源显示未知, 歌曲被删除后仍然可以显示在歌单中
-            val name = if (musicInfo == null) item else musicInfo.name
+            val name = musicInfo?.name ?: item
             selectedPlaylist?.apply {
                 Dialog.confirm(pages.context, "是否从歌单\"${this.name}\"中删除\"$name\"?") { _, _ ->
                     val args = arrayOf(this, position)
@@ -112,6 +108,8 @@ class FragmentPlaylist(pages: RachelPages, musicInfos: IMusicInfoMap,
 
         // 列表
         v.list.layoutManager = LinearLayoutManager(pages.context)
+        v.list.setHasFixedSize(true)
+        v.list.recycledViewPool.setMaxRecycledViews(0, 20)
         v.list.adapter = adapter
 
         // TAB
@@ -147,7 +145,7 @@ class FragmentPlaylist(pages: RachelPages, musicInfos: IMusicInfoMap,
         when (item.content.toString()) {
             "播放" -> {
                 pages.sendMessage(RachelPages.music, RachelMessage.MUSIC_START_PLAYER, adapter.selectedPlaylist)
-                pages.popSecond()
+                pages.pop()
             }
             "重命名" -> Dialog.input(pages.context, "请输入歌单名称", 10) { _, input ->
                 val newName = input.toString()
@@ -197,7 +195,7 @@ class FragmentPlaylist(pages: RachelPages, musicInfos: IMusicInfoMap,
     private fun uploadPlaylist() {
         lifecycleScope.launch {
             val result = withContext(Dispatchers.IO) {
-                API.UserAPI.uploadPlaylist(Arg.Playlist(Config.user_id, Config.user_pwd, playlists.encodeBase64()))
+                API.UserAPI.uploadPlaylist(Config.user_id, Config.user_pwd, playlists)
             }
             if (result.ok) XToastUtils.success(result.value)
             else XToastUtils.error(result.value)
@@ -208,16 +206,14 @@ class FragmentPlaylist(pages: RachelPages, musicInfos: IMusicInfoMap,
     private fun downloadPlaylist() {
         lifecycleScope.launch {
             val result = withContext(Dispatchers.IO) {
-                API.UserAPI.downloadPlaylist(Arg.Login(Config.user_id, Config.user_pwd))
+                API.UserAPI.downloadPlaylist(Config.user_id, Config.user_pwd)
             }
             if (result.ok) {
-                (result.value2.decodeBase64(object : TypeToken<PlaylistMap>(){}.type) as IPlaylistMap?)?.apply {
-                    pages.sendMessage(RachelPages.music, RachelMessage.MUSIC_STOP_PLAYER)
-                    Config.playlist = this
-                    playlists.clearAddAll(this)
-                    updatePlaylist()
-                    XToastUtils.success(result.value1)
-                }
+                pages.sendMessage(RachelPages.music, RachelMessage.MUSIC_STOP_PLAYER)
+                Config.playlist = result.value2
+                playlists.clearAddAll(result.value2)
+                updatePlaylist()
+                XToastUtils.success(result.value1)
             }
             else XToastUtils.error(result.value1)
         }

@@ -3,10 +3,11 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     style="@style/RachelCard"
-    app:cardElevation="4dp" >
+    android:layout_margin="3dp"
+    app:cardElevation="3dp" >
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content" >
         <com.xuexiang.xui.widget.imageview.RadiusImageView
             android:id="@+id/pic"
             style="@style/RachelRoundImage"
@@ -15,36 +16,54 @@
             app:layout_constraintTop_toTopOf="parent"
             app:riv_corner_radius="10dp"
             app:riv_is_circle="false" />
+        <com.xuexiang.xui.widget.textview.label.LabelTextView
+            android:id="@+id/version"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:label_backgroundColor="@color/steel_blue"
+            app:label_distance="20dp"
+            app:label_height="20dp"
+            app:label_orientation="LEFT_TOP"
+            app:label_text="1.0"
+            app:label_textSize="@dimen/xs"
+            android:elevation="10dp" />
+        <com.xuexiang.xui.widget.textview.BadgeView
+            android:id="@+id/id"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintRight_toRightOf="@id/pic"
+            app:layout_constraintBottom_toBottomOf="@id/pic"
+            android:layout_margin="5dp"
+            android:text="1.0"
+            android:textSize="@dimen/sm" />
         <com.xuexiang.xui.widget.textview.autofit.AutoFitTextView
             android:id="@+id/name"
-            style="@style/RachelText.X"
+            style="@style/RachelText.X0"
             app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@id/pic"
+            android:layout_margin="5dp"
+            android:textSize="@dimen/sm"
             android:textColor="@color/steel_blue"
             android:textAlignment="center" />
         <com.xuexiang.xui.widget.textview.autofit.AutoFitTextView
-            android:id="@+id/id"
+            android:id="@+id/singer"
             style="@style/RachelText.X0"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toLeftOf="@id/version"
-            app:layout_constraintTop_toBottomOf="@id/name"
-            android:textSize="@dimen/xs"
-            android:textColor="@color/gold"
-            android:textAlignment="center" />
-        <com.xuexiang.xui.widget.textview.autofit.AutoFitTextView
-            android:id="@+id/version"
-            style="@style/RachelText.X0"
-            app:layout_constraintLeft_toRightOf="@id/id"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@id/name"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_margin="5dp"
             android:textSize="@dimen/xs"
-            android:textColor="@color/gray"
+            android:textColor="@color/black"
             android:textAlignment="center" />
         <com.xuexiang.xui.widget.button.SmoothCheckBox
             android:id="@+id/select"
             android:layout_width="20dp"
             android:layout_height="20dp"
-            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:layout_margin="5dp"
             app:scb_color_unchecked="@color/white"

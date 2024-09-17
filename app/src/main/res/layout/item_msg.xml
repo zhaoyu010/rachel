@@ -23,8 +23,7 @@
             android:scaleType="fitXY" />
         <TextView
             android:id="@+id/name"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            style="@style/RachelText.X0"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintLeft_toRightOf="@id/avatar"
             app:layout_constraintRight_toLeftOf="@id/details"

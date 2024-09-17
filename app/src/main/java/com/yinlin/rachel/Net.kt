@@ -17,41 +17,46 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
+import java.net.Proxy
+import java.util.concurrent.TimeUnit
 
 
 object Net {
     private const val DOWNLOAD_BUFFER_SIZE = 1024 * 64
 
-    private val client: OkHttpClient = OkHttpClient()
+    private val client: OkHttpClient = OkHttpClient.Builder()
+        .proxy(Proxy.NO_PROXY)
+        .connectTimeout(5, TimeUnit.SECONDS)
+        .build()
 
-    fun get(url: String, headers: Map<String, String>?): JsonObject? {
+    fun get(url: String, headers: Map<String, String>? = null): JsonObject? {
         try {
             val builder = Request.Builder().url(url)
             headers?.apply { builder.headers(this.toHeaders()) }
             val request = builder.build()
             client.newCall(request).execute().use { response ->
-                return Gson().fromJson(response.body?.string(), JsonObject::class.java)
+                return gson.fromJson(response.body?.string(), JsonObject::class.java)
             }
         }
         catch (ignored: Exception) { }
         return null
     }
 
-    fun post(url: String, data: String, headers: Map<String, String>?): JsonObject? {
+    fun post(url: String, data: String, headers: Map<String, String>? = null): JsonObject? {
         try {
             val builder = Request.Builder().url(url)
             headers?.apply { builder.headers(this.toHeaders()) }
             builder.post(data.toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull()))
             val request = builder.build()
             client.newCall(request).execute().use { response ->
-                return Gson().fromJson(response.body?.string(), JsonObject::class.java)
+                return gson.fromJson(response.body?.string(), JsonObject::class.java)
             }
         }
         catch (ignored: Exception) { }
         return null
     }
 
-    fun postForm(url: String, files: Map<String, String>, content: Map<String, String>?, headers: Map<String, String>?): JsonObject? {
+    fun postForm(url: String, files: Map<String, String>, content: Map<String, String>?, headers: Map<String, String>? = null): JsonObject? {
         try {
             val builder = Request.Builder().url(url)
             headers?.apply { builder.headers(this.toHeaders()) }
@@ -66,7 +71,7 @@ object Net {
             builder.post(bodyBuilder.build())
             val request = builder.build()
             client.newCall(request).execute().use { response ->
-                return Gson().fromJson(response.body?.string(), JsonObject::class.java)
+                return gson.fromJson(response.body?.string(), JsonObject::class.java)
             }
         }
         catch (ignored: Exception) { }
@@ -114,7 +119,7 @@ object Net {
                 }
             } catch (ignored: Exception) { }
             dialog.dismiss()
-            callback?.invoke(status)
+            if (callback != null) handler.post { callback.invoke(status) }
         }
         dialog.setOnCancelListener { thread.interrupt() }
         dialog.show()

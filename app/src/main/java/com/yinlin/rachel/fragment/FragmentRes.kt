@@ -15,7 +15,6 @@ import com.yinlin.rachel.Net
 import com.yinlin.rachel.R
 import com.yinlin.rachel.annotation.NewThread
 import com.yinlin.rachel.api.API
-import com.yinlin.rachel.clearAddAll
 import com.yinlin.rachel.data.ResFile
 import com.yinlin.rachel.data.ResFolder
 import com.yinlin.rachel.databinding.FragmentResBinding
@@ -32,15 +31,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 
-class FragmentRes(pages: RachelPages) : RachelFragment<FragmentResBinding>(pages) {
+class FragmentRes(pages: RachelPages) : RachelFragment<FragmentResBinding>(pages), OnClickListenerBreadcrumbs {
     class Adapter(private val fragment: FragmentRes, var currentRes: ResFolder) : RachelAdapter<ItemResBinding, ResFile>(currentRes.items) {
         var currentPos: Int = -1
-        private val rilNet = RachelImageLoader(fragment.pages.context, R.drawable.placeholder_res, DiskCacheStrategy.ALL)
+        private val rilNet = RachelImageLoader(fragment.pages.context, R.drawable.placeholder_loading, DiskCacheStrategy.ALL)
 
         override fun bindingClass() = ItemResBinding::class.java
 
-        override fun init(holder: RachelViewHolder<ItemResBinding>) {
-            val v = holder.v
+        override fun init(holder: RachelViewHolder<ItemResBinding>, v: ItemResBinding) {
             val context = fragment.pages.context
             v.downloadHd.rachelClick {
                 items[holder.bindingAdapterPosition].thumbUrl?.apply { Net.downloadPicture(context, this, ::processDownloadResult) }
@@ -81,9 +79,10 @@ class FragmentRes(pages: RachelPages) : RachelFragment<FragmentResBinding>(pages
         @SuppressLint("NotifyDataSetChanged")
         fun setRes(position: Int, res: ResFolder) {
             if (res != this.currentRes) {
+                fragment.v.list.smoothScrollToPosition(0)
                 currentPos = position
                 currentRes = res
-                items.clearAddAll(currentRes.items)
+                items = currentRes.items
                 notifyDataSetChanged()
             }
         }
@@ -101,29 +100,20 @@ class FragmentRes(pages: RachelPages) : RachelFragment<FragmentResBinding>(pages
 
     override fun init() {
         // 面包屑
-        v.header.setOnClickListenerBreadcrumbs(object : OnClickListenerBreadcrumbs {
-            override fun onBackClick() {
-                adapter.currentRes.parent?.apply { adapter.setRes(adapter.currentPos - 1, this) }
-            }
-            override fun onPathItemClick(index: Int, title: String, id: Int) {
-                var root = adapter.currentRes
-                var pos = adapter.currentPos
-                while (index != pos) {
-                    root = root.parent!!
-                    --pos
-                }
-                adapter.setRes(pos, root)
-            }
-            override fun onPathItemLongClick(index: Int, title: String, id: Int) { }
-        })
+        v.header.setOnClickListenerBreadcrumbs(this)
         v.header.initUltimateBreadcrumbsView()
+
         // 列表
         v.list.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+        v.list.setHasFixedSize(true)
+        v.list.recycledViewPool.setMaxRecycledViews(0, 15)
         v.list.adapter = adapter
-        // 刷新
-        v.buttonUpdate.rachelClick { updateRes() }
+
+        // 下拉刷新
+        v.container.setOnRefreshListener { loadRes() }
+
         // 首次加载
-        updateRes()
+        loadRes()
     }
 
     override fun back(): Boolean {
@@ -135,15 +125,32 @@ class FragmentRes(pages: RachelPages) : RachelFragment<FragmentResBinding>(pages
     }
 
     @NewThread
-    fun updateRes() {
+    fun loadRes() {
         lifecycleScope.launch {
             pages.loadingDialog.show()
             rootRes = withContext(Dispatchers.IO) { API.ResAPI.getInfo() }
+            if (v.container.isRefreshing) v.container.finishRefresh()
             pages.loadingDialog.dismiss()
-            if (rootRes.items.isEmpty()) v.state.showOffline { updateRes() }
+            if (rootRes.items.isEmpty()) v.state.showOffline { loadRes() }
             else v.state.showContent()
             while (v.header.itemCount > 0) v.header.back()
             adapter.setRes(-1, rootRes)
         }
     }
+
+    override fun onBackClick() {
+        adapter.currentRes.parent?.apply { adapter.setRes(adapter.currentPos - 1, this) }
+    }
+
+    override fun onPathItemClick(index: Int, title: String?, id: Int) {
+        var root = adapter.currentRes
+        var pos = adapter.currentPos
+        while (index != pos) {
+            root = root.parent!!
+            --pos
+        }
+        adapter.setRes(pos, root)
+    }
+
+    override fun onPathItemLongClick(index: Int, title: String?, id: Int) { }
 }

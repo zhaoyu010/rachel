@@ -27,21 +27,16 @@ class FragmentLibrary(pages: RachelPages,
     : RachelFragment<FragmentLibraryBinding>(pages) {
     class Adapter(private val pages: RachelPages, private val fragment: FragmentLibrary)
         : RachelAdapter<ItemMusicBinding, MusicInfo>(fragment.musicInfos.values.toMutableList()) {
-        internal var isManageMode = false
+        var isManageMode = false
         val checkStatus = BooleanArray(items.size)
 
         override fun bindingClass() = ItemMusicBinding::class.java
 
-        override fun init(holder: RachelViewHolder<ItemMusicBinding>) {
-            holder.v.select.setOnCheckedChangeListener { _, isChecked ->
-                checkStatus[holder.bindingAdapterPosition] = isChecked
-            }
-        }
-
         override fun update(v: ItemMusicBinding, item: MusicInfo, position: Int) {
             v.name.text = item.name // 歌名
-            v.id.text = item.id // 编号
-            v.version.text = item.version // 版本
+            v.singer.text = item.singer
+            v.id.text = " ${item.id} " // 编号
+            v.version.labelText = item.version // 版本
             v.pic.load(pages.ril, item.recordPath) // 封面
             // 选择器
             v.select.visibility = if (isManageMode) View.VISIBLE else View.GONE
@@ -51,20 +46,22 @@ class FragmentLibrary(pages: RachelPages,
         override fun onItemClicked(v: ItemMusicBinding, item: MusicInfo, position: Int) {
             if (isManageMode) {
                 checkStatus[position] = !checkStatus[position]
-                notifyItemChanged(position)
+                if (checkStatus.all { !it }) {
+                    isManageMode = false
+                    fragment.setManageMode(View.GONE)
+                }
+                else notifyItemChanged(position)
             } else {
-                pages.popSecond()
+                pages.pop()
                 pages.sendMessage(RachelPages.music, RachelMessage.MUSIC_START_PLAYER,
                     Playlist(pages.getResString(R.string.default_playlist_name), item.id))
             }
         }
 
-        @SuppressLint("NotifyDataSetChanged")
         override fun onItemLongClicked(v: ItemMusicBinding, item: MusicInfo, position: Int) {
             if (!isManageMode) {
                 checkStatus[position] = true
                 fragment.setManageMode(View.VISIBLE)
-                notifyDataSetChanged()
             }
         }
 
@@ -86,7 +83,11 @@ class FragmentLibrary(pages: RachelPages,
         v.buttonPlaylist.rachelClick { addMusicIntoPlaylist() }
         v.buttonDelete.rachelClick { deleteMusic() }
         v.buttonUnselect.rachelClick { exitManageMode() }
+
         v.list.layoutManager = GridLayoutManager(context, 3)
+        v.list.setHasFixedSize(true)
+        v.list.recycledViewPool.setMaxRecycledViews(0, 14)
+        v.list.setItemViewCacheSize(4)
         v.list.adapter = adapter
     }
 
@@ -98,18 +99,18 @@ class FragmentLibrary(pages: RachelPages,
         return true
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun setManageMode(visibility: Int) {
         adapter.isManageMode = visibility == View.VISIBLE
         v.buttonPlaylist.visibility = visibility
         v.buttonDelete.visibility = visibility
         v.buttonUnselect.visibility = visibility
+        adapter.notifyDataSetChanged()
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     private fun exitManageMode() {
         Arrays.fill(adapter.checkStatus, false)
         setManageMode(View.GONE)
-        adapter.notifyDataSetChanged()
     }
 
     // 添加到歌单
@@ -118,7 +119,7 @@ class FragmentLibrary(pages: RachelPages,
             val selectIds = adapter.checkIds // 获得所有歌单名供选择
             if (selectIds.isNotEmpty()) {
                 Dialog.choice(pages.context, "添加到歌单", playlists.keys) { _, _, _, text ->
-                    pages.popSecond()
+                    pages.pop()
                     val playlist = playlists[text.toString()]
                     val args = arrayOf(playlist, selectIds)
                     val num = pages.sendMessageForResult(RachelPages.music, RachelMessage.MUSIC_ADD_MUSIC_INTO_PLAYLIST, args) as Int
@@ -136,7 +137,7 @@ class FragmentLibrary(pages: RachelPages,
         val selectIds = adapter.checkIds
         if (selectIds.isNotEmpty()) {
             Dialog.confirm(pages.context, "是否从曲库中卸载指定歌曲?") { _, _ ->
-                pages.popSecond()
+                pages.pop()
                 pages.sendMessage(RachelPages.music, RachelMessage.MUSIC_DELETE_MUSIC, selectIds)
                 XToastUtils.success("已卸载${selectIds.size}首歌曲")
             }

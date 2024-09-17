@@ -5,7 +5,6 @@ import com.yinlin.rachel.data.MusicInfo
 import com.yinlin.rachel.data.Playlist
 import com.yinlin.rachel.data.WeiboUser
 
-typealias MsgInfoList = ArrayList<MsgInfo>
 typealias IMsgInfoList = MutableList<MsgInfo>
 
 typealias WeiboUserMap = LinkedHashMap<String, WeiboUser>

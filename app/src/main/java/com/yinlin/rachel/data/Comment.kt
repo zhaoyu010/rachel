@@ -1,36 +1,23 @@
 package com.yinlin.rachel.data
 
-import com.google.gson.JsonElement
+import com.yinlin.rachel.api.API
 import java.text.SimpleDateFormat
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.Date
 import java.util.Locale
 
-
-data class Mail(
-    val mid: Long,
+@JvmRecord
+data class Comment (
+    val cid: Long,
     val id: String,
     val ts: String,
-    val type: Int,
-    var processed: Int,
-    val title: String,
     val content: String,
-    val filter: String,
-    val param1: String?,
-    val param2: String?,
-    val info: JsonElement,
+    val isTop: Int,
+    val userTitle: String,
+    val userTitleGroup: Int,
 ) {
-    companion object {
-        const val TYPE_INFO = 1
-        const val TYPE_CONFIRM = 2
-        const val TYPE_DECISION = 4
-        const val TYPE_INPUT = 8
-    }
-
-    var isProcessed: Boolean
-        get() = processed != 0
-        set(value) { processed = if (value) 1 else 0 }
+    val isTopTopic: Boolean get() = isTop == 1
     val date: String get() {
         try {
             val d1 = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH).parse(ts)
@@ -40,4 +27,5 @@ data class Mail(
         }
         catch (ignored: Exception) { return ts }
     }
+    val avatarPath: String get() = "${API.BASEURL}/user/${id}/avatar.webp"
 }

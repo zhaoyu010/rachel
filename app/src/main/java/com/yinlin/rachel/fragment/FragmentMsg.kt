@@ -18,7 +18,6 @@ import com.yinlin.rachel.R
 import com.yinlin.rachel.annotation.NewThread
 import com.yinlin.rachel.api.WeiboAPI
 import com.yinlin.rachel.bold
-import com.yinlin.rachel.clearAddAll
 import com.yinlin.rachel.data.MsgInfo
 import com.yinlin.rachel.databinding.FragmentMsgBinding
 import com.yinlin.rachel.databinding.ItemMsgBinding
@@ -46,7 +45,7 @@ class FragmentMsg(pages: RachelPages) : RachelFragment<FragmentMsgBinding>(pages
                 val itemView = view.getChildAt(i)
                 val bounds = Rect()
                 itemView?.getGlobalVisibleRect(bounds)
-                list[i].setShowBounds(bounds)
+                list[i].showBounds = bounds
             }
             PreviewBuilder.from(imageView.context as Activity)
                 .setImgs(list).setCurrentIndex(index)
@@ -60,8 +59,7 @@ class FragmentMsg(pages: RachelPages) : RachelFragment<FragmentMsgBinding>(pages
 
         override fun bindingClass() = ItemMsgBinding::class.java
 
-        override fun init(holder: RachelViewHolder<ItemMsgBinding>) {
-            val v = holder.v
+        override fun init(holder: RachelViewHolder<ItemMsgBinding>, v: ItemMsgBinding) {
             v.name.bold = true
             v.pics.setAdapter(ImageAdapter(rilNet))
             v.text.setOnClickATagListener { _, _, href ->
@@ -69,12 +67,12 @@ class FragmentMsg(pages: RachelPages) : RachelFragment<FragmentMsgBinding>(pages
                     val url = if (href.startsWith("http") || href.startsWith("www")) href
                     else if (href.startsWith("/status/")) "${WeiboAPI.BASEURL}${href}"
                     else ""
-                    if (url != "") pages.gotoSecond(FragmentWebpage(pages, url))
+                    if (url != "") pages.navigate(FragmentWebpage(pages, url))
                 }
                 true
             }
             v.details.rachelClick {
-                pages.gotoSecond(FragmentWebpage(pages, "${WeiboAPI.DETAILS_URL}${items[holder.bindingAdapterPosition].id}"))
+                pages.navigate(FragmentWebpage(pages, "${WeiboAPI.DETAILS_URL}${items[holder.bindingAdapterPosition].id}"))
             }
             imageGetter = HtmlHttpImageGetter(v.text)
         }
@@ -96,6 +94,9 @@ class FragmentMsg(pages: RachelPages) : RachelFragment<FragmentMsgBinding>(pages
     override fun init() {
         // 列表
         v.list.layoutManager = LinearLayoutManager(pages.context)
+        v.list.setHasFixedSize(true)
+        v.list.recycledViewPool.setMaxRecycledViews(0, 8)
+        v.list.setItemViewCacheSize(4)
         v.list.adapter = adapter
 
         // 下拉刷新
@@ -114,12 +115,12 @@ class FragmentMsg(pages: RachelPages) : RachelFragment<FragmentMsgBinding>(pages
     fun loadMsg() {
         lifecycleScope.launch {
             pages.loadingDialog.show()
-            val msgInfos = withContext(Dispatchers.IO) { WeiboAPI.extract(Config.weibo_users) }
+            adapter.items.clear()
+            withContext(Dispatchers.IO) { WeiboAPI.extract(Config.weibo_users, adapter.items) }
             if (v.container.isRefreshing) v.container.finishRefresh()
             pages.loadingDialog.dismiss()
-            if (msgInfos.isEmpty()) v.state.showOffline { loadMsg() }
+            if (adapter.items.isEmpty()) v.state.showOffline { loadMsg() }
             else v.state.showContent()
-            adapter.items.clearAddAll(msgInfos)
             adapter.notifyDataSetChanged()
         }
     }

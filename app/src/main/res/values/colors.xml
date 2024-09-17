@@ -11,6 +11,8 @@
     <color name="gold">#FFD700</color>
     <color name="pink">#FFC0CB</color>
     <color name="light_pink">#FFB6C1</color>
+    <color name="dark_pink">#F2A1B0</color>
+    <color name="dark_pink_pressed">#DC8999</color>
     <color name="orange">#FFA500</color>
     <color name="orange_red">#F99045</color>
     <color name="light_salmon">#FFA07A</color>
@@ -80,6 +82,8 @@
     <color name="black">#000000</color>
 
     <color name="hyperlinks">#1C85B4</color>
+
+    <color name="title_dark">#80000000</color>
 
     <color name="music_lyrics_main">#4682B4</color>
     <color name="music_lyrics_second">#D3D3D3</color>

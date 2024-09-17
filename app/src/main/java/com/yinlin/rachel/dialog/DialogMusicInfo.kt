@@ -6,29 +6,38 @@ import com.yinlin.rachel.databinding.DialogMusicInfoBinding
 import com.yinlin.rachel.fragment.FragmentMusic
 import com.yinlin.rachel.interceptScroll
 import com.yinlin.rachel.load
-import com.yinlin.rachel.model.RachelDialog
+import com.yinlin.rachel.model.RachelBottomDialog
 
-class DialogMusicInfo(fragment: FragmentMusic, private val musicInfo: MusicInfo)
-    : RachelDialog<DialogMusicInfoBinding, FragmentMusic>(fragment, 0.7f) {
+class DialogMusicInfo(fragment: FragmentMusic) : RachelBottomDialog<DialogMusicInfoBinding, FragmentMusic>(fragment, 0.7f) {
+    private var currentMusicInfo = MusicInfo()
 
     override fun bindingClass() = DialogMusicInfoBinding::class.java
 
     override fun init() {
-        v.name.text = musicInfo.name
-        v.name.bold = true
-        v.version.text = "v ${musicInfo.version}"
-        v.id.text = "ID: ${musicInfo.id}"
-        v.pic.load(root.pages.ril, musicInfo.recordPath)
-        v.singer.text = "演唱: ${musicInfo.singer}"
-        v.lyricist.text = "作词: ${musicInfo.lyricist}"
-        v.composer.text = "作曲: ${musicInfo.composer}"
-        v.album.text = "专辑分类: ${musicInfo.album}"
-        v.author.text = "MOD作者: ${musicInfo.author}"
-        v.an.isChecked = musicInfo.bgd
-        v.an.isEnabled = false
-        v.mv.isChecked = musicInfo.video
-        v.mv.isEnabled = false
-        musicInfo.lyrics?.apply { v.lyrics.text = this.plaintext }
+        super.init()
         v.lyricsContainer.interceptScroll()
+        v.name.bold = true
+        v.an.isEnabled = false
+        v.mv.isEnabled = false
+    }
+
+    fun update(musicInfo: MusicInfo): DialogMusicInfo {
+        if (currentMusicInfo != musicInfo) {
+            currentMusicInfo = musicInfo
+            v.name.text = musicInfo.name
+            v.version.text = "v ${musicInfo.version}"
+            v.id.text = "ID: ${musicInfo.id}"
+            v.pic.load(root.pages.ril, musicInfo.recordPath)
+            v.singer.text = "演唱: ${musicInfo.singer}"
+            v.lyricist.text = "作词: ${musicInfo.lyricist}"
+            v.composer.text = "作曲: ${musicInfo.composer}"
+            v.album.text = "专辑分类: ${musicInfo.album}"
+            v.author.text = "MOD作者: ${musicInfo.author}"
+            v.an.isChecked = musicInfo.bgd
+            v.mv.isChecked = musicInfo.video
+            v.lyricsContainer.scrollTo(0, 0)
+            musicInfo.lyrics?.apply { v.lyrics.text = this.plaintext }
+        }
+        return this
     }
 }

@@ -1,19 +1,19 @@
 package com.yinlin.rachel.model
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import com.yinlin.rachel.rachelClick
 
 
-abstract class RachelAdapter<Binding : ViewBinding, Item>(val items: MutableList<Item>)
+abstract class RachelAdapter<Binding : ViewBinding, Item>(var items: MutableList<Item>)
     : RecyclerView.Adapter<RachelAdapter.RachelViewHolder<Binding>>() {
-        class RachelViewHolder<Binding : ViewBinding>(val v: Binding) : RecyclerView.ViewHolder(v.root)
+
+    class RachelViewHolder<Binding : ViewBinding>(val v: Binding) : RecyclerView.ViewHolder(v.root)
 
     protected abstract fun bindingClass(): Class<Binding>
-    protected open fun init(holder: RachelViewHolder<Binding>) { }
+    protected open fun init(holder: RachelViewHolder<Binding>, v: Binding) { }
     protected open fun update(v: Binding, item: Item, position: Int) { }
     protected open fun onItemClicked(v: Binding, item: Item, position: Int) { }
     protected open fun onItemLongClicked(v: Binding, item: Item, position: Int) { }
@@ -26,7 +26,7 @@ abstract class RachelAdapter<Binding : ViewBinding, Item>(val items: MutableList
         @Suppress("UNCHECKED_CAST")
         val v = method.invoke(null, LayoutInflater.from(parent.context), parent, false) as Binding
         val holder = RachelViewHolder(v)
-        val root: View = v.root
+        val root = v.root
         root.rachelClick(300) {
             val position = holder.getBindingAdapterPosition()
             onItemClicked(holder.v, items[position], position)
@@ -36,7 +36,7 @@ abstract class RachelAdapter<Binding : ViewBinding, Item>(val items: MutableList
             onItemLongClicked(holder.v, items[position], position)
             true
         }
-        init(holder)
+        init(holder, v)
         return holder
     }
 

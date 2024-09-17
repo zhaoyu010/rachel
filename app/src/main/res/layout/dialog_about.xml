@@ -109,13 +109,22 @@
             android:textSize="@dimen/xxl"
             android:textColor="@color/purple" />
         <TextView
+            android:id="@+id/text8"
+            style="@style/RachelText"
+            android:layout_marginVertical="5dp"
+            android:layout_marginHorizontal="40dp"
+            android:tag="1743694231"
+            android:text="晨晨"
+            android:textSize="@dimen/xxl"
+            android:textColor="@color/purple" />
+        <TextView
             style="@style/RachelText"
             android:layout_marginVertical="5dp"
             android:text="程序"
             android:textSize="@dimen/xl"
             android:textColor="@color/steel_blue" />
         <TextView
-            android:id="@+id/text8"
+            android:id="@+id/text9"
             style="@style/RachelText"
             android:layout_marginVertical="5dp"
             android:layout_marginHorizontal="40dp"
@@ -124,7 +133,7 @@
             android:textSize="@dimen/xxl"
             android:textColor="@color/purple" />
         <TextView
-            android:id="@+id/text9"
+            android:id="@+id/text10"
             style="@style/RachelText"
             android:layout_marginVertical="5dp"
             android:layout_marginHorizontal="40dp"
@@ -133,7 +142,7 @@
             android:textSize="@dimen/xxl"
             android:textColor="@color/purple" />
         <TextView
-            android:id="@+id/text10"
+            android:id="@+id/text11"
             style="@style/RachelText"
             android:layout_marginVertical="5dp"
             android:layout_marginHorizontal="40dp"
@@ -148,7 +157,7 @@
             android:textSize="@dimen/xl"
             android:textColor="@color/steel_blue" />
         <TextView
-            android:id="@+id/text11"
+            android:id="@+id/text12"
             style="@style/RachelText"
             android:layout_marginVertical="5dp"
             android:layout_marginHorizontal="40dp"
@@ -157,7 +166,7 @@
             android:textSize="@dimen/xxl"
             android:textColor="@color/purple" />
         <TextView
-            android:id="@+id/text12"
+            android:id="@+id/text13"
             style="@style/RachelText"
             android:layout_marginVertical="5dp"
             android:layout_marginHorizontal="40dp"
@@ -166,7 +175,7 @@
             android:textSize="@dimen/xxl"
             android:textColor="@color/purple" />
         <TextView
-            android:id="@+id/text13"
+            android:id="@+id/text14"
             style="@style/RachelText"
             android:layout_marginVertical="5dp"
             android:layout_marginHorizontal="40dp"
@@ -181,7 +190,7 @@
             android:textSize="@dimen/xl"
             android:textColor="@color/steel_blue" />
         <TextView
-            android:id="@+id/text14"
+            android:id="@+id/text15"
             style="@style/RachelText"
             android:layout_marginVertical="5dp"
             android:layout_marginHorizontal="40dp"
@@ -190,7 +199,7 @@
             android:textSize="@dimen/xxl"
             android:textColor="@color/purple" />
         <TextView
-            android:id="@+id/text15"
+            android:id="@+id/text16"
             style="@style/RachelText"
             android:layout_marginVertical="5dp"
             android:layout_marginHorizontal="40dp"
@@ -199,7 +208,7 @@
             android:textSize="@dimen/xxl"
             android:textColor="@color/purple" />
         <TextView
-            android:id="@+id/text16"
+            android:id="@+id/text17"
             style="@style/RachelText"
             android:layout_marginVertical="5dp"
             android:layout_marginHorizontal="40dp"

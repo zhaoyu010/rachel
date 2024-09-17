@@ -5,14 +5,13 @@ import android.os.Parcel
 import android.os.Parcelable
 import com.xuexiang.xui.widget.imageview.preview.enitity.IPreviewInfo
 
-@JvmRecord
 data class MsgInfo(
-    val name: String,
-    val avatar: String,
-    val text: String,
-    val time: String,
-    val location: String,
-    val id: String,
+    var name: String,
+    var avatar: String,
+    var text: String,
+    var time: String,
+    var location: String,
+    var id: String,
     val pictures: MutableList<Picture> = ArrayList(),
 ) {
     enum class MsgType { PICTURE, VIDEO }
@@ -20,7 +19,7 @@ data class MsgInfo(
     class Picture(private var type: MsgType = MsgType.PICTURE,
                   private var thumb: String = "",
                   private var source: String = "") : IPreviewInfo {
-        private var showBounds: Rect = Rect()
+        var showBounds: Rect = Rect()
 
         companion object CREATOR : Parcelable.Creator<Picture> {
             override fun createFromParcel(parcel: Parcel) = Picture(parcel)
@@ -47,7 +46,6 @@ data class MsgInfo(
         override fun getVideoUrl() = if (type == MsgType.VIDEO) source else null
         override fun describeContents() = 0
 
-        fun setShowBounds(rect: Rect) { showBounds = rect }
         fun getThumb() = thumb
     }
 }

@@ -24,7 +24,7 @@ class TitleView(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : App
     constructor(context: Context): this(context, null)
 
     init {
-        paint.color = context.getColor(R.color.dark)
+        paint.color = context.getColor(R.color.title_dark)
         if (!isInEditMode) paint.bold(context, true)
         paint.textAlign = Paint.Align.CENTER
         paint.textSize = 10f.toSP(context)
@@ -39,5 +39,10 @@ class TitleView(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : App
     fun setTitle(titleGroup: Int, text: String) {
         this.text = text
         this.setImageDrawable(ContextCompat.getDrawable(context, levelMap[titleGroup]))
+    }
+
+    fun setDefaultTitle() {
+        this.text = context.getString(R.string.default_title)
+        this.setImageDrawable(ContextCompat.getDrawable(context, levelMap[1]))
     }
 }

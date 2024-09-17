@@ -6,7 +6,6 @@ import com.yinlin.rachel.Config
 import com.yinlin.rachel.RachelMessage
 import com.yinlin.rachel.annotation.NewThread
 import com.yinlin.rachel.api.API
-import com.yinlin.rachel.api.Arg
 import com.yinlin.rachel.content
 import com.yinlin.rachel.databinding.FragmentLoginBinding
 import com.yinlin.rachel.model.RachelFragment
@@ -58,14 +57,14 @@ class FragmentLogin(pages: RachelPages) : RachelFragment<FragmentLoginBinding>(p
             lifecycleScope.launch {
                 pages.loadingDialog.show()
                 val result = withContext(Dispatchers.IO) {
-                    val result = API.UserAPI.login(Arg.Login(id, pwdMd5))
+                    val result = API.UserAPI.login(id, pwdMd5)
                     withContext(Dispatchers.Main) { pages.loadingDialog.dismiss() }
                     result
                 }
                 if (result.ok) {
                     Config.user_id = id
                     Config.user_pwd = pwdMd5
-                    pages.popSecond()
+                    pages.pop()
                     pages.sendMessage(RachelPages.me, RachelMessage.ME_REQUEST_USER_INFO)
                 }
                 else XToastUtils.error(result.value)
@@ -85,7 +84,7 @@ class FragmentLogin(pages: RachelPages) : RachelFragment<FragmentLoginBinding>(p
                 lifecycleScope.launch {
                     pages.loadingDialog.show()
                     val result = withContext(Dispatchers.IO) {
-                        val result = API.UserAPI.register(Arg.Register(id, pwd.toMD5(), inviter))
+                        val result = API.UserAPI.register(id, pwd.toMD5(), inviter)
                         withContext(Dispatchers.Main) { pages.loadingDialog.dismiss() }
                         result
                     }

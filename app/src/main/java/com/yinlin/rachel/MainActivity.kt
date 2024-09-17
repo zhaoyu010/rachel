@@ -29,11 +29,12 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
         pages = RachelPages(this, v.bbl, arrayOf(
             RachelPages.msg, RachelPages.res, RachelPages.music, RachelPages.discovery, RachelPages.me
-        ), RachelPages.msg, R.id.frame, R.id.frame_child)
+        ), RachelPages.msg, R.id.frame)
 
-        detectImportMod(intent)
+        runOnUiThread { detectImportMod(intent) } // 延迟响应MOD
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -50,7 +51,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun initTextFont() {
         val configuration = resources.configuration
-        configuration.densityDpi = 480
         configuration.fontScale = 1.15f
         @Suppress("DEPRECATION")
         resources.updateConfiguration(configuration, resources.displayMetrics)
@@ -58,7 +58,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun detectImportMod(intent: Intent?) {
         if (intent?.action?.equals(Intent.ACTION_VIEW) == true) {
-            intent.data?.apply { pages.gotoSecond(FragmentImportMod(pages, this)) }
+            intent.data?.apply { pages.navigate(FragmentImportMod(pages, this)) }
         }
     }
 }

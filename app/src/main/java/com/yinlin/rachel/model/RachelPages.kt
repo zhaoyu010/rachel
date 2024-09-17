@@ -9,7 +9,6 @@ import androidx.annotation.IdRes
 import androidx.annotation.StringRes
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentTransaction
 import com.chaychan.library.BottomBarLayout
 import com.chaychan.library.TabData
 import com.xuexiang.xui.utils.WidgetUtils
@@ -25,8 +24,7 @@ import kotlin.random.Random
 
 
 class RachelPages(activity: FragmentActivity, private val bbl: BottomBarLayout,
-    private val items: Array<Item>, home: Item,
-    @IdRes val mainFrame: Int, @IdRes val secondFrame: Int) {
+    private val items: Array<Item>, home: Item, @IdRes val mainFrame: Int) {
     @JvmRecord
     data class Item(val index: Int, val prototype: Class<*>,
                     val title: String, @DrawableRes val iconNormal: Int,
@@ -44,102 +42,79 @@ class RachelPages(activity: FragmentActivity, private val bbl: BottomBarLayout,
     val context: Context = activity
     private val manager: FragmentManager = activity.supportFragmentManager
     private val fragments = arrayOfNulls<RachelFragment<*>>(items.size)
-    private var current: Int = -1
-    private var isSecond: Boolean = false
+    private var isMain: Boolean
+    private var currentFragment: RachelFragment<*>
+    private var currentMainFragment: RachelFragment<*>
     val handler: Handler = Handler(activity.mainLooper)
     val ril: RachelImageLoader = RachelImageLoader(activity)
     val loadingDialog: LoadingDialog = WidgetUtils.getLoadingDialog(activity, "加载中...")
 
     init {
+        // 初始化加载框
         loadingDialog.setIconScale(0.4f)
         loadingDialog.setLoadingSpeed(8)
         loadingDialog.setCancelable(false)
 
+        // 首页
+        val homeFragment = items[home.index].prototype.getConstructor(RachelPages::class.java)
+            .newInstance(this) as RachelFragment<*>
+        fragments[home.index] = homeFragment
+        currentFragment = homeFragment
+        currentMainFragment = homeFragment
+        isMain = true
+        manager.beginTransaction().add(mainFrame, homeFragment).commit()
+
+        // 回退操作
+        manager.addOnBackStackChangedListener {
+            if (manager.backStackEntryCount == 0) {
+                isMain = true
+                bbl.visibility = View.VISIBLE
+                currentFragment = currentMainFragment
+            }
+        }
+
+        // 初始化底部导航栏
         val tabSource: MutableList<TabData> = ArrayList()
         for (item in items) tabSource.add(TabData(item.title, item.iconNormal, item.iconActive))
         bbl.setData(tabSource)
         bbl.currentItem = home.index
-        bbl.setOnItemSelectedListener { _, _, currentPos -> gotoMain(currentPos) }
-
-        manager.addOnBackStackChangedListener {
-            if (manager.backStackEntryCount == 0) {
-                isSecond = false
-                bbl.visibility = View.VISIBLE
-                val transaction = manager.beginTransaction()
-                createOrShowMain(current, transaction)
+        bbl.setOnItemSelectedListener { _, _, pos ->
+            if (isMain) {
+                val transaction = manager.beginTransaction().hide(currentFragment)
+                var nextFragment = fragments[pos]
+                if (nextFragment == null) {
+                    nextFragment = items[pos].prototype.getConstructor(RachelPages::class.java)
+                        .newInstance(this@RachelPages) as RachelFragment<*>
+                    fragments[pos] = nextFragment
+                    transaction.add(mainFrame, nextFragment)
+                }
+                else transaction.show(nextFragment)
+                currentFragment = nextFragment
+                currentMainFragment = nextFragment
                 transaction.commit()
             }
         }
+    }
 
-        val transaction = manager.beginTransaction()
-        createOrShowMain(home.index, transaction)
+    val isNotMain get() = !isMain
+
+    fun isForeground(item: Item) = isMain && currentFragment == fragments[item.index]
+
+    fun navigate(des: RachelFragment<*>) {
+        if (bbl.visibility == View.VISIBLE) bbl.visibility = View.GONE
+        isMain = false
+        val transaction = manager.beginTransaction().hide(currentFragment).add(mainFrame, des).addToBackStack(null)
+        currentFragment = des
         transaction.commit()
     }
 
-    private fun createOrShowMain(index: Int, transaction: FragmentTransaction) {
-        current = index
-        if (fragments[current] == null) { // 懒加载新页面
-            try {
-                val constructor = items[current].prototype.getConstructor(RachelPages::class.java)
-                fragments[current] = constructor.newInstance(this) as RachelFragment<*>
-                transaction.add(mainFrame, fragments[current]!!)
-            }
-            catch (ignored: Exception) { }
-        }
-        else transaction.show(fragments[current]!!)
-    }
-
-    val isMainFragment get() = !isSecond
-    val isSecondFragment get() = isSecond
-
-    fun isForeground(item: Item) = !isSecond && current == item.index
-
-    private fun gotoMain(index: Int) {
-        if (isSecond) { // 副页面状态 - 清空回退栈
-            current = index
-            manager.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-        }
-        else if (current != index) { // 主页面状态
-            // 隐藏当前页面
-            val transaction = manager.beginTransaction()
-            transaction.hide(fragments[current]!!)
-            // 调起新页面
-            createOrShowMain(index, transaction)
-            transaction.commit()
-        }
-    }
-
-    fun gotoSecond(des: RachelFragment<*>) {
-        bbl.visibility = View.GONE
-        if (!isSecond) { // 主页面状态
-            // 隐藏主页面
-            isSecond = true
-            val transactionSrc = manager.beginTransaction()
-            transactionSrc.hide(fragments[current]!!)
-            transactionSrc.commit()
-        }
-        // 调起副页面
-        val transactionDes = manager.beginTransaction()
-        transactionDes.replace(secondFrame, des)
-        transactionDes.addToBackStack(null)
-        transactionDes.commit()
-    }
-
-    fun popSecond() {
-        if (isSecond && manager.backStackEntryCount > 0) {
+    fun pop() {
+        if (isNotMain && manager.backStackEntryCount > 0) {
             manager.popBackStackImmediate()
         }
     }
 
-    fun goBack(): Boolean {
-        if (isSecond) {
-            if (manager.backStackEntryCount > 0) {
-                return (manager.fragments.last() as RachelFragment<*>).back()
-            }
-            return false
-        }
-        return fragments[current]?.back() ?: false
-    }
+    fun goBack(): Boolean = currentFragment.back()
 
     fun getResString(@StringRes id: Int) = context.getString(id)
 

@@ -221,6 +221,12 @@
                             android:text="好友"
                             app:drawableTopCompat="@drawable/svg_me_friend" />
                         <TextView
+                            android:id="@+id/button_topic"
+                            style="@style/RachelText.Image"
+                            android:layout_weight="1"
+                            android:text="主题"
+                            app:drawableTopCompat="@drawable/svg_me_topic" />
+                        <TextView
                             android:id="@+id/button_mail"
                             style="@style/RachelText.Image"
                             android:layout_weight="1"

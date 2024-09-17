@@ -34,8 +34,8 @@ object Config {
     }
 
     class JsonMeta<U>(name: String, private val defJson: String, private val type: Type) : Meta<U>(name, null) {
-        override fun set(value: U) { kv.encode(name, Gson().toJson(value)) }
-        override fun get(): U = Gson().fromJson(kv.decodeString(name, defJson), type)
+        override fun set(value: U) { kv.encode(name, gson.toJson(value)) }
+        override fun get(): U = gson.fromJson(kv.decodeString(name, defJson), type)
         override fun setDefault() { kv.encode(name, defJson) }
     }
 

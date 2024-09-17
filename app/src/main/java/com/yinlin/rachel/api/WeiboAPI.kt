@@ -3,7 +3,6 @@ package com.yinlin.rachel.api
 import com.yinlin.rachel.Net
 import com.yinlin.rachel.IMsgInfoList
 import com.yinlin.rachel.IWeiboUserMap
-import com.yinlin.rachel.MsgInfoList
 import com.yinlin.rachel.data.MsgInfo
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
@@ -100,8 +99,7 @@ object WeiboAPI {
         catch (ignored: Exception) { }
     }
 
-    fun extract(weiboUsers: IWeiboUserMap): IMsgInfoList {
-        val array = MsgInfoList()
+    fun extract(weiboUsers: IWeiboUserMap, array: IMsgInfoList) {
         for ((key, value) in weiboUsers) extractSingle(key, value.containerId, array)
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
         array.sortWith { o1: MsgInfo, o2: MsgInfo ->
@@ -109,6 +107,5 @@ object WeiboAPI {
             val dateTime2 = LocalDateTime.parse(o2.time, formatter)
             dateTime1.compareTo(dateTime2) * -1
         }
-        return array
     }
 }

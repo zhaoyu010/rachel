@@ -2,12 +2,12 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="10dp"
+    android:paddingHorizontal="10dp"
+    android:paddingTop="10dp"
     tools:context=".fragment.FragmentLibrary" >
     <LinearLayout
         android:layout_width="match_parent"
@@ -21,26 +21,26 @@
             android:text="曲库"
             android:textColor="@color/steel_blue"
             android:textSize="@dimen/xxxl" />
-        <TextView
+        <ImageView
             android:id="@+id/button_playlist"
-            style="@style/RachelText.Image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginEnd="10dp"
-            app:drawableTopCompat="@drawable/svg_playlist_blue"
-            android:text="加入歌单"
+            android:src="@drawable/svg_playlist_blue"
             android:visibility="gone" />
-        <TextView
+        <ImageView
             android:id="@+id/button_delete"
-            style="@style/RachelText.Image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginEnd="10dp"
-            app:drawableTopCompat="@drawable/svg_delete_blue"
-            android:text="删除"
+            android:src="@drawable/svg_delete_blue"
             android:visibility="gone" />
-        <TextView
+        <ImageView
             android:id="@+id/button_unselect"
-            style="@style/RachelText.Image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginEnd="10dp"
-            app:drawableTopCompat="@drawable/svg_unselect_blue"
-            android:text="取消选择"
+            android:src="@drawable/svg_unselect_blue"
             android:visibility="gone" />
     </LinearLayout>
     <com.yinlin.rachel.view.LineView

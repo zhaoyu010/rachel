@@ -30,7 +30,7 @@ abstract class RachelFragment<Binding : ViewBinding>(val pages: RachelPages) : F
     }
 
     final override fun onViewCreated(view: View, bundle: Bundle?) {
-        super.onViewCreated(view, bundle)
+        super.onViewCreated(view, null)
         init()
         update()
     }
@@ -44,6 +44,10 @@ abstract class RachelFragment<Binding : ViewBinding>(val pages: RachelPages) : F
     final override fun onDestroyView() {
         super.onDestroyView()
         quit()
+    }
+
+    final override fun onDestroy() {
+        super.onDestroy()
         _binding = null
     }
 

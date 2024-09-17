@@ -43,9 +43,9 @@ fun File.write(data: ByteArray) {
 
 fun File.writeText(data: String) = write(data.toByteArray(StandardCharsets.UTF_8))
 
-fun <T> File.readJson(type: Type): T = Gson().fromJson(readText(), type)
+inline fun <reified T> File.readJson(): T = readText().to()
 
-fun File.writeJson(obj: Any) = writeText(Gson().toJson(obj))
+fun File.writeJson(obj: Any) = writeText(obj.json())
 
 fun File.create(data: ByteArray) {
     if (!exists()) write(data)

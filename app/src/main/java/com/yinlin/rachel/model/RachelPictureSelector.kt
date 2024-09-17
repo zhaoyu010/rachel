@@ -13,6 +13,7 @@ import com.luck.picture.lib.config.SelectModeConfig
 import com.luck.picture.lib.engine.ImageEngine
 import com.luck.picture.lib.entity.LocalMedia
 import com.luck.picture.lib.interfaces.OnResultCallbackListener
+import com.luck.picture.lib.utils.ActivityCompatHelper
 import com.yalantis.ucrop.UCrop
 import com.yinlin.rachel.R
 
@@ -23,31 +24,35 @@ object RachelPictureSelector {
         }
 
         override fun loadImage(context: Context, url: String, imageView: ImageView) {
-            Glide.with(context).load(url).into(imageView)
+            if (ActivityCompatHelper.assertValidRequest(context))
+                Glide.with(context).load(url).into(imageView)
         }
 
         override fun loadImage(context: Context, imageView: ImageView, url: String, maxWidth: Int, maxHeight: Int) {
-            Glide.with(context).load(url).override(maxWidth, maxHeight).into(imageView)
+            if (ActivityCompatHelper.assertValidRequest(context))
+                Glide.with(context).load(url).override(maxWidth, maxHeight).into(imageView)
         }
 
         override fun loadAlbumCover(context: Context, url: String, imageView: ImageView) {
-            Glide.with(context).asBitmap().load(url)
-                .override(180, 180).sizeMultiplier(0.5f)
-                .transform(CenterCrop(), RoundedCorners(8))
-                .placeholder(R.drawable.placeholder_pic).into(imageView)
+            if (ActivityCompatHelper.assertValidRequest(context))
+                Glide.with(context).asBitmap().load(url)
+                    .override(180, 180).sizeMultiplier(0.5f)
+                    .transform(CenterCrop(), RoundedCorners(8))
+                    .placeholder(R.drawable.placeholder_pic).into(imageView)
         }
 
         override fun loadGridImage(context: Context, url: String, imageView: ImageView) {
-            Glide.with(context).load(url).override(200, 200)
-                .centerCrop().placeholder(R.drawable.placeholder_pic).into(imageView)
+            if (ActivityCompatHelper.assertValidRequest(context))
+                Glide.with(context).load(url).override(200, 200)
+                    .centerCrop().placeholder(R.drawable.placeholder_pic).into(imageView)
         }
 
         override fun pauseRequests(context: Context) {
-            Glide.with(context).pauseRequests()
+            if (ActivityCompatHelper.assertValidRequest(context)) Glide.with(context).pauseRequests()
         }
 
         override fun resumeRequests(context: Context) {
-            Glide.with(context).resumeRequests()
+            if (ActivityCompatHelper.assertValidRequest(context)) Glide.with(context).resumeRequests()
         }
     }
 

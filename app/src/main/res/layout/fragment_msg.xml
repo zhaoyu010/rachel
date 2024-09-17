@@ -23,9 +23,7 @@
         android:id="@+id/state"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        app:stf_inAnimation="@android:anim/slide_in_left"
-        app:stf_outAnimation="@android:anim/slide_out_right" >
+        android:orientation="vertical" >
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/list"
             android:layout_width="match_parent"
