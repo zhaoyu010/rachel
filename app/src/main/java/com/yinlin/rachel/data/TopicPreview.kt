@@ -13,4 +13,5 @@ data class TopicPreview(
 ) {
     val isTopTopic: Boolean get() = isTop == 1
     val picPath: String get() = "${API.BASEURL}/user/${id}/pics/${pic}.webp"
+    val avatarPath: String get() = "${API.BASEURL}/user/${id}/avatar.webp"
 }

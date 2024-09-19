@@ -21,6 +21,14 @@ object Dialog {
             .cancelable(false).show()
     }
 
+    fun inputNumber(context: Context, content: String, callback: MaterialDialog.InputCallback) {
+        MaterialDialog.Builder(context).iconRes(R.mipmap.icon)
+            .title("输入").positiveText(R.string.ok).negativeText(R.string.cancel)
+            .inputType(InputType.TYPE_CLASS_NUMBER).inputRange(1, 1)
+            .input(content, "", false, callback)
+            .cancelable(false).show()
+    }
+
     fun choice(context: Context, content: String, items: Collection<*>, callback: MaterialDialog.ListCallbackSingleChoice) {
         MaterialDialog.Builder(context).iconRes(R.mipmap.icon)
             .title(content).positiveText(R.string.ok).negativeText(R.string.cancel)

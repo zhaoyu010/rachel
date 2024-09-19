@@ -68,6 +68,7 @@
             app:ngiv_imgGap="3dp"
             app:ngiv_showStyle="fill" />
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/comment_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintLeft_toLeftOf="parent"
@@ -83,7 +84,11 @@
                 android:hint="快来留下你的足迹~"
                 android:inputType="textMultiLine"
                 android:maxLength="256"
-                android:textSize="@dimen/sm" />
+                android:textSize="@dimen/sm"
+                android:gravity="start"
+                android:lines="5"
+                android:maxLines="5"
+                android:scrollbars="vertical" />
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

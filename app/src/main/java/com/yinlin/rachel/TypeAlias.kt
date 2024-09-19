@@ -1,5 +1,6 @@
 package com.yinlin.rachel
 
+import com.yinlin.rachel.data.LyricsInfo
 import com.yinlin.rachel.data.MsgInfo
 import com.yinlin.rachel.data.MusicInfo
 import com.yinlin.rachel.data.Playlist
@@ -9,6 +10,10 @@ typealias IMsgInfoList = MutableList<MsgInfo>
 
 typealias WeiboUserMap = LinkedHashMap<String, WeiboUser>
 typealias IWeiboUserMap = MutableMap<String, WeiboUser>
+
+typealias ChorusList = List<Long>
+typealias LyricsInfoList = List<LyricsInfo>
+typealias LyricsFileMap = Map<String, List<String>>
 
 typealias PlaylistMap = HashMap<String, Playlist>
 typealias IPlaylistMap = MutableMap<String, Playlist>

@@ -88,31 +88,37 @@ abstract class RachelHeaderAdapter<HeaderBinding : ViewBinding, ItemBinding : Vi
         if (lp is StaggeredGridLayoutManager.LayoutParams) lp.isFullSpan = holder.itemViewType == HEADER
     }
 
-    fun notifyChanged() {
+    fun getHolderPosition(holder: RachelItemViewHolder<ItemBinding>) = holder.bindingAdapterPosition - 1
+
+    fun notifyChangedEx() {
         if (items.size > 0) notifyItemRangeChanged(1, items.size)
     }
 
-    fun notifyChanged(position: Int) {
+    fun notifyChangedEx(position: Int) {
         if (items.size > 0) notifyItemChanged(position + 1)
     }
 
-    fun notifyChanged(position: Int, count: Int) {
+    fun notifyChangedEx(position: Int, count: Int) {
         if (items.size > 0) notifyItemRangeChanged(position + 1, count)
     }
 
-    fun notifyInsertChanged(position: Int) {
+    fun notifyInsertChangedEx(position: Int) {
         if (items.size > 0) notifyItemInserted(position + 1)
     }
 
-    fun notifyInsertChanged(position: Int, count: Int) {
+    fun notifyInsertChangedEx(position: Int, count: Int) {
         if (items.size > 0) notifyItemRangeInserted(position + 1, count)
     }
 
-    fun notifyRemoveChanged(position: Int) {
+    fun notifyRemoveChangedEx(position: Int) {
         notifyItemRemoved(position + 1)
     }
 
-    fun notifyRemoveChanged(position: Int, count: Int) {
+    fun notifyRemoveChangedEx(position: Int, count: Int) {
         notifyItemRangeRemoved(position + 1, count)
+    }
+
+    fun notifyMovedEx(fromPosition: Int, toPosition: Int) {
+        notifyItemMoved(fromPosition, toPosition)
     }
 }

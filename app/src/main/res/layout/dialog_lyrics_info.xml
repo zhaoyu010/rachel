@@ -7,7 +7,7 @@
     android:orientation="vertical"
     android:padding="10dp"
     android:background="@drawable/bg_dialog_white"
-    tools:context=".dialog.DialogLyricsEngine" >
+    tools:context=".dialog.DialogLyricsInfo" >
     <com.xuexiang.xui.widget.textview.autofit.AutoFitTextView
         android:id="@+id/title"
         style="@style/RachelText.X"

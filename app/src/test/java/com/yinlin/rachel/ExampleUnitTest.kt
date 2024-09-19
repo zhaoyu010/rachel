@@ -9,12 +9,11 @@ import java.io.FileOutputStream
 class ExampleUnitTest {
     @Test @Throws(Exception::class)
     fun generateMod() {
+        basePath = "D:\\银临的小银库\\银临茶舍"
         val src = File("D:\\银临的小银库\\银临茶舍\\music")
-        val des = File("C:\\Users\\Administrator\\Desktop\\琉璃单首.rachel")
-        val ids = listOf("42")
-        val filter = listOf(RachelMod.RES_INFO, RachelMod.RES_AUDIO,
-            RachelMod.RES_LYRICS, RachelMod.RES_RECORD,
-            RachelMod.RES_BGS, RachelMod.RES_BGD)
+        val des = File("C:\\Users\\Administrator\\Desktop\\棠梨煎雪.rachel")
+        val ids = listOf("棠梨煎雪")
+        val filter = listOf(RachelMod.RES_VIDEO)
         val merger = RachelMod.Merger(src)
         val metadata = merger.getMetadata(ids, filter)
         val stream = FileOutputStream(des)

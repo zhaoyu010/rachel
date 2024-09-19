@@ -105,7 +105,7 @@ class FragmentProfile(pages: RachelPages, private val profileId: String) : Rache
                header.wall.load(pages.ril, profile.wallPath, Config.cache_key_wall.get())
            }
            adapter.items = profile.topics
-           adapter.notifyChanged()
+           adapter.notifyChangedEx()
        }
     }
 }

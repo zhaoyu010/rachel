@@ -4,15 +4,24 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:padding="8dp" >
+    android:padding="8dp"
+    android:gravity="center" >
+    <TextView
+        android:id="@+id/engine_name"
+        style="@style/RachelText"
+        android:layout_marginHorizontal="10dp"
+        android:textSize="@dimen/base" />
     <com.xuexiang.xui.widget.textview.autofit.AutoFitTextView
         android:id="@+id/name"
         style="@style/RachelText.X0"
         android:layout_weight="1"
-        android:textSize="@dimen/base" >
+        android:layout_marginHorizontal="10dp"
+        android:textSize="@dimen/base"
+        android:textColor="@color/gray"
+        android:textAlignment="center" >
     </com.xuexiang.xui.widget.textview.autofit.AutoFitTextView>
     <TextView
-        android:id="@+id/locked"
+        android:id="@+id/available"
         style="@style/RachelText"
-        android:layout_marginStart="10dp" />
+        android:layout_marginHorizontal="10dp" />
 </LinearLayout>

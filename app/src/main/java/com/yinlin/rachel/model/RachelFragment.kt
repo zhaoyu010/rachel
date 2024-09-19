@@ -18,8 +18,8 @@ abstract class RachelFragment<Binding : ViewBinding>(val pages: RachelPages) : F
     protected open fun hidden() { }
     protected open fun quit() { }
     open fun back(): Boolean = false
-    open fun message(msg: RachelMessage, arg: Any?) { }
-    open fun messageForResult(msg: RachelMessage, arg: Any?): Any? = null
+    open fun message(msg: RachelMessage, vararg args: Any?) { }
+    open fun messageForResult(msg: RachelMessage, vararg args: Any?): Any? = null
 
     final override fun onCreateView(inflater: LayoutInflater, parent: ViewGroup?, bundle: Bundle?): View {
         val cls: Class<Binding> = bindingClass()

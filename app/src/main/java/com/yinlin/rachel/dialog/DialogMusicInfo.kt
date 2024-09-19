@@ -35,8 +35,8 @@ class DialogMusicInfo(fragment: FragmentMusic) : RachelBottomDialog<DialogMusicI
             v.author.text = "MOD作者: ${musicInfo.author}"
             v.an.isChecked = musicInfo.bgd
             v.mv.isChecked = musicInfo.video
+            v.lyrics.text = musicInfo.lyricsText
             v.lyricsContainer.scrollTo(0, 0)
-            musicInfo.lyrics?.apply { v.lyrics.text = this.plaintext }
         }
         return this
     }

@@ -1,6 +1,8 @@
 package com.yinlin.rachel.fragment
 
+import android.graphics.SurfaceTexture
 import android.net.Uri
+import android.view.TextureView.SurfaceTextureListener
 import android.view.View
 import androidx.annotation.OptIn
 import androidx.lifecycle.lifecycleScope
@@ -10,7 +12,6 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ShuffleOrder.DefaultShuffleOrder
-import com.google.gson.reflect.TypeToken
 import com.xuexiang.xui.utils.XToastUtils
 import com.yinlin.rachel.Config
 import com.yinlin.rachel.MusicInfoMap
@@ -29,13 +30,13 @@ import com.yinlin.rachel.RachelMessage.MUSIC_STOP_PLAYER
 import com.yinlin.rachel.RachelMessage.MUSIC_USE_LYRICS_ENGINE
 import com.yinlin.rachel.bold
 import com.yinlin.rachel.clear
-import com.yinlin.rachel.data.Lyrics
+import com.yinlin.rachel.data.LyricsInfo
 import com.yinlin.rachel.data.MusicInfo
 import com.yinlin.rachel.data.Playlist
 import com.yinlin.rachel.databinding.FragmentMusicBinding
 import com.yinlin.rachel.deleteFilter
 import com.yinlin.rachel.dialog.DialogCurrentPlaylist
-import com.yinlin.rachel.dialog.DialogLyricsEngine
+import com.yinlin.rachel.dialog.DialogLyricsInfo
 import com.yinlin.rachel.dialog.DialogMusicInfo
 import com.yinlin.rachel.div
 import com.yinlin.rachel.load
@@ -43,6 +44,7 @@ import com.yinlin.rachel.model.RachelFragment
 import com.yinlin.rachel.model.RachelMod
 import com.yinlin.rachel.model.RachelPages
 import com.yinlin.rachel.model.RachelRotateAnimator
+import com.yinlin.rachel.model.engine.LyricsEngineFactory
 import com.yinlin.rachel.pathMusic
 import com.yinlin.rachel.rachelClick
 import com.yinlin.rachel.readJson
@@ -68,7 +70,7 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
 
     private val dialogCurrentPlaylist = DialogCurrentPlaylist(this)
     private val dialogMusicInfo = DialogMusicInfo(this)
-    private val dialogLyricsEngine = DialogLyricsEngine(this)
+    private val dialogLyricsInfo = DialogLyricsInfo(this)
 
     override fun bindingClass() = FragmentMusicBinding::class.java
 
@@ -83,7 +85,10 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
                     for (f in this) {
                         try {
                             val info: MusicInfo = f.readJson()
-                            if (info.isCorrect) musicInfos[info.id] = info
+                            if (info.isCorrect) {
+                                info.parseLyricsText()
+                                musicInfos[info.id] = info
+                            }
                         }
                         catch (ignored: Exception) { }
                     }
@@ -99,7 +104,7 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
         // 对话框
         dialogCurrentPlaylist.init()
         dialogMusicInfo.init()
-        dialogLyricsEngine.init()
+        dialogLyricsInfo.init()
 
         // 播放器
         player.addListener(this)
@@ -107,8 +112,9 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
         // 更新播放进度回调
         onTimeUpdate = object : Runnable {
             override fun run() {
-                v.progress.updateProgress(player.currentPosition, false) // 更新进度条
-                v.lyrics.updateLyrics(player.currentPosition) // 更新歌词
+                val position = player.currentPosition
+                v.progress.updateProgress(position, false) // 更新进度条
+                v.lyrics.update(position) // 更新歌词
                 postDelay(UPDATE_FREQUENCY, this) // 更新消息
             }
         }
@@ -193,8 +199,13 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
         v.buttonMv.rachelClick { }
         // 歌词
         v.buttonLyrics.rachelClick {
-            currentMusic?.lyrics?.items?.keys?.toMutableList()?.apply {
-                dialogLyricsEngine.update(this).show()
+            currentMusic?.lyrics?.apply {
+                val arr = ArrayList<LyricsInfo>()
+                for ((engineName, nameList) in this) {
+                    val available = LyricsEngineFactory.hasEngine(engineName)
+                    for (name in nameList) arr += LyricsInfo(engineName, name, available)
+                }
+                dialogLyricsInfo.update(arr).show()
             }
         }
         // 评论
@@ -208,7 +219,7 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
     }
 
     override fun quit() {
-        dialogLyricsEngine.release()
+        dialogLyricsInfo.release()
         dialogCurrentPlaylist.release()
         dialogMusicInfo.release()
         endTimeUpdate()
@@ -228,12 +239,12 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
         if (player.isPlaying) endTimeUpdate()
     }
 
-    override fun message(msg: RachelMessage, arg: Any?) {
+    override fun message(msg: RachelMessage, vararg args: Any?) {
         when (msg) {
-            MUSIC_START_PLAYER -> startPlayer(arg as Playlist)
+            MUSIC_START_PLAYER -> startPlayer(args[0] as Playlist)
             MUSIC_STOP_PLAYER -> stopPlayer()
             MUSIC_DELETE_PLAYLIST -> {
-                val playlist = arg as Playlist
+                val playlist = args[0] as Playlist
                 // 检查歌单是否正在播放
                 if (isLoadPlaylist(playlist)) stopPlayer()
                 // UI更新
@@ -242,7 +253,6 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
                 Config.playlist = playlists
             }
             MUSIC_DELETE_MUSIC_FROM_PLAYLIST -> {
-                val args = arg as Array<*>
                 val playlist = args[0] as Playlist
                 val position = args[1] as Int
                 // 检查歌单是否正在播放
@@ -262,7 +272,7 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
             }
             MUSIC_DELETE_MUSIC -> {
                 stopPlayer() // 删除音乐前停止播放器
-                for (id in arg as List<*>) {
+                for (id in args[0] as List<*>) {
                     // 更新UI
                     musicInfos.remove(id as String)
                     // 数据存储
@@ -270,34 +280,38 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
                 }
             }
             MUSIC_GOTO_MUSIC -> {
-                val index = loadMusics.indexOf(arg as String)
+                val index = loadMusics.indexOf(args[0] as String)
                 if (player.currentMediaItemIndex != index) {
                     player.seekTo(index, 0)
                     if (!player.isPlaying) player.play()
                 }
             }
             MUSIC_NOTIFY_ADD_MUSIC -> {
-                for (id in arg as List<*>) {
+                for (id in args[0] as List<*>) {
                     // 更新UI
                     val info: MusicInfo = (pathMusic / (id as String + RachelMod.RES_INFO)).readJson()
-                    if (info.isCorrect) musicInfos[info.id] = info
+                    if (info.isCorrect) {
+                        info.parseLyricsText()
+                        musicInfos[info.id] = info
+                    }
                     else musicInfos.remove(id)
                 }
             }
             MUSIC_USE_LYRICS_ENGINE -> {
-                val engineName = arg as String
-                currentMusic?.lyrics?.apply {
-                    if(!v.lyrics.switchEngine(this, engineName)) XToastUtils.error("切换歌词引擎失败")
+                val engineName = args[0] as String
+                val name = args[1] as String
+                currentMusic?.apply {
+                    if (!v.lyrics.switchEngine(this, engineName, name)) XToastUtils.error("加载歌词引擎失败")
                 }
             }
             else -> {}
         }
     }
 
-    override fun messageForResult(msg: RachelMessage, arg: Any?): Any? {
+    override fun messageForResult(msg: RachelMessage, vararg args: Any?): Any? {
         when (msg) {
             MUSIC_CREATE_PLAYLIST -> {
-                val newName = arg as String
+                val newName = args[0] as String
                 // 校验歌单
                 if (newName.isEmpty() || playlists.containsKey(newName) ||
                     newName == pages.getResString(R.string.default_playlist_name)) return false
@@ -308,7 +322,6 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
                 return true
             }
             MUSIC_RENAME_PLAYLIST -> {
-                val args = arg as Array<*>
                 val playlist = args[0] as Playlist
                 val newName = args[1] as String
                 // 校验歌单
@@ -322,7 +335,6 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
                 return true
             }
             MUSIC_ADD_MUSIC_INTO_PLAYLIST -> {
-                val args = arg as Array<*>
                 val playlist = args[0] as Playlist
                 // 更新UI
                 val ids = playlist.items
@@ -352,10 +364,9 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
         super.onMediaItemTransition(mediaItem, reason)
         if (mediaItem == null) return
 
-        // 加载歌词
+        // 加载歌词引擎
         musicInfos[mediaItem.mediaId]?.apply {
-            if (this.lyrics == null) this.lyrics = Lyrics(this.lyricsPath.readText())
-            if (!v.lyrics.loadLyrics(this.lyrics!!)) XToastUtils.error("没有合适的歌词引擎")
+            if(!v.lyrics.loadEngine(this)) XToastUtils.error("加载歌词引擎失败")
         }
 
         // 处于前台时更新前台信息
@@ -372,7 +383,8 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
             // 置空当前播放歌单与歌曲
             currentPlaylist = null
             savedMusic = null
-            v.lyrics.stopLyrics()
+            // 停止歌词引擎
+            v.lyrics.releaseEngine()
         }
     }
 
@@ -444,12 +456,9 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
 
     // 更新前台
     private fun updateForeground() {
-        // 更新进度条
-        val duration = player.duration
-        v.progress.setInfo(v.lyrics.hotpots, if (duration == C.TIME_UNSET) 0 else duration)
-
         // 更新背景
         val info = currentMusic
+        v.progress.setInfo(info?.chorus ?: emptyList(), if (player.duration == C.TIME_UNSET) 0 else player.duration)
         if (info == null) { // 停止播放状态, 更新
             // 更新歌曲信息
             v.title.text = pages.getResString(R.string.no_audio_source)

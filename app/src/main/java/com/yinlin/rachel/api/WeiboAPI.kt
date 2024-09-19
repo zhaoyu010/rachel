@@ -14,22 +14,22 @@ object WeiboAPI {
     const val BASEURL = "https://m.weibo.cn"
     const val DETAILS_URL = "https://m.weibo.cn/detail/"
 
-    fun extractContainerId(uid: String): Array<String>? {
-        try {
-            val url = "https://m.weibo.cn/api/container/getIndex?type=uid&value=$uid"
-            val json = Net.get(url, null)
-            val data = json!!.getAsJsonObject("data")
-            val name = data.getAsJsonObject("userInfo")["screen_name"].asString
-            val tabs = data.getAsJsonObject("tabsInfo").getAsJsonArray("tabs")
-            for (item in tabs) {
-                val tab = item.asJsonObject
-                if (tab["title"].asString == "微博") {
-                    return arrayOf(uid, name, tab["containerid"].asString)
-                }
+    fun extractContainerId(uid: String): Array<String>? = try {
+        val url = "https://m.weibo.cn/api/container/getIndex?type=uid&value=$uid"
+        val json = Net.get(url, null)
+        val data = json!!.getAsJsonObject("data")
+        val name = data.getAsJsonObject("userInfo")["screen_name"].asString
+        val tabs = data.getAsJsonObject("tabsInfo").getAsJsonArray("tabs")
+        var arr: Array<String>? = null
+        for (item in tabs) {
+            val tab = item.asJsonObject
+            if (tab["title"].asString == "微博") {
+                arr = arrayOf(uid, name, tab["containerid"].asString)
+                break
             }
-        } catch (ignored: Exception) { }
-        return null
-    }
+        }
+        arr
+    } catch (ignored: Exception) { null }
 
     private fun extractSingle(uid: String, containerId: String, array: IMsgInfoList) {
         try {

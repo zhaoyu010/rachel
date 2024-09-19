@@ -7,7 +7,8 @@ import com.xuexiang.xui.utils.XToastUtils
 import com.yinlin.rachel.Config
 import com.yinlin.rachel.R
 import com.yinlin.rachel.RachelMessage
-import com.yinlin.rachel.RachelMessage.*
+import com.yinlin.rachel.RachelMessage.ME_REQUEST_USER_INFO
+import com.yinlin.rachel.RachelMessage.ME_UPDATE_USER_INFO
 import com.yinlin.rachel.annotation.NewThread
 import com.yinlin.rachel.api.API
 import com.yinlin.rachel.bold
@@ -106,7 +107,7 @@ class FragmentMe(pages: RachelPages) : RachelFragment<FragmentMeBinding>(pages) 
         dialogAbout.release()
     }
 
-    override fun message(msg: RachelMessage, arg: Any?) {
+    override fun message(msg: RachelMessage, vararg args: Any?) {
         when (msg) {
             ME_REQUEST_USER_INFO -> requestUserInfo()
             ME_UPDATE_USER_INFO -> updateUserInfo()

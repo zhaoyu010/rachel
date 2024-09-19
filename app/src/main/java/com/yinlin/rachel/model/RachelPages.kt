@@ -120,11 +120,8 @@ class RachelPages(activity: FragmentActivity, private val bbl: BottomBarLayout,
 
     fun getResColor(@ColorRes id: Int) = context.getColor(id)
 
-    fun sendMessage(item: Item, msg: RachelMessage, arg: Any?) = fragments[item.index]?.message(msg, arg)
+    fun sendMessage(item: Item, msg: RachelMessage, vararg args: Any?) = fragments[item.index]?.message(msg, *args)
 
-    fun sendMessage(item: Item, msg: RachelMessage) = sendMessage(item, msg, null)
-
-    fun sendMessageForResult(item: Item, msg: RachelMessage, arg: Any?) = fragments[item.index]?.messageForResult(msg, arg)
-
-    fun sendMessageForResult(item: Item, msg: RachelMessage) = sendMessageForResult(item, msg, null)
+    @Suppress("UNCHECKED_CAST")
+    fun <T> sendMessageForResult(item: Item, msg: RachelMessage, vararg args: Any?): T? = fragments[item.index]?.messageForResult(msg, *args) as T?
 }

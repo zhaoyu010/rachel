@@ -64,8 +64,7 @@ class FragmentPlaylist(pages: RachelPages, musicInfos: IMusicInfoMap,
             val name = musicInfo?.name ?: item
             selectedPlaylist?.apply {
                 Dialog.confirm(pages.context, "是否从歌单\"${this.name}\"中删除\"$name\"?") { _, _ ->
-                    val args = arrayOf(this, position)
-                    pages.sendMessage(RachelPages.music, RachelMessage.MUSIC_DELETE_MUSIC_FROM_PLAYLIST, args)
+                    pages.sendMessage(RachelPages.music, RachelMessage.MUSIC_DELETE_MUSIC_FROM_PLAYLIST, this, position)
                     notifyItemRemoved(position)
                 }
             }
@@ -128,7 +127,7 @@ class FragmentPlaylist(pages: RachelPages, musicInfos: IMusicInfoMap,
         val name = v.tab.getTab(index).text.toString()
         playlists[name]?.apply {
             adapter.selectedPlaylist = this
-            adapter.items.clearAddAll(this.items)
+            adapter.items = this.items
             adapter.notifyDataSetChanged()
         }
     }
@@ -149,8 +148,7 @@ class FragmentPlaylist(pages: RachelPages, musicInfos: IMusicInfoMap,
             }
             "重命名" -> Dialog.input(pages.context, "请输入歌单名称", 10) { _, input ->
                 val newName = input.toString()
-                val args = arrayOf(adapter.selectedPlaylist, newName)
-                if (pages.sendMessageForResult(RachelPages.music, RachelMessage.MUSIC_RENAME_PLAYLIST, args) as Boolean) {
+                if (pages.sendMessageForResult<Boolean>(RachelPages.music, RachelMessage.MUSIC_RENAME_PLAYLIST, adapter.selectedPlaylist, newName)!!) {
                     XToastUtils.success("修改成功")
                     v.tab.getTab(v.tab.selectedIndex).text = newName
                     v.tab.notifyDataChanged()
@@ -175,7 +173,7 @@ class FragmentPlaylist(pages: RachelPages, musicInfos: IMusicInfoMap,
         }
         if (playlists.isNotEmpty()) v.tab.selectTab(currentTabIndex)
         else {
-            adapter.items.clear()
+            adapter.items = ArrayList()
             adapter.selectedPlaylist = null
             adapter.notifyDataSetChanged()
             v.tab.notifyDataChanged()
@@ -183,7 +181,7 @@ class FragmentPlaylist(pages: RachelPages, musicInfos: IMusicInfoMap,
     }
 
     private fun createPlaylist(newName: String) {
-        if (pages.sendMessageForResult(RachelPages.music, RachelMessage.MUSIC_CREATE_PLAYLIST, newName) as Boolean) {
+        if (pages.sendMessageForResult<Boolean>(RachelPages.music, RachelMessage.MUSIC_CREATE_PLAYLIST, newName)!!) {
             XToastUtils.success("创建成功")
             v.tab.addTab(TabSegment.Tab(newName))
             v.tab.selectTab(playlists.size - 1)

@@ -5,7 +5,6 @@ import android.content.Context
 import android.os.Environment
 import android.os.Handler
 import android.provider.MediaStore
-import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog
 import com.yinlin.rachel.annotation.NewThread
@@ -27,6 +26,7 @@ object Net {
     private val client: OkHttpClient = OkHttpClient.Builder()
         .proxy(Proxy.NO_PROXY)
         .connectTimeout(5, TimeUnit.SECONDS)
+        .callTimeout(5, TimeUnit.SECONDS)
         .build()
 
     fun get(url: String, headers: Map<String, String>? = null): JsonObject? {

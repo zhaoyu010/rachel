@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="10dp"
+    android:background="@color/micro_gray"
+    tools:context=".fragment.FragmentCreateTopic" >
+    <TextView
+        android:id="@+id/cancel"
+        style="@style/RachelText"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginHorizontal="10dp"
+        android:text="取消"
+        android:textSize="@dimen/lg"
+        android:textColor="@color/gray" />
+    <TextView
+        style="@style/RachelText.X0"
+        app:layout_constraintLeft_toRightOf="@id/cancel"
+        app:layout_constraintRight_toLeftOf="@id/send"
+        app:layout_constraintTop_toTopOf="parent"
+        android:textAlignment="center"
+        android:text="发表主题"
+        android:textSize="@dimen/lg" />
+    <TextView
+        android:id="@+id/send"
+        style="@style/RachelText"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginHorizontal="10dp"
+        android:text="发送"
+        android:textSize="@dimen/lg"
+        android:textColor="@color/steel_blue" />
+    <com.yinlin.rachel.view.LineView
+        android:id="@+id/line"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/send"
+        android:layout_marginVertical="10dp" />
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/title_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/line"
+        android:layout_marginVertical="10dp"
+        app:counterEnabled="true"
+        app:counterMaxLength="48" >
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="标题"
+            android:inputType="textMultiLine"
+            android:maxLength="48"
+            android:textSize="@dimen/sm"
+            android:gravity="start"
+            android:lines="2"
+            android:maxLines="2"
+            android:scrollbars="vertical" />
+    </com.google.android.material.textfield.TextInputLayout>
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/content_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/title_container"
+        android:layout_marginVertical="10dp"
+        app:counterEnabled="true"
+        app:counterMaxLength="512" >
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="内容"
+            android:inputType="textMultiLine"
+            android:maxLength="512"
+            android:textSize="@dimen/sm"
+            android:gravity="start"
+            android:lines="10"
+            android:maxLines="10"
+            android:scrollbars="vertical" />
+    </com.google.android.material.textfield.TextInputLayout>
+    <com.yinlin.rachel.view.ImageSelectView
+        android:id="@+id/picList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/content_container"
+        android:layout_marginVertical="10dp" />
+</androidx.constraintlayout.widget.ConstraintLayout>

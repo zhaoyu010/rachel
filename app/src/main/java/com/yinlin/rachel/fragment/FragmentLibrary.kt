@@ -35,7 +35,6 @@ class FragmentLibrary(pages: RachelPages,
         override fun update(v: ItemMusicBinding, item: MusicInfo, position: Int) {
             v.name.text = item.name // 歌名
             v.singer.text = item.singer
-            v.id.text = " ${item.id} " // 编号
             v.version.labelText = item.version // 版本
             v.pic.load(pages.ril, item.recordPath) // 封面
             // 选择器
@@ -53,8 +52,7 @@ class FragmentLibrary(pages: RachelPages,
                 else notifyItemChanged(position)
             } else {
                 pages.pop()
-                pages.sendMessage(RachelPages.music, RachelMessage.MUSIC_START_PLAYER,
-                    Playlist(pages.getResString(R.string.default_playlist_name), item.id))
+                pages.sendMessage(RachelPages.music, RachelMessage.MUSIC_START_PLAYER, Playlist(pages.getResString(R.string.default_playlist_name), item.id))
             }
         }
 
@@ -121,8 +119,7 @@ class FragmentLibrary(pages: RachelPages,
                 Dialog.choice(pages.context, "添加到歌单", playlists.keys) { _, _, _, text ->
                     pages.pop()
                     val playlist = playlists[text.toString()]
-                    val args = arrayOf(playlist, selectIds)
-                    val num = pages.sendMessageForResult(RachelPages.music, RachelMessage.MUSIC_ADD_MUSIC_INTO_PLAYLIST, args) as Int
+                    val num: Int = pages.sendMessageForResult(RachelPages.music, RachelMessage.MUSIC_ADD_MUSIC_INTO_PLAYLIST, playlist, selectIds)!!
                     XToastUtils.success("已添加${num}首歌曲")
                     true
                 }

@@ -29,15 +29,6 @@
             app:label_text="1.0"
             app:label_textSize="@dimen/xs"
             android:elevation="10dp" />
-        <com.xuexiang.xui.widget.textview.BadgeView
-            android:id="@+id/id"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintRight_toRightOf="@id/pic"
-            app:layout_constraintBottom_toBottomOf="@id/pic"
-            android:layout_margin="5dp"
-            android:text="1.0"
-            android:textSize="@dimen/sm" />
         <com.xuexiang.xui.widget.textview.autofit.AutoFitTextView
             android:id="@+id/name"
             style="@style/RachelText.X0"

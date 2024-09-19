@@ -9,6 +9,7 @@ import android.view.Gravity
 import com.tencent.mmkv.MMKV
 import com.xuexiang.xui.XUI
 import com.xuexiang.xui.widget.toast.XToast
+import org.libpag.PAGFont
 import java.io.PrintWriter
 import java.io.StringWriter
 
@@ -48,6 +49,8 @@ class RachelApplication : Application() {
         fontBold = Typeface.create(fontNormal, Typeface.BOLD)
         fontItalic = Typeface.create(fontNormal, Typeface.ITALIC)
         fontBoldItalic = Typeface.create(fontNormal, Typeface.BOLD_ITALIC)
+
+        PAGFont.RegisterFont(assets, "fonts/hyyx.ttf")
 
         // 初始化目录
         basePath = filesDir.path

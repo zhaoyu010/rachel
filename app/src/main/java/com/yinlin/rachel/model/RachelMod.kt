@@ -1,6 +1,5 @@
 package com.yinlin.rachel.model
 
-import com.google.gson.reflect.TypeToken
 import com.yinlin.rachel.data.MusicInfo
 import com.yinlin.rachel.div
 import com.yinlin.rachel.json
@@ -20,22 +19,22 @@ import java.io.OutputStream
 // | <Items> |                  ------ ?字节 资源
 
 object RachelMod {
-    const val MOD_VERSION = 1
+    const val MOD_VERSION = 2
     val MOD_MAGIC = "RACHEL".toByteArray()
     const val MOD_BUFFER_SIZE = 1024 * 64
 
     const val RES_INFO = ".json"
     const val RES_AUDIO = ".flac"
     const val RES_RECORD = "_record.webp"
-    const val RES_LYRICS = ".lyrics"
     const val RES_VIDEO = ".mp4"
     const val RES_BGS = "_bgs.webp"
     const val RES_BGD = "_bgd.webp"
+    const val RES_DEFAULT_LRC = ".lrc"
 
     data class MusicItem(val name: String, val version: String, val resList: MutableList<String> = ArrayList())
 
     class Metadata {
-        val version: Int = MOD_VERSION // MOD版本
+        var version: Int = MOD_VERSION // MOD版本
         var config: String = "" // MOD配置
         val items = HashMap<String, MusicItem>() // 音乐集
 
@@ -132,7 +131,7 @@ object RachelMod {
                     name = name.substring(0, pos)
                 }
                 val item = metadata.items[name]
-                if (item == null || ext.isEmpty() || !filter.contains(ext)) continue
+                if (item == null || ext.isEmpty() || filter.contains(ext)) continue
                 item.resList.add(ext)
             }
             // 至少存在一个音乐基础信息不足
@@ -141,8 +140,8 @@ object RachelMod {
                     !resList.contains(RES_INFO) ||
                     !resList.contains(RES_AUDIO) ||
                     !resList.contains(RES_RECORD) ||
-                    !resList.contains(RES_LYRICS) ||
-                    !resList.contains(RES_BGS)
+                    !resList.contains(RES_BGS) ||
+                    !resList.contains(RES_DEFAULT_LRC)
                 }) metadata.items.clear()
             return metadata
         }

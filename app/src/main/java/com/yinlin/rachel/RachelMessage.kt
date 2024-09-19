@@ -13,7 +13,7 @@ enum class RachelMessage {
     MUSIC_GOTO_MUSIC,  // String
     MUSIC_NOTIFY_ADD_MUSIC,  // List<String>
 
-    MUSIC_USE_LYRICS_ENGINE,  // String
+    MUSIC_USE_LYRICS_ENGINE,  // String, String
 
 
     // FragmentMe

@@ -23,10 +23,14 @@ class FragmentImportMod(pages: RachelPages, private val uri: Uri) : RachelFragme
     @NewThread
     override fun init() {
         var releaser: RachelMod.Releaser? = null
+        var errorText = "导入失败"
         try {
             releaser = RachelMod.Releaser(pages.context.contentResolver.openInputStream(uri)!!)
             val metadata = releaser.getMetadata()
-            if (metadata.empty) throw Exception()
+            if (metadata.empty || metadata.version != RachelMod.MOD_VERSION) {
+                errorText = "Mod版本不一致"
+                throw Exception()
+            }
             val ids = ArrayList<String>()
             val listData = ArrayList<Map<String, String>>()
             for ((id, value) in metadata.items) {
@@ -71,7 +75,7 @@ class FragmentImportMod(pages: RachelPages, private val uri: Uri) : RachelFragme
             }
         } catch (e: Exception) {
             releaser?.close()
-            setButtonStatus("导入失败", R.color.red)
+            setButtonStatus(errorText, R.color.red)
         }
     }
 
