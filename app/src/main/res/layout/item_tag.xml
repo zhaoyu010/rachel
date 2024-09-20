@@ -12,6 +12,7 @@
         android:paddingHorizontal="15dp"
         android:background="@drawable/bg_tag"
         android:maxLines="1"
+        android:ellipsize="end"
         android:textSize="@dimen/sm"
         android:textColor="@color/selector_tag" />
 </LinearLayout>

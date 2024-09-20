@@ -15,9 +15,11 @@
             android:id="@+id/pic"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:maxHeight="300dp"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:adjustViewBounds="true" />
+            android:adjustViewBounds="true"
+            android:scaleType="centerCrop" />
         <TextView
             android:id="@+id/title"
             style="@style/RachelText.X"

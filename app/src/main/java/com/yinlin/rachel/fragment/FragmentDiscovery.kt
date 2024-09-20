@@ -46,7 +46,7 @@ class FragmentDiscovery(pages: RachelPages) : RachelFragment<FragmentDiscoveryBi
             else v.pic.load(rilNet, item.picPath)
             v.title.text = item.title
             v.id.text = item.id
-            v.avatar.load(rilNet, item.avatarPath)
+            v.avatar.load(pages.ril, item.avatarPath)
             v.comment.text = item.commentNum.toString()
             v.coin.text = item.coinNum.toString()
         }

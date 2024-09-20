@@ -1,19 +1,18 @@
 package com.yinlin.rachel.view
 
 import android.app.Activity
-import android.content.ContentResolver
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.Build
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.net.toFile
+import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.forjrking.lubankt.Luban
 import com.luck.picture.lib.basic.PictureSelector
 import com.luck.picture.lib.config.SelectMimeType
 import com.luck.picture.lib.config.SelectModeConfig
@@ -24,13 +23,9 @@ import com.xuexiang.xui.utils.XToastUtils
 import com.xuexiang.xui.widget.imageview.preview.PreviewBuilder
 import com.yinlin.rachel.R
 import com.yinlin.rachel.databinding.ItemImageSelectBinding
-import com.yinlin.rachel.div
 import com.yinlin.rachel.model.RachelPictureSelector.RachelImageEngine
 import com.yinlin.rachel.model.RachelPreviewInfo
 import com.yinlin.rachel.rachelClick
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
 
 
 class ImageSelectView(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : RecyclerView(context, attrs, defStyleAttr) {
@@ -38,6 +33,35 @@ class ImageSelectView(context: Context, attrs: AttributeSet?, defStyleAttr: Int)
 
     class Adapter(private val rv: ImageSelectView) : RecyclerView.Adapter<ViewHolder>() {
         internal val items: MutableList<String> = arrayListOf()
+
+        private val compressEngine = CompressFileEngine { context, source, call ->
+            val format = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) Bitmap.CompressFormat.WEBP_LOSSY
+            else @Suppress("DEPRECATION") Bitmap.CompressFormat.WEBP
+            Luban.with(context as FragmentActivity).load(source)
+                .concurrent(true).useDownSample(true)
+                .format(format).ignoreBy(300).quality(90).compressObserver {
+                    onSuccess = {
+                        val count = it.size
+                        for ((index, pic) in source.withIndex()) {
+                            if (index < count) call.onCallback(pic.toString(), it[index].absolutePath)
+                            else call.onCallback(pic.toString(), null)
+                        }
+                    }
+                    onError = { _, pic ->
+                        call.onCallback(pic.toString(), null)
+                    }
+                }.launch()
+        }
+
+        private val resultProcessor = object : OnResultCallbackListener<LocalMedia> {
+            override fun onResult(result: ArrayList<LocalMedia>) {
+                val currentSize = items.size
+                val addSize = result.size
+                for (pic in result) items += pic.compressPath
+                notifyItemRangeChanged(currentSize, addSize + 1)
+            }
+            override fun onCancel() {}
+        }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val context = parent.context
@@ -60,50 +84,8 @@ class ImageSelectView(context: Context, attrs: AttributeSet?, defStyleAttr: Int)
                             .setImageEngine(RachelImageEngine.instance)
                             .setSelectionMode(SelectModeConfig.MULTIPLE)
                             .setMaxSelectNum(addNum)
-                            .setCompressEngine(CompressFileEngine { context, source, call ->
-                                Thread {
-                                    for ((index, pic) in source.withIndex()) {
-                                        var bitmap: Bitmap? = null
-                                        try {
-                                            val fis = context.contentResolver.openInputStream(pic)
-                                            bitmap = BitmapFactory.decodeStream(fis)
-                                            if (fis != null && bitmap != null) {
-                                                val width = bitmap.width
-                                                val height = bitmap.height
-                                                if (width * height > 3000000) {
-                                                    bitmap = Bitmap.createScaledBitmap(bitmap, width / 2, height / 2, true)
-                                                }
-                                                else if (width * height > 1000000) {
-                                                    bitmap = Bitmap.createScaledBitmap(bitmap, width * 3 / 4, height * 3 / 4, true)
-                                                }
-                                                val des = context.cacheDir / "${System.currentTimeMillis()}_${index}.webp"
-                                                val fos = FileOutputStream(des)
-                                                val format = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) Bitmap.CompressFormat.WEBP_LOSSY
-                                                else @Suppress("DEPRECATION") Bitmap.CompressFormat.WEBP
-                                                val success = bitmap.compress(format, 90, fos)
-                                                fis.close()
-                                                fos.close()
-                                                call.onCallback(pic.toString(), if (success) des.absolutePath else null)
-                                            }
-                                        }
-                                        catch (ignored: Exception) {
-                                            call.onCallback(pic.toString(), null)
-                                        }
-                                        finally {
-                                            if (bitmap != null && !bitmap.isRecycled) bitmap.recycle()
-                                        }
-                                    }
-                                }.start()
-                            })
-                            .forResult(object : OnResultCallbackListener<LocalMedia> {
-                                override fun onResult(result: ArrayList<LocalMedia>) {
-                                    val currentSize = items.size
-                                    val addSize = result.size
-                                    for (pic in result) items.add(pic.compressPath)
-                                    notifyItemRangeChanged(currentSize, addSize + 1)
-                                }
-                                override fun onCancel() {}
-                            })
+                            .setCompressEngine(compressEngine)
+                            .forResult(resultProcessor)
                     }
                 }
                 else { // 是图片

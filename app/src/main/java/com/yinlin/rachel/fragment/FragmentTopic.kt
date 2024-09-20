@@ -39,6 +39,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+
 class FragmentTopic(pages: RachelPages, private val topicId: Int) : RachelFragment<FragmentTopicBinding>(pages) {
     class ImageAdapter(private val rilNet: RachelImageLoader)
         : NineGridImageViewAdapter<RachelNineGridPicture>(),
@@ -61,6 +62,8 @@ class FragmentTopic(pages: RachelPages, private val topicId: Int) : RachelFragme
     }
 
     class Adapter(private val fragment: FragmentTopic) : RachelHeaderAdapter<HeaderTopicBinding, ItemCommentBinding, Comment>() {
+        private val pages = fragment.pages
+
         override fun bindingHeaderClass() = HeaderTopicBinding::class.java
         override fun bindingItemClass() = ItemCommentBinding::class.java
 
@@ -69,7 +72,7 @@ class FragmentTopic(pages: RachelPages, private val topicId: Int) : RachelFragme
             v.title.bold = true
             v.avatar.rachelClick {
                 if (!fragment.topic.isBroken) {
-                    fragment.pages.navigate(FragmentProfile(fragment.pages, fragment.topic.id))
+                    pages.navigate(FragmentProfile(pages, fragment.topic.id))
                 }
             }
             v.pics.setAdapter(ImageAdapter(fragment.rilNet))
@@ -82,7 +85,7 @@ class FragmentTopic(pages: RachelPages, private val topicId: Int) : RachelFragme
             // 投币
             v.buttonCoin.rachelClick {
                 if (fragment.topic.id == Config.user_id) XToastUtils.warning("不能给自己投币哦")
-                else Dialog.inputNumber(fragment.pages.context, "请输入投币数量(1-3)") { _, text ->
+                else Dialog.inputNumber(pages.context, "请输入投币数量(1-3)") { _, text ->
                     val value = text.toString().toIntOrNull() ?: 0
                     if (Config.user.coin < value) XToastUtils.warning("你的银币不够哦")
                     else if (value in 1..3) fragment.sendCoin(value)
@@ -95,14 +98,14 @@ class FragmentTopic(pages: RachelPages, private val topicId: Int) : RachelFragme
             v.id.bold = true
             v.avatar.rachelClick {
                 val position = getHolderPosition(holder)
-                fragment.pages.navigate(FragmentProfile(fragment.pages, items[position].id))
+                pages.navigate(FragmentProfile(pages, items[position].id))
             }
         }
 
         override fun update(v: ItemCommentBinding, item: Comment, position: Int) {
             v.id.text = item.id
             v.time.text = item.date
-            v.avatar.load(fragment.rilNet, item.avatarPath)
+            v.avatar.load(pages.ril, item.avatarPath)
             v.content.text = item.content
             v.userTitle.setTitle(item.userTitleGroup, item.userTitle)
             v.top.visibility = if (item.isTopTopic) View.VISIBLE else View.GONE
@@ -149,7 +152,7 @@ class FragmentTopic(pages: RachelPages, private val topicId: Int) : RachelFragme
             else {
                 header.id.text = topic.id
                 header.time.text = topic.date
-                header.avatar.load(rilNet, topic.avatarPath)
+                header.avatar.load(pages.ril, topic.avatarPath)
                 header.title.text = topic.title
                 header.content.text = topic.content
                 header.userTitle.setTitle(topic.userTitleGroup, topic.userTitle)

@@ -82,6 +82,7 @@ dependencies {
     implementation("com.github.AbdAlrahmanShammout:UltimateBreadcrumbsView:1.0.2")
     implementation("com.github.bumptech.glide:glide:4.16.0")
     implementation("com.github.chaychan:BottomBarLayout:3.0.0")
+    implementation("com.github.forJrking:KLuban:1.1.0")
     implementation("com.github.xuexiangjys:XUI:1.2.1")
 
     implementation("com.squareup.okhttp3:okhttp:4.12.0")

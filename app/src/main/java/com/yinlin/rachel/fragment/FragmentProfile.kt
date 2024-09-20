@@ -101,8 +101,8 @@ class FragmentProfile(pages: RachelPages, private val profileId: String) : Rache
                header.signature.text = profile.signature
                header.level.text = profile.level.toString()
                header.coin.text = profile.coin.toString()
-               header.avatar.load(pages.ril, profile.avatarPath, Config.cache_key_avatar.get())
-               header.wall.load(pages.ril, profile.wallPath, Config.cache_key_wall.get())
+               header.avatar.load(pages.ril, profile.avatarPath)
+               header.wall.load(pages.ril, profile.wallPath)
            }
            adapter.items = profile.topics
            adapter.notifyChangedEx()
