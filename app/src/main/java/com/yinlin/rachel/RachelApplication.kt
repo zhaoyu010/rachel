@@ -8,13 +8,18 @@ import android.graphics.Typeface
 import android.view.Gravity
 import com.tencent.mmkv.MMKV
 import com.xuexiang.xui.XUI
+import com.xuexiang.xui.widget.popupwindow.popup.XUIBasePopup
+import com.xuexiang.xui.widget.popupwindow.popup.XUIPopup
 import com.xuexiang.xui.widget.toast.XToast
-import org.libpag.PAGFont
 import java.io.PrintWriter
 import java.io.StringWriter
 
 
 class RachelApplication : Application() {
+    companion object {
+        const val DEFAULT_FONT_PATH = "fonts/SourceHanSans.otf"
+    }
+
     class CrashHandler(val context: Context) : Thread.UncaughtExceptionHandler {
         private val sw = StringWriter()
         private val pw = PrintWriter(sw)
@@ -41,16 +46,14 @@ class RachelApplication : Application() {
 
         // 初始化XUI
         XUI.init(this)
-        XUI.initFontStyle("fonts/hyyx.ttf")
-        XToast.Config.get().setTextSize(14).setGravity(Gravity.CENTER)
+        XUI.initFontStyle(DEFAULT_FONT_PATH)
+        XToast.Config.get().setTextSize(12).setGravity(Gravity.CENTER)
 
         // 初始化字体
         fontNormal = XUI.getDefaultTypeface()!!
         fontBold = Typeface.create(fontNormal, Typeface.BOLD)
         fontItalic = Typeface.create(fontNormal, Typeface.ITALIC)
         fontBoldItalic = Typeface.create(fontNormal, Typeface.BOLD_ITALIC)
-
-        PAGFont.RegisterFont(assets, "fonts/hyyx.ttf")
 
         // 初始化目录
         basePath = filesDir.path

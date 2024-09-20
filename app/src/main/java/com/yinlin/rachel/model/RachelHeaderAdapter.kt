@@ -102,23 +102,23 @@ abstract class RachelHeaderAdapter<HeaderBinding : ViewBinding, ItemBinding : Vi
         if (items.size > 0) notifyItemRangeChanged(position + 1, count)
     }
 
-    fun notifyInsertChangedEx(position: Int) {
+    fun notifyInsertEx(position: Int) {
         if (items.size > 0) notifyItemInserted(position + 1)
     }
 
-    fun notifyInsertChangedEx(position: Int, count: Int) {
+    fun notifyInsertEx(position: Int, count: Int) {
         if (items.size > 0) notifyItemRangeInserted(position + 1, count)
     }
 
-    fun notifyRemoveChangedEx(position: Int) {
+    fun notifyRemovedEx(position: Int) {
         notifyItemRemoved(position + 1)
     }
 
-    fun notifyRemoveChangedEx(position: Int, count: Int) {
+    fun notifyRemovedEx(position: Int, count: Int) {
         notifyItemRangeRemoved(position + 1, count)
     }
 
     fun notifyMovedEx(fromPosition: Int, toPosition: Int) {
-        notifyItemMoved(fromPosition, toPosition)
+        notifyItemMoved(fromPosition + 1, toPosition + 1)
     }
 }

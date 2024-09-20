@@ -7,17 +7,16 @@ import java.time.ZonedDateTime
 import java.util.Date
 import java.util.Locale
 
-@JvmRecord
 data class Comment (
     val cid: Long,
     val id: String,
     val ts: String,
     val content: String,
-    val isTop: Int,
+    var isTop: Int,
     val userTitle: String,
     val userTitleGroup: Int,
 ) {
-    val isTopTopic: Boolean get() = isTop == 1
+    val isTopComment: Boolean get() = isTop == 1
     val date: String get() {
         try {
             val d1 = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH).parse(ts)

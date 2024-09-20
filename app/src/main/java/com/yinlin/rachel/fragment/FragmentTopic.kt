@@ -13,6 +13,7 @@ import com.xuexiang.xui.utils.XToastUtils
 import com.xuexiang.xui.widget.imageview.nine.ItemImageClickListener
 import com.xuexiang.xui.widget.imageview.nine.NineGridImageViewAdapter
 import com.xuexiang.xui.widget.imageview.preview.PreviewBuilder
+import com.xuexiang.xui.widget.popupwindow.popup.XUISimplePopup
 import com.yinlin.rachel.Config
 import com.yinlin.rachel.Dialog
 import com.yinlin.rachel.R
@@ -21,13 +22,11 @@ import com.yinlin.rachel.annotation.NewThread
 import com.yinlin.rachel.api.API
 import com.yinlin.rachel.bold
 import com.yinlin.rachel.clear
-import com.yinlin.rachel.content
 import com.yinlin.rachel.data.Comment
 import com.yinlin.rachel.data.Topic
 import com.yinlin.rachel.databinding.FragmentTopicBinding
 import com.yinlin.rachel.databinding.HeaderTopicBinding
 import com.yinlin.rachel.databinding.ItemCommentBinding
-import com.yinlin.rachel.interceptScroll
 import com.yinlin.rachel.load
 import com.yinlin.rachel.model.RachelFragment
 import com.yinlin.rachel.model.RachelHeaderAdapter
@@ -38,6 +37,7 @@ import com.yinlin.rachel.rachelClick
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Collections
 
 
 class FragmentTopic(pages: RachelPages, private val topicId: Int) : RachelFragment<FragmentTopicBinding>(pages) {
@@ -76,11 +76,28 @@ class FragmentTopic(pages: RachelPages, private val topicId: Int) : RachelFragme
                 }
             }
             v.pics.setAdapter(ImageAdapter(fragment.rilNet))
+            // 菜单
+            v.more.rachelClick(300) {
+                val topText = if (fragment.topic.isTopTopic) "取消置顶" else "置顶"
+                XUISimplePopup<XUISimplePopup<*>>(pages.context,
+                    arrayOf(topText, "删除")
+                ).create(500) { _, _, index ->
+                    when(index) {
+                        0 -> Dialog.confirm(pages.context, "${topText}这篇主题?") { _, _ ->
+                            fragment.updateTopicTop(if (fragment.topic.isTopTopic) 0 else 1)
+                        }
+                        1 -> Dialog.confirm(pages.context, "删除这篇主题?") { _, _ ->
+                            fragment.deleteTopic()
+                        }
+                    }
+                }.setHasDivider(true).showDown(it)
+            }
+
             // 评论
-            v.inputComment.interceptScroll()
             v.buttonSend.rachelClick {
-                val content = v.inputComment.content
-                if (content.isNotEmpty()) fragment.sendComment(content)
+                Dialog.inputMultiLines(pages.context, "快来留下你的足迹~", 256, 5) { _, input ->
+                    fragment.sendComment(input.toString())
+                }
             }
             // 投币
             v.buttonCoin.rachelClick {
@@ -100,6 +117,23 @@ class FragmentTopic(pages: RachelPages, private val topicId: Int) : RachelFragme
                 val position = getHolderPosition(holder)
                 pages.navigate(FragmentProfile(pages, items[position].id))
             }
+            v.more.rachelClick(300) {
+                val position = getHolderPosition(holder)
+                val comment = items[position]
+                val topText = if (comment.isTopComment) "取消置顶" else "置顶"
+                XUISimplePopup<XUISimplePopup<*>>(pages.context,
+                    arrayOf(topText, "删除")
+                ).create(500) { _, _, index ->
+                    when(index) {
+                        0 -> Dialog.confirm(pages.context, "${topText}这条评论?") { _, _ ->
+                            fragment.updateCommentTop(comment.cid, position, if (comment.isTopComment) 0 else 1)
+                        }
+                        1 -> Dialog.confirm(pages.context, "删除这条评论?") { _, _ ->
+                            fragment.deleteComment(comment.cid, position)
+                        }
+                    }
+                }.setHasDivider(true).showDown(it)
+            }
         }
 
         override fun update(v: ItemCommentBinding, item: Comment, position: Int) {
@@ -108,7 +142,7 @@ class FragmentTopic(pages: RachelPages, private val topicId: Int) : RachelFragme
             v.avatar.load(pages.ril, item.avatarPath)
             v.content.text = item.content
             v.userTitle.setTitle(item.userTitleGroup, item.userTitle)
-            v.top.visibility = if (item.isTopTopic) View.VISIBLE else View.GONE
+            v.top.visibility = if (item.isTopComment) View.VISIBLE else View.GONE
         }
     }
 
@@ -139,30 +173,24 @@ class FragmentTopic(pages: RachelPages, private val topicId: Int) : RachelFragme
                 topic = API.UserAPI.getTopic(topicId)
                 withContext(Dispatchers.Main) { pages.loadingDialog.dismiss() }
             }
-            val header = adapter.header
-            if (topic.isBroken) {
-                header.id.text = ""
-                header.time.text = ""
-                header.avatar.clear(rilNet)
-                header.title.text = topic.title
-                header.content.text = topic.content
-                header.userTitle.setDefaultTitle()
-                header.commentContainer.visibility = View.GONE
-            }
-            else {
+            if (!topic.isBroken) {
+                val header = adapter.header
                 header.id.text = topic.id
                 header.time.text = topic.date
                 header.avatar.load(pages.ril, topic.avatarPath)
                 header.title.text = topic.title
                 header.content.text = topic.content
                 header.userTitle.setTitle(topic.userTitleGroup, topic.userTitle)
-                header.commentContainer.visibility = View.VISIBLE
+                val pics = ArrayList<RachelNineGridPicture>(topic.pics.size)
+                for (pic in topic.pics) pics += RachelNineGridPicture(topic.picPath(pic))
+                header.pics.setImagesData(pics)
+                adapter.items = topic.comments
+                adapter.notifyChangedEx()
             }
-            val pics = ArrayList<RachelNineGridPicture>(topic.pics.size)
-            for (pic in topic.pics) pics += RachelNineGridPicture(topic.picPath(pic))
-            header.pics.setImagesData(pics)
-            adapter.items = topic.comments
-            adapter.notifyChangedEx()
+            else {
+                pages.pop()
+                XToastUtils.error("主题不存在")
+            }
         }
     }
 
@@ -176,9 +204,8 @@ class FragmentTopic(pages: RachelPages, private val topicId: Int) : RachelFragme
                 result
             }
             if (result.ok) {
-                adapter.header.inputComment.content = ""
                 adapter.items += result.value2!!
-                adapter.notifyInsertChangedEx(adapter.items.size)
+                adapter.notifyInsertEx(adapter.items.size)
                 XToastUtils.success(result.value1)
             }
             else XToastUtils.error(result.value1)
@@ -198,6 +225,80 @@ class FragmentTopic(pages: RachelPages, private val topicId: Int) : RachelFragme
                 pages.sendMessage(RachelPages.me, ME_REQUEST_USER_INFO)
                 XToastUtils.success(result.value)
             }
+            else XToastUtils.error(result.value)
+        }
+    }
+
+    @NewThread
+    private fun deleteComment(cid: Long, position: Int) {
+        lifecycleScope.launch {
+            pages.loadingDialog.show()
+            val result = withContext(Dispatchers.IO) {
+                val result = API.UserAPI.deleteComment(Config.user_id, Config.user_pwd, cid, topicId)
+                withContext(Dispatchers.Main) { pages.loadingDialog.dismiss() }
+                result
+            }
+            if (result.ok) {
+                adapter.items.removeAt(position)
+                adapter.notifyRemovedEx(position)
+                XToastUtils.success(result.value)
+            }
+            else XToastUtils.error(result.value)
+        }
+    }
+
+    @NewThread
+    private fun updateCommentTop(cid: Long, position: Int, isTop: Int) {
+        lifecycleScope.launch {
+            pages.loadingDialog.show()
+            val result = withContext(Dispatchers.IO) {
+                val result = API.UserAPI.updateCommentTop(Config.user_id, Config.user_pwd, cid, topicId, isTop)
+                withContext(Dispatchers.Main) { pages.loadingDialog.dismiss() }
+                result
+            }
+            if (result.ok) {
+                val comment = adapter.items[position]
+                if (comment.isTop != isTop) {
+                    comment.isTop = isTop
+                    adapter.notifyChangedEx(position)
+                    if (position != 0) {
+                        Collections.swap(adapter.items, position, 0)
+                        adapter.notifyMovedEx(position, 0)
+                    }
+                }
+                XToastUtils.success(result.value)
+            }
+            else XToastUtils.error(result.value)
+        }
+    }
+
+    @NewThread
+    private fun deleteTopic() {
+        lifecycleScope.launch {
+            pages.loadingDialog.show()
+            val result = withContext(Dispatchers.IO) {
+                val result = API.UserAPI.deleteTopic(Config.user_id, Config.user_pwd, topicId)
+                withContext(Dispatchers.Main) { pages.loadingDialog.dismiss() }
+                result
+            }
+            if (result.ok) {
+                pages.pop()
+                XToastUtils.success(result.value)
+            }
+            else XToastUtils.error(result.value)
+        }
+    }
+
+    @NewThread
+    private fun updateTopicTop(isTop: Int) {
+        lifecycleScope.launch {
+            pages.loadingDialog.show()
+            val result = withContext(Dispatchers.IO) {
+                val result = API.UserAPI.updateTopicTop(Config.user_id, Config.user_pwd, topicId, isTop)
+                withContext(Dispatchers.Main) { pages.loadingDialog.dismiss() }
+                result
+            }
+            if (result.ok) XToastUtils.success(result.value)
             else XToastUtils.error(result.value)
         }
     }

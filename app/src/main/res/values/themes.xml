@@ -1,5 +1,5 @@
 <resources>
     <style name="Theme.Rachel" parent="XUITheme.Phone">
-
+        <item name="android:textSize">@dimen/sm</item>
     </style>
 </resources>

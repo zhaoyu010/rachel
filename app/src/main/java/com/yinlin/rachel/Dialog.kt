@@ -3,6 +3,7 @@ package com.yinlin.rachel
 import android.content.Context
 import android.text.InputType
 import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog
+import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog.InputCallback
 
 
 object Dialog {
@@ -19,6 +20,20 @@ object Dialog {
             .inputType(InputType.TYPE_CLASS_TEXT).inputRange(1, maxLength)
             .input(content, "", false, callback)
             .cancelable(false).show()
+    }
+
+    fun inputMultiLines(context: Context, content: String, maxLength: Int, maxLine: Int, callback: InputCallback) {
+        val dialog = MaterialDialog.Builder(context).iconRes(R.mipmap.icon)
+            .title("输入").positiveText(R.string.ok).negativeText(R.string.cancel)
+            .inputType(InputType.TYPE_CLASS_TEXT).inputRange(1, maxLength)
+            .input(content, "", false, callback)
+            .cancelable(false).build()
+        dialog.inputEditText?.apply {
+            isSingleLine = false
+            maxLines = maxLine
+            setLines(maxLine)
+        }
+        dialog.show()
     }
 
     fun inputNumber(context: Context, content: String, callback: MaterialDialog.InputCallback) {

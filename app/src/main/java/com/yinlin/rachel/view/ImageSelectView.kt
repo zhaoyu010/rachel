@@ -39,7 +39,7 @@ class ImageSelectView(context: Context, attrs: AttributeSet?, defStyleAttr: Int)
             else @Suppress("DEPRECATION") Bitmap.CompressFormat.WEBP
             Luban.with(context as FragmentActivity).load(source)
                 .concurrent(true).useDownSample(true)
-                .format(format).ignoreBy(300).quality(90).compressObserver {
+                .format(format).ignoreBy(200).quality(90).compressObserver {
                     onSuccess = {
                         val count = it.size
                         for ((index, pic) in source.withIndex()) {

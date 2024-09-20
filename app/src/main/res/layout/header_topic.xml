@@ -2,8 +2,10 @@
 <androidx.cardview.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     style="@style/RachelCard"
-    app:contentPadding="10dp" >
+    app:contentPadding="10dp"
+    tools:context=".fragment.FragmentTopic" >
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
@@ -18,10 +20,19 @@
             style="@style/RachelText.X0"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintLeft_toRightOf="@id/avatar"
+            app:layout_constraintRight_toLeftOf="@id/more"
+            android:layout_marginHorizontal="10dp"
+            android:textColor="@color/steel_blue" />
+        <ImageView
+            android:id="@+id/more"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintTop_toTopOf="@id/id"
+            app:layout_constraintBottom_toBottomOf="@id/id"
             app:layout_constraintRight_toRightOf="parent"
             android:layout_marginHorizontal="10dp"
-            android:textSize="@dimen/base"
-            android:textColor="@color/orange_red" />
+            android:src="@drawable/svg_more_gray" />
         <com.yinlin.rachel.view.TitleView
             android:id="@+id/user_title"
             android:layout_width="80dp"
@@ -39,7 +50,8 @@
             android:layout_marginStart="10dp"
             android:textAlignment="textEnd"
             android:ellipsize="end"
-            android:textColor="@color/dark_gray" />
+            android:textColor="@color/dark_gray"
+            android:textSize="@dimen/xs" />
         <TextView
             android:id="@+id/title"
             android:layout_width="match_parent"
@@ -56,7 +68,6 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toBottomOf="@id/title"
             android:layout_marginVertical="5dp"
-            android:textSize="@dimen/sm"
             android:textColor="@color/black" />
         <com.xuexiang.xui.widget.imageview.nine.NineGridImageView
             android:id="@+id/pics"
@@ -67,53 +78,33 @@
             android:layout_marginVertical="5dp"
             app:ngiv_imgGap="3dp"
             app:ngiv_showStyle="fill" />
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/comment_container"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toBottomOf="@id/pics"
             app:layout_constraintBottom_toBottomOf="parent"
             android:layout_marginTop="20dp"
-            app:counterEnabled="true"
-            app:counterMaxLength="256" >
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/input_comment"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="快来留下你的足迹~"
-                android:inputType="textMultiLine"
-                android:maxLength="256"
-                android:textSize="@dimen/sm"
-                android:gravity="start"
-                android:lines="5"
-                android:maxLines="5"
-                android:scrollbars="vertical" />
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
+            android:orientation="horizontal"
+            android:gravity="end" >
+            <com.xuexiang.xui.widget.textview.supertextview.SuperButton
+                android:id="@+id/button_coin"
+                android:layout_width="60dp"
+                android:layout_height="30dp"
+                style="@style/RachelButton"
                 android:layout_margin="5dp"
-                android:gravity="end" >
-                <com.xuexiang.xui.widget.textview.supertextview.SuperButton
-                    android:id="@+id/button_coin"
-                    android:layout_width="60dp"
-                    android:layout_height="30dp"
-                    style="@style/RachelButton"
-                    android:layout_margin="5dp"
-                    app:sSelectorNormalColor="@color/dark_pink"
-                    app:sSelectorPressedColor="@color/dark_pink_pressed"
-                    android:textSize="@dimen/sm"
-                    android:text="投币" />
-                <com.xuexiang.xui.widget.textview.supertextview.SuperButton
-                    android:id="@+id/button_send"
-                    android:layout_width="60dp"
-                    android:layout_height="30dp"
-                    android:layout_margin="5dp"
-                    style="@style/RachelButton"
-                    android:textSize="@dimen/sm"
-                    android:text="发送" />
-            </LinearLayout>
-        </com.google.android.material.textfield.TextInputLayout>
+                app:sSelectorNormalColor="@color/dark_pink"
+                app:sSelectorPressedColor="@color/dark_pink_pressed"
+                android:textSize="@dimen/sm"
+                android:text="投币" />
+            <com.xuexiang.xui.widget.textview.supertextview.SuperButton
+                android:id="@+id/button_send"
+                android:layout_width="60dp"
+                android:layout_height="30dp"
+                android:layout_margin="5dp"
+                style="@style/RachelButton"
+                android:textSize="@dimen/sm"
+                android:text="回复" />
+        </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

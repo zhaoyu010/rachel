@@ -31,7 +31,7 @@ class FragmentLogin(pages: RachelPages) : RachelFragment<FragmentLoginBinding>(p
             v.registerContainer.expand(true)
         }
         // 忘记密码
-        v.labelNopwd.rachelClick { }
+        v.labelNopwd.rachelClick { forgotPassword() }
         // 登录
         v.buttonLogin.rachelClick { login() }
         // 返回登录
@@ -70,7 +70,7 @@ class FragmentLogin(pages: RachelPages) : RachelFragment<FragmentLoginBinding>(p
                 else XToastUtils.error(result.value)
             }
         }
-        else XToastUtils.warning("ID或密码不能为空")
+        else XToastUtils.warning("ID和密码不能为空")
     }
 
     @NewThread
@@ -101,5 +101,25 @@ class FragmentLogin(pages: RachelPages) : RachelFragment<FragmentLoginBinding>(p
             else XToastUtils.warning("两次输入的密码不相同")
         }
         else XToastUtils.warning("ID、密码、邀请人均不能为空")
+    }
+
+    @NewThread
+    fun forgotPassword() {
+        val id = v.loginId.content
+        val pwd = v.loginPwd.content
+        if (id.isNotEmpty() && pwd.isNotEmpty()) {
+            val pwdMd5 = pwd.toMD5()
+            lifecycleScope.launch {
+                pages.loadingDialog.show()
+                val result = withContext(Dispatchers.IO) {
+                    val result = API.UserAPI.forgotPassword(id, pwdMd5)
+                    withContext(Dispatchers.Main) { pages.loadingDialog.dismiss() }
+                    result
+                }
+                if (result.ok) XToastUtils.success(result.value)
+                else XToastUtils.error(result.value)
+            }
+        }
+        else XToastUtils.warning("ID和新密码不能为空")
     }
 }

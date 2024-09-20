@@ -110,6 +110,14 @@ object API {
             errResult
         }
 
+        // 忘记密码
+        fun forgotPassword(id: String, pwd: String) = try {
+            Net.post("$BASEURL/forgotPassword", jsonMap("id" to id, "pwd" to pwd))!!.fetchMsg()
+        }
+        catch (ignored: Exception) {
+            errResult
+        }
+
         // 歌单云备份
         fun uploadPlaylist(id: String, pwd: String, playlist: IPlaylistMap) = try {
             Net.post("$BASEURL/uploadPlaylist",
@@ -253,6 +261,42 @@ object API {
         fun sendCoin(srcId: String, pwd: String, desId: String, tid: Int, value: Int) = try {
             Net.post("$BASEURL/sendCoin",
                 object { val srcId = srcId; val pwd = pwd; val desId = desId; val tid = tid; val value = value; }.json()
+            )!!.fetchMsg()
+        } catch (ignored: Exception) {
+            errResult
+        }
+
+        // 删除评论
+        fun deleteComment(id: String, pwd: String, cid: Long, tid: Int) = try {
+            Net.post("$BASEURL/deleteComment",
+                object { val id = id; val pwd = pwd; val cid = cid; val tid = tid; }.json()
+            )!!.fetchMsg()
+        } catch (ignored: Exception) {
+            errResult
+        }
+
+        // 更新评论置顶
+        fun updateCommentTop(id: String, pwd: String, cid: Long, tid: Int, type: Int) = try {
+            Net.post("$BASEURL/updateCommentTop",
+                object { val id = id; val pwd = pwd; val cid = cid; val tid = tid; val type = type }.json()
+            )!!.fetchMsg()
+        } catch (ignored: Exception) {
+            errResult
+        }
+
+        // 删除主题
+        fun deleteTopic(id: String, pwd: String, tid: Int) = try {
+            Net.post("$BASEURL/deleteTopic",
+                object { val id = id; val pwd = pwd; val tid = tid; }.json()
+            )!!.fetchMsg()
+        } catch (ignored: Exception) {
+            errResult
+        }
+
+        // 更新主题置顶
+        fun updateTopicTop(id: String, pwd: String, tid: Int, type: Int) = try {
+            Net.post("$BASEURL/updateTopicTop",
+                object { val id = id; val pwd = pwd; val tid = tid; val type = type }.json()
             )!!.fetchMsg()
         } catch (ignored: Exception) {
             errResult

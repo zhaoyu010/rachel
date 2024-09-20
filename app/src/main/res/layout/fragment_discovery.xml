@@ -1,71 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<com.scwang.smart.refresh.layout.SmartRefreshLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/micro_gray"
-    tools:context=".fragment.FragmentDiscovery">
-    <com.xuexiang.xui.widget.searchview.MaterialSearchView
-        android:id="@+id/search"
+    tools:context=".fragment.FragmentDiscovery" >
+    <com.scwang.smart.refresh.header.ClassicsHeader
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:elevation="5dp" />
+        app:srlClassicsSpinnerStyle="FixedBehind"
+        app:srlDrawableArrowSize="20dp"
+        app:srlDrawableMarginRight="20dp"
+        app:srlDrawableProgressSize="20dp"
+        app:srlEnableLastTime="true"
+        app:srlFinishDuration="500"
+        app:srlTextSizeTime="@dimen/sm"
+        app:srlTextSizeTitle="@dimen/base"
+        app:srlTextTimeMarginTop="2dp" />
+    <com.scwang.smart.refresh.footer.ClassicsFooter
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/header_container"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:padding="5dp" >
-        <com.yinlin.rachel.view.ActiveTextView
-            android:id="@+id/tv_latest"
-            style="@style/RachelText"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@color/micro_gray"
+        tools:context=".fragment.FragmentDiscovery">
+        <com.xuexiang.xui.widget.searchview.MaterialSearchView
+            android:id="@+id/search"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginHorizontal="10dp"
-            android:text="最新"
-            android:textSize="@dimen/xl" />
-        <com.yinlin.rachel.view.ActiveTextView
-            android:id="@+id/tv_hot"
-            style="@style/RachelText"
-            app:layout_constraintLeft_toRightOf="@id/tv_latest"
+            android:elevation="5dp" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/header_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginHorizontal="20dp"
-            android:text="热门"
-            android:textSize="@dimen/xl" />
-        <ImageView
-            android:id="@+id/button_search"
-            android:layout_width="0dp"
+            android:padding="5dp" >
+            <com.yinlin.rachel.view.ActiveTextView
+                android:id="@+id/tv_latest"
+                style="@style/RachelText"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginHorizontal="10dp"
+                android:text="最新"
+                android:textSize="@dimen/lg" />
+            <com.yinlin.rachel.view.ActiveTextView
+                android:id="@+id/tv_hot"
+                style="@style/RachelText"
+                app:layout_constraintLeft_toRightOf="@id/tv_latest"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginHorizontal="20dp"
+                android:text="热门"
+                android:textSize="@dimen/lg" />
+            <ImageView
+                android:id="@+id/button_search"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="@id/tv_hot"
+                app:layout_constraintBottom_toBottomOf="@id/tv_hot"
+                android:layout_marginHorizontal="10dp"
+                android:padding="5dp"
+                android:src="@drawable/svg_search_blue" />
+            <ImageView
+                android:id="@+id/button_add"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintRight_toLeftOf="@id/button_search"
+                app:layout_constraintTop_toTopOf="@id/tv_hot"
+                app:layout_constraintBottom_toBottomOf="@id/tv_hot"
+                android:layout_marginHorizontal="10dp"
+                android:padding="5dp"
+                android:src="@drawable/svg_add_blue" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/list"
+            android:layout_width="match_parent"
             android:layout_height="0dp"
-            app:layout_constraintDimensionRatio="1:1"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="@id/tv_hot"
-            app:layout_constraintBottom_toBottomOf="@id/tv_hot"
-            android:layout_marginHorizontal="10dp"
-            android:padding="5dp"
-            android:src="@drawable/svg_search_blue" />
-        <ImageView
-            android:id="@+id/button_add"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            app:layout_constraintDimensionRatio="1:1"
-            app:layout_constraintRight_toLeftOf="@id/button_search"
-            app:layout_constraintTop_toTopOf="@id/tv_hot"
-            app:layout_constraintBottom_toBottomOf="@id/tv_hot"
-            android:layout_marginHorizontal="10dp"
-            android:padding="5dp"
-            android:src="@drawable/svg_add_blue" />
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/header_container"
+            app:layout_constraintBottom_toBottomOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/list"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/header_container"
-        app:layout_constraintBottom_toBottomOf="parent" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+</com.scwang.smart.refresh.layout.SmartRefreshLayout>

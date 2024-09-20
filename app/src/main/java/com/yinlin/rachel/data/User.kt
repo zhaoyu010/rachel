@@ -10,13 +10,13 @@ data class User(
     // 邀请人
     val inviter: String? = null,
     // 权限
-    // 1
-    // 2
-    // 4
-    // 8
-    // 16
-    // 32
-    // 64
+    // 1 备份
+    // 2 下载美图
+    // 4 主题发表与评论
+    // 8 未定
+    // 16 账号管理
+    // 32 主题管理
+    // 64 日历管理
     val privilege: Int = 0,
     // 个性签名
     val signature: String = "",

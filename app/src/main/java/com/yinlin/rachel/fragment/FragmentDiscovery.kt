@@ -58,7 +58,7 @@ class FragmentDiscovery(pages: RachelPages) : RachelFragment<FragmentDiscoveryBi
 
     private var topicUpper: Int = 2147483647
     private var topicOffset: Int = 0
-    private var isLoadingMore: Boolean = false
+    private var isLoading: Boolean = false
 
     private val adapter = Adapter(this)
 
@@ -72,12 +72,12 @@ class FragmentDiscovery(pages: RachelPages) : RachelFragment<FragmentDiscoveryBi
         v.tvLatest.rachelClick {
             v.tvLatest.active = true
             v.tvHot.active = false
-            requestLatestTopic()
+            v.container.autoRefresh()
         }
         v.tvHot.rachelClick {
             v.tvLatest.active = false
             v.tvHot.active = true
-            requestHotTopic()
+            v.container.autoRefresh()
         }
         v.buttonSearch.rachelClick {
             if (v.search.isSearchOpen) v.search.closeSearch()
@@ -87,23 +87,30 @@ class FragmentDiscovery(pages: RachelPages) : RachelFragment<FragmentDiscoveryBi
             pages.navigate(FragmentCreateTopic(pages))
         }
 
+        v.container.setOnRefreshListener {
+            if (!isLoading) {
+                isLoading = true
+                v.container.resetNoMoreData()
+                if (v.tvLatest.active) requestLatestTopic()
+                else requestHotTopic()
+            }
+        }
+        v.container.setEnableLoadMore(true)
+        v.container.setOnLoadMoreListener {
+            if (!isLoading) {
+                isLoading = true
+                if (v.tvLatest.active) requestLatestTopicMore()
+                else requestHotTopicMore()
+            }
+        }
+
         v.list.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
         v.list.setHasFixedSize(true)
         v.list.recycledViewPool.setMaxRecycledViews(0, 20)
         v.list.setItemViewCacheSize(4)
-        v.list.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                val manager = recyclerView.layoutManager as StaggeredGridLayoutManager
-                if (manager.itemCount > 0) {
-                    val arr = manager.findLastCompletelyVisibleItemPositions(null)
-                    if (arr.contains(manager.itemCount - 1)) loadMore()
-                }
-            }
-        })
         v.list.adapter = adapter
 
-        requestLatestTopic()
+        v.container.autoRefresh()
     }
 
     override fun quit() {
@@ -130,42 +137,44 @@ class FragmentDiscovery(pages: RachelPages) : RachelFragment<FragmentDiscoveryBi
     @NewThread @SuppressLint("NotifyDataSetChanged")
     private fun requestLatestTopic() {
         lifecycleScope.launch {
-            pages.loadingDialog.show()
             v.list.scrollToPosition(0)
             val topics = withContext(Dispatchers.IO) {
                 val topics = API.UserAPI.getLatestTopic()
-                withContext(Dispatchers.Main) { pages.loadingDialog.dismiss() }
+                withContext(Dispatchers.Main) { v.container.finishRefresh() }
                 topics
             }
             topicUpper = if (topics.isEmpty()) 2147483647 else topics.last().tid
             adapter.items.clearAddAll(topics)
             adapter.notifyDataSetChanged()
+            isLoading = false
         }
     }
 
     @NewThread @SuppressLint("NotifyDataSetChanged")
     private fun requestHotTopic() {
         lifecycleScope.launch {
-            pages.loadingDialog.show()
             v.list.scrollToPosition(0)
             val topics = withContext(Dispatchers.IO) {
                 val topics = API.UserAPI.getHotTopic()
-                withContext(Dispatchers.Main) { pages.loadingDialog.dismiss() }
+                withContext(Dispatchers.Main) { v.container.finishRefresh() }
                 topics
             }
             topicOffset = if (topics.isEmpty()) 0 else topics.size
             adapter.items.clearAddAll(topics)
             adapter.notifyDataSetChanged()
+            isLoading = false
         }
     }
 
     @NewThread @SuppressLint("NotifyDataSetChanged")
     private fun requestLatestTopicMore() {
         lifecycleScope.launch {
-            pages.loadingDialog.show()
             val topics = withContext(Dispatchers.IO) {
                 val topics = API.UserAPI.getLatestTopic(topicUpper)
-                withContext(Dispatchers.Main) { pages.loadingDialog.dismiss() }
+                withContext(Dispatchers.Main) {
+                    if (topics.isEmpty()) v.container.finishLoadMoreWithNoMoreData()
+                    else v.container.finishLoadMore()
+                }
                 topics
             }
             if (topics.isNotEmpty()) {
@@ -173,18 +182,19 @@ class FragmentDiscovery(pages: RachelPages) : RachelFragment<FragmentDiscoveryBi
                 adapter.items.addAll(topics)
                 adapter.notifyDataSetChanged()
             }
-            else XToastUtils.warning("没有更多主题啦")
-            isLoadingMore = false
+            isLoading = false
         }
     }
 
     @NewThread @SuppressLint("NotifyDataSetChanged")
     private fun requestHotTopicMore() {
         lifecycleScope.launch {
-            pages.loadingDialog.show()
             val topics = withContext(Dispatchers.IO) {
                 val topics = API.UserAPI.getHotTopic(topicOffset)
-                withContext(Dispatchers.Main) { pages.loadingDialog.dismiss() }
+                withContext(Dispatchers.Main) {
+                    if (topics.isEmpty()) v.container.finishLoadMoreWithNoMoreData()
+                    else v.container.finishLoadMore()
+                }
                 topics
             }
             if (topics.isNotEmpty()) {
@@ -193,15 +203,7 @@ class FragmentDiscovery(pages: RachelPages) : RachelFragment<FragmentDiscoveryBi
                 adapter.notifyDataSetChanged()
             }
             else XToastUtils.warning("没有更多主题啦")
-            isLoadingMore = false
-        }
-    }
-
-    private fun loadMore() {
-        if (!isLoadingMore) {
-            isLoadingMore = true
-            if (v.tvLatest.active) requestLatestTopicMore()
-            else requestHotTopicMore()
+            isLoading = false
         }
     }
 }

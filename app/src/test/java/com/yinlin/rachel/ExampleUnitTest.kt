@@ -15,7 +15,7 @@ class ExampleUnitTest {
         val ids = listOf("棠梨煎雪")
         val filter = listOf(RachelMod.RES_VIDEO)
         val merger = RachelMod.Merger(src)
-        val metadata = merger.getMetadata(ids, filter)
+        val metadata = merger.getMetadata(ids, filter) { _, _, -> }
         val stream = FileOutputStream(des)
         merger.run(stream, metadata, null)
     }

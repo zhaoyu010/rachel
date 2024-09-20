@@ -22,7 +22,7 @@
         app:barBackground="@color/white"
         app:iconWidth="24dp"
         app:iconHeight="24dp"
-        app:itemTextSize="@dimen/sm"
+        app:itemTextSize="@dimen/xs"
         app:itemTextBold="true"
         app:itemMarginTop="3dp"
         app:textColorNormal="@color/steel_blue"
