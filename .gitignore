@@ -15,6 +15,7 @@
 .idea/
 .gradle/
 gradle/
-app/build/
-app/release
-app/src/test/
+*/.gradle/
+*/build/
+*/release/
+*/src/test/
