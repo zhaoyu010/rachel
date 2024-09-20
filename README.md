@@ -6,9 +6,7 @@
 银临茶舍APP，集资讯、听歌、美图、论坛、社交于一体的小银子聚集地
 水群：828049503
 
-<div style="text-align: center;">
-<img height="192" src="./QQGroup.png" width="192" alt="QQGroup"/>
-</div>
+![](QQGroup.png)
 
 ## 数据
 
