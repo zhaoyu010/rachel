@@ -87,14 +87,13 @@ dependencies {
 
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
-    implementation("com.tencent:mmkv:1.3.9")
-    implementation("com.tencent.tav:libpag:4.4.1-harfbuzz")
-
-
     implementation("io.github.lucksiege:pictureselector:v3.11.2")
     implementation("io.github.lucksiege:ucrop:v3.11.2")
     implementation("io.github.scwang90:refresh-layout-kernel:2.1.0")
     implementation("io.github.scwang90:refresh-header-classics:2.1.0")
+
+    implementation("com.tencent:mmkv:1.3.9")
+    implementation("com.tencent.tav:libpag:4.4.1-harfbuzz")
 
     testImplementation("junit:junit:4.13.2")
 }
