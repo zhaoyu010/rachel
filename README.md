@@ -36,7 +36,7 @@ RachelModMaker为可执行程序， music目录为待打包歌曲的所有配置
 ```json
 {
     "version": "1.0",
-	"author": "官方",
+    "author": "官方",
     "id": "棠梨煎雪",
     "name": "棠梨煎雪",
     "singer": "银临",
@@ -45,11 +45,11 @@ RachelModMaker为可执行程序， music目录为待打包歌曲的所有配置
     "album": "腐草为萤",
     "bgd": false,
     "video": false,
-	"chorus": [71670, 161140, 210400],
-	"lyrics": {
-		"line": [""],
-		"pag": ["video"]
-	}
+    "chorus": [71670, 161140, 210400],
+    "lyrics": {
+        "line": [""],
+        "pag": ["video"]
+    }
 }
 ```
 

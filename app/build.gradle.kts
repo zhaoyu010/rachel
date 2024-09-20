@@ -93,7 +93,7 @@ dependencies {
     implementation("io.github.scwang90:refresh-header-classics:2.1.0")
 
     implementation("com.tencent:mmkv:1.3.9")
-    implementation("com.tencent.tav:libpag:4.4.1-harfbuzz")
+    implementation("com.tencent.tav:libpag:4.4.8-harfbuzz")
 
     testImplementation("junit:junit:4.13.2")
 }
