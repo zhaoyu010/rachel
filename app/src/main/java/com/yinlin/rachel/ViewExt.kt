@@ -84,3 +84,7 @@ fun ImageView.load(loader: RachelImageLoader, file: File, sign: Any) {
 }
 
 fun ImageView.clear(loader: RachelImageLoader) = loader.glide.clear(this)
+
+var ImageView.pureColor: Int
+    get() = (drawable as? ColorDrawable)?.color ?: Color.TRANSPARENT
+    set(value) { setImageDrawable(if (value == Color.TRANSPARENT) null else ColorDrawable(value)) }

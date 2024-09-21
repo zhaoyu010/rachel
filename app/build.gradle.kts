@@ -11,8 +11,8 @@ android {
         applicationId = "com.yinlin.rachel"
         minSdk = 29
         targetSdk = 34
-        versionCode = 121
-        versionName = "1.2.1-alpha"
+        versionCode = 122
+        versionName = "1.2.2-alpha"
 
         ndk {
             abiFilters += "arm64-v8a"
@@ -75,6 +75,8 @@ dependencies {
     implementation("androidx.media3:media3-exoplayer-dash:1.3.1")
     implementation("androidx.media3:media3-ui:1.3.1")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+
+    implementation("com.haibin:calendarview:3.7.1")
 
     implementation("com.google.code.gson:gson:2.11.0")
     implementation("com.google.android.material:material:1.10.0")

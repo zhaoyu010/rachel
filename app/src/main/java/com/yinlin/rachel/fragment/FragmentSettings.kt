@@ -104,17 +104,17 @@ class FragmentSettings(pages: RachelPages) : RachelFragment<FragmentSettingsBind
     private fun updateInfo() {
         v.id.setRightString(Config.user_id)
         val user = Config.user
-        if (user.isBroken) {
-            v.avatar.load(pages.ril, R.drawable.placeholder_pic)
-            v.signature.text = pages.getResString(R.string.default_signature)
-            v.inviter.setRightString("")
-            v.wall.clear(rilNet)
-        }
-        else {
+        if (user.ok) {
             v.avatar.load(rilNet, user.avatarPath, Config.cache_key_avatar.get())
             v.signature.text = user.signature
             v.inviter.setRightString(user.inviter ?: "")
             v.wall.load(rilNet, user.wallPath, Config.cache_key_wall.get())
+        }
+        else {
+            v.avatar.load(pages.ril, R.drawable.placeholder_pic)
+            v.signature.text = pages.getResString(R.string.default_signature)
+            v.inviter.setRightString("")
+            v.wall.clear(rilNet)
         }
         v.weiboList.clearAndAddTags(WeiboUser.getNames(Config.weibo_users))
     }

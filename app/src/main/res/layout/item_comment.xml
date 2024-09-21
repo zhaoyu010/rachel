@@ -65,7 +65,7 @@
             style="@style/RachelText.X0"
             app:layout_constraintBottom_toBottomOf="@id/user_title"
             app:layout_constraintLeft_toRightOf="@id/user_title"
-            app:layout_constraintRight_toRightOf="@id/id"
+            app:layout_constraintRight_toRightOf="@id/more"
             android:layout_marginStart="10dp"
             android:textAlignment="textEnd"
             android:ellipsize="end"

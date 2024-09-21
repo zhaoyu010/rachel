@@ -1,8 +1,11 @@
 package com.yinlin.rachel.fragment
 
+import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.haibin.calendarview.Calendar
+import com.haibin.calendarview.CalendarView
 import com.xuexiang.xui.utils.XToastUtils
 import com.yinlin.rachel.Config
 import com.yinlin.rachel.R
@@ -18,6 +21,7 @@ import com.yinlin.rachel.load
 import com.yinlin.rachel.model.RachelFragment
 import com.yinlin.rachel.model.RachelImageLoader
 import com.yinlin.rachel.model.RachelPages
+import com.yinlin.rachel.pureColor
 import com.yinlin.rachel.rachelClick
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -38,6 +42,8 @@ class FragmentMe(pages: RachelPages) : RachelFragment<FragmentMeBinding>(pages) 
         v.id.bold = true
         v.tvLevel.bold = true
         v.tvCoin.bold = true
+        v.tvAccount.bold = true
+        v.tvShow.bold = true
 
         // 扫码
         v.buttonScan.rachelClick {
@@ -101,6 +107,30 @@ class FragmentMe(pages: RachelPages) : RachelFragment<FragmentMeBinding>(pages) 
 
         // 首次刷新
         if (isLogin) requestUserInfo()
+
+        v.calendar.setOnCalendarSelectListener(object : CalendarView.OnCalendarSelectListener {
+            override fun onCalendarOutOfRange(p0: Calendar) {
+                println(p0)
+            }
+
+            override fun onCalendarSelect(p0: Calendar, p1: Boolean) {
+                println("${p0} ${p0.isCurrentMonth}")
+            }
+        })
+        v.calendar.addSchemeDate(Calendar().apply {
+            year = 2024
+            month = 9
+            day = 20
+            schemeColor = pages.getResColor(R.color.green)
+            scheme = "国风天华"
+        })
+        v.calendar.addSchemeDate(Calendar().apply {
+            year = 2024
+            month = 9
+            day = 28
+            schemeColor = pages.getResColor(R.color.purple)
+            scheme = "良辰"
+        })
     }
 
     override fun quit() {
@@ -117,16 +147,7 @@ class FragmentMe(pages: RachelPages) : RachelFragment<FragmentMeBinding>(pages) 
 
     private fun updateUserInfo() {
         val user = Config.user
-        if (user.isBroken) {
-            v.id.text = pages.getResString(R.string.default_id)
-            v.title.setDefaultTitle()
-            v.signature.text = pages.getResString(R.string.default_signature)
-            v.level.text = "1"
-            v.coin.text = "0"
-            v.avatar.setImageDrawable(ColorDrawable(pages.getResColor(R.color.white)))
-            v.wall.setImageDrawable(ColorDrawable(pages.getResColor(R.color.dark)))
-        }
-        else {
+        if (user.ok) {
             v.id.text = Config.user_id
             v.title.setTitle(user.titleGroup, user.title)
             v.signature.text = user.signature
@@ -134,6 +155,15 @@ class FragmentMe(pages: RachelPages) : RachelFragment<FragmentMeBinding>(pages) 
             v.coin.text = user.coin.toString()
             v.avatar.load(rilNet, user.avatarPath, Config.cache_key_avatar.get())
             v.wall.load(rilNet, user.wallPath, Config.cache_key_wall.get())
+        }
+        else {
+            v.id.text = pages.getResString(R.string.default_id)
+            v.title.setDefaultTitle()
+            v.signature.text = pages.getResString(R.string.default_signature)
+            v.level.text = "1"
+            v.coin.text = "0"
+            v.avatar.pureColor = pages.getResColor(R.color.white)
+            v.wall.pureColor = pages.getResColor(R.color.dark)
         }
     }
 

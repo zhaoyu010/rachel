@@ -141,7 +141,7 @@ object API {
         fun getInfo(id: String, pwd: String): User = try {
             Net.post("$BASEURL/getInfo", jsonMap("id" to id, "pwd" to pwd)).to()
         } catch (ignored: Exception) {
-            User(true)
+            User(false)
         }
 
         // 更新头像
@@ -210,7 +210,7 @@ object API {
         fun getProfile(id: String): UserProfile = try {
             Net.post("$BASEURL/getProfile", jsonMap("id" to id)).to()
         } catch (ignored: Exception) {
-            UserProfile(true)
+            UserProfile(false)
         }
 
         // 取最新主题
@@ -231,7 +231,7 @@ object API {
         fun getTopic(tid: Int) : Topic = try {
             Net.post("$BASEURL/getTopic", jsonMap("tid" to tid)).to()
         } catch (ignored: Exception) {
-            Topic(true)
+            Topic(false)
         }
 
         // 发主题

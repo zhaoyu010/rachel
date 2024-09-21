@@ -20,6 +20,7 @@ import com.yinlin.rachel.model.RachelAdapter
 import com.yinlin.rachel.model.RachelFragment
 import com.yinlin.rachel.model.RachelImageLoader
 import com.yinlin.rachel.model.RachelPages
+import com.yinlin.rachel.pureColor
 import com.yinlin.rachel.rachelClick
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -42,7 +43,7 @@ class FragmentDiscovery(pages: RachelPages) : RachelFragment<FragmentDiscoveryBi
         }
 
         override fun update(v: ItemTopicUserBinding, item: TopicPreview, position: Int) {
-            if (item.pic == null) v.pic.setImageDrawable(null)
+            if (item.pic == null) v.pic.pureColor = 0
             else v.pic.load(rilNet, item.picPath)
             v.title.text = item.title
             v.id.text = item.id

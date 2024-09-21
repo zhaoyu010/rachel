@@ -71,7 +71,7 @@ class FragmentTopic(pages: RachelPages, private val topicId: Int) : RachelFragme
             v.id.bold = true
             v.title.bold = true
             v.avatar.rachelClick {
-                if (!fragment.topic.isBroken) {
+                if (fragment.topic.ok) {
                     pages.navigate(FragmentProfile(pages, fragment.topic.id))
                 }
             }
@@ -173,7 +173,7 @@ class FragmentTopic(pages: RachelPages, private val topicId: Int) : RachelFragme
                 topic = API.UserAPI.getTopic(topicId)
                 withContext(Dispatchers.Main) { pages.loadingDialog.dismiss() }
             }
-            if (!topic.isBroken) {
+            if (topic.ok) {
                 val header = adapter.header
                 header.id.text = topic.id
                 header.time.text = topic.date

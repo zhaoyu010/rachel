@@ -9,7 +9,7 @@ import java.util.Locale
 
 @JvmRecord
 data class Topic (
-    val isBroken: Boolean = false,
+    val ok: Boolean = false,
     val tid: Int = 0,
     val id: String = "",
     val ts: String = "",

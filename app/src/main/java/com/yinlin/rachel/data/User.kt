@@ -4,7 +4,7 @@ import com.yinlin.rachel.api.API
 
 @JvmRecord
 data class User(
-    val isBroken: Boolean = false,
+    val ok: Boolean = false,
     // ID
     val id: String = "",
     // 邀请人

@@ -20,6 +20,7 @@ import com.yinlin.rachel.model.RachelFragment
 import com.yinlin.rachel.model.RachelHeaderAdapter
 import com.yinlin.rachel.model.RachelImageLoader
 import com.yinlin.rachel.model.RachelPages
+import com.yinlin.rachel.pureColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -42,7 +43,7 @@ class FragmentProfile(pages: RachelPages, private val profileId: String) : Rache
         }
 
         override fun update(v: ItemTopicBinding, item: TopicPreview, position: Int) {
-            if (item.pic == null) v.pic.setImageDrawable(null)
+            if (item.pic == null) v.pic.pureColor = 0
             else v.pic.load(rilNet, item.picPath)
             v.top.visibility = if (item.isTopTopic) View.VISIBLE else View.GONE
             v.title.text = item.title
@@ -86,16 +87,7 @@ class FragmentProfile(pages: RachelPages, private val profileId: String) : Rache
                withContext(Dispatchers.Main) { pages.loadingDialog.dismiss() }
            }
            val header = adapter.header
-           if (profile.isBroken) {
-               header.id.text = pages.getResString(R.string.default_id)
-               header.title.setTitle(1, pages.getResString(R.string.default_title))
-               header.signature.text = pages.getResString(R.string.default_signature)
-               header.level.text = "1"
-               header.coin.text = "0"
-               header.avatar.setImageDrawable(ColorDrawable(pages.getResColor(R.color.white)))
-               header.wall.setImageDrawable(ColorDrawable(pages.getResColor(R.color.dark)))
-           }
-           else {
+           if (profile.ok) {
                header.id.text = profileId
                header.title.setTitle(profile.titleGroup, profile.title)
                header.signature.text = profile.signature
@@ -103,6 +95,15 @@ class FragmentProfile(pages: RachelPages, private val profileId: String) : Rache
                header.coin.text = profile.coin.toString()
                header.avatar.load(pages.ril, profile.avatarPath)
                header.wall.load(pages.ril, profile.wallPath)
+           }
+           else {
+               header.id.text = pages.getResString(R.string.default_id)
+               header.title.setTitle(1, pages.getResString(R.string.default_title))
+               header.signature.text = pages.getResString(R.string.default_signature)
+               header.level.text = "1"
+               header.coin.text = "0"
+               header.avatar.pureColor = pages.getResColor(R.color.white)
+               header.wall.pureColor = pages.getResColor(R.color.dark)
            }
            adapter.items = profile.topics
            adapter.notifyChangedEx()

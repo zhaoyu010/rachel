@@ -8,6 +8,17 @@
 
 <img height="192" src="./QQGroup.png" width="192" alt="QQGroup" />
 
+
+## 团队
+
+美工：木棠、方旖旎、竹香满亭
+运营：思懿、喵喵、鲤鱼焙梨
+程序：焦骨、海屿悼词、冰临
+特效：名字不太喵
+策划：泸沽寻临、寒山、南溟
+测试：圈圈临、韩非、yingfeng
+宣发：姜辞、晨晨、银小临
+
 ## 数据
 
 [![GitHub stars](https://img.shields.io/github/stars/masterQian/rachel.svg)](https://github.com/masterQian/rachel/stargazers)
@@ -106,6 +117,7 @@ RachelModMaker为可执行程序， music目录为待打包歌曲的所有配置
 | [PictureSelector](https://github.com/LuckSiege/PictureSelector)                           | LuckSiege           |
 | [SmartRefreshLayout](https://github.com/scwang90/SmartRefreshLayout)                      | scwang90            |
 | [html-textview](https://github.com/SufficientlySecure/html-textview)                      | SufficientlySecure  |
+| [CalendarView](https://github.com/huanghaibin-dev/CalendarView)            |huanghaibin-dev|
 | [gson](https://github.com/google/gson)                                                    | google              |
 | [material-components](https://github.com/material-components/material-components-android) | google              |
 | [MMKV](https://github.com/Tencent/MMKV)                                                   | Tencent             |

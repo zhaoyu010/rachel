@@ -4,7 +4,7 @@ import com.yinlin.rachel.api.API
 
 @JvmRecord
 data class UserProfile(
-    val isBroken: Boolean = false,
+    val ok: Boolean = false,
     // ID
     val id: String = "",
     // 个性签名
