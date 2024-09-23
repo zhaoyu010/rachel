@@ -1,7 +1,5 @@
 package com.yinlin.rachel.fragment
 
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.haibin.calendarview.Calendar
@@ -10,7 +8,6 @@ import com.xuexiang.xui.utils.XToastUtils
 import com.yinlin.rachel.Config
 import com.yinlin.rachel.R
 import com.yinlin.rachel.RachelMessage
-import com.yinlin.rachel.RachelMessage.ME_REQUEST_USER_INFO
 import com.yinlin.rachel.RachelMessage.ME_UPDATE_USER_INFO
 import com.yinlin.rachel.annotation.NewThread
 import com.yinlin.rachel.api.API
@@ -31,8 +28,6 @@ class FragmentMe(pages: RachelPages) : RachelFragment<FragmentMeBinding>(pages) 
     private val rilNet = RachelImageLoader(pages.context, R.drawable.placeholder_pic, DiskCacheStrategy.ALL)
 
     override fun bindingClass() = FragmentMeBinding::class.java
-
-    private val isLogin: Boolean get() = !Config.user_id_meta.isDefault() && !Config.user_pwd_meta.isDefault()
 
     private val dialogAbout = DialogAbout(this)
 
@@ -66,7 +61,7 @@ class FragmentMe(pages: RachelPages) : RachelFragment<FragmentMeBinding>(pages) 
 
         // 签到
         v.buttonSignIn.rachelClick {
-            if (isLogin) signIn()
+            if (Config.isLoginAndUpdate) signIn()
             else {
                 XToastUtils.warning("请先登录")
                 pages.navigate(FragmentLogin(pages))
@@ -80,7 +75,7 @@ class FragmentMe(pages: RachelPages) : RachelFragment<FragmentMeBinding>(pages) 
 
         // 主题
         v.buttonTopic.rachelClick {
-            if (isLogin) pages.navigate(FragmentProfile(pages, Config.user_id))
+            if (Config.isLoginAndUpdate) pages.navigate(FragmentProfile(pages, Config.user_id))
             else {
                 XToastUtils.warning("请先登录")
                 pages.navigate(FragmentLogin(pages))
@@ -89,7 +84,7 @@ class FragmentMe(pages: RachelPages) : RachelFragment<FragmentMeBinding>(pages) 
 
         // 邮箱
         v.buttonMail.rachelClick {
-            if (isLogin) pages.navigate(FragmentMail(pages))
+            if (Config.isLoginAndUpdate) pages.navigate(FragmentMail(pages))
             else {
                 XToastUtils.warning("请先登录")
                 pages.navigate(FragmentLogin(pages))
@@ -98,15 +93,10 @@ class FragmentMe(pages: RachelPages) : RachelFragment<FragmentMeBinding>(pages) 
 
         // 下拉刷新
         v.container.setOnRefreshListener {
-            if (isLogin) { requestUserInfo() }
-            else {
-                v.container.finishRefresh()
-                pages.navigate(FragmentLogin(pages))
-            }
+            if (Config.isLogin) { pages.requestUserInfo() }
+            else pages.navigate(FragmentLogin(pages))
+            v.container.finishRefresh()
         }
-
-        // 首次刷新
-        if (isLogin) requestUserInfo()
 
         v.calendar.setOnCalendarSelectListener(object : CalendarView.OnCalendarSelectListener {
             override fun onCalendarOutOfRange(p0: Calendar) {
@@ -133,13 +123,16 @@ class FragmentMe(pages: RachelPages) : RachelFragment<FragmentMeBinding>(pages) 
         })
     }
 
+    override fun update() {
+        updateUserInfo()
+    }
+
     override fun quit() {
         dialogAbout.release()
     }
 
     override fun message(msg: RachelMessage, vararg args: Any?) {
         when (msg) {
-            ME_REQUEST_USER_INFO -> requestUserInfo()
             ME_UPDATE_USER_INFO -> updateUserInfo()
             else -> { }
         }
@@ -164,20 +157,6 @@ class FragmentMe(pages: RachelPages) : RachelFragment<FragmentMeBinding>(pages) 
             v.coin.text = "0"
             v.avatar.pureColor = pages.getResColor(R.color.white)
             v.wall.pureColor = pages.getResColor(R.color.dark)
-        }
-    }
-
-    // 请求用户信息
-    @NewThread
-    private fun requestUserInfo() {
-        if (isLogin) {
-            lifecycleScope.launch {
-                pages.loadingDialog.show()
-                Config.user = withContext(Dispatchers.IO) { API.UserAPI.getInfo(Config.user_id, Config.user_pwd) }
-                if (v.container.isRefreshing) v.container.finishRefresh()
-                pages.loadingDialog.dismiss()
-                updateUserInfo()
-            }
         }
     }
 
@@ -206,7 +185,7 @@ class FragmentMe(pages: RachelPages) : RachelFragment<FragmentMeBinding>(pages) 
             val result = withContext(Dispatchers.IO) { API.UserAPI.signIn(Config.user_id, Config.user_pwd) }
             pages.loadingDialog.dismiss()
             if (result.ok) {
-                requestUserInfo()
+                pages.requestUserInfo()
                 XToastUtils.success(result.value)
             }
             else XToastUtils.error(result.value)

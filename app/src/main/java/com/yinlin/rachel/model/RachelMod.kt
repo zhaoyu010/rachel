@@ -116,7 +116,10 @@ object RachelMod {
                 val infoFile = folder / (id + RES_INFO)
                 if (!infoFile.exists()) continue
                 val musicInfo: MusicInfo = infoFile.readJson()
-                if (!musicInfo.isCorrect || musicInfo.id != id) continue
+                if (!musicInfo.isCorrect || musicInfo.id != id) {
+                    listener?.onError(id, "NotCorrect")
+                    continue
+                }
                 metadata.items[id] = MusicItem(musicInfo.name, musicInfo.version)
             }
             // 遍历

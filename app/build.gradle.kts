@@ -83,6 +83,9 @@ dependencies {
 
     implementation("com.github.AbdAlrahmanShammout:UltimateBreadcrumbsView:1.0.2")
     implementation("com.github.bumptech.glide:glide:4.16.0")
+    implementation("com.github.CarGuo.GSYVideoPlayer:gsyVideoPlayer-java:v9.0.0-release-jitpack")
+    implementation("com.github.CarGuo.GSYVideoPlayer:gsyVideoPlayer-arm64:v9.0.0-release-jitpack")
+
     implementation("com.github.chaychan:BottomBarLayout:3.0.0")
     implementation("com.github.forJrking:KLuban:1.1.0")
     implementation("com.github.xuexiangjys:XUI:1.2.1")

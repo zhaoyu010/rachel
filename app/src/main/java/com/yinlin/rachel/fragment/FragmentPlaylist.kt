@@ -4,14 +4,13 @@ import android.annotation.SuppressLint
 import android.graphics.Paint
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.gson.reflect.TypeToken
 import com.xuexiang.xui.utils.XToastUtils
 import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog
 import com.xuexiang.xui.widget.dialog.materialdialog.simplelist.MaterialSimpleListAdapter
 import com.xuexiang.xui.widget.dialog.materialdialog.simplelist.MaterialSimpleListItem
 import com.xuexiang.xui.widget.tabbar.TabSegment
 import com.yinlin.rachel.Config
-import com.yinlin.rachel.Dialog
+import com.yinlin.rachel.model.RachelDialog
 import com.yinlin.rachel.IMusicInfoMap
 import com.yinlin.rachel.IPlaylistMap
 import com.yinlin.rachel.R
@@ -63,7 +62,7 @@ class FragmentPlaylist(pages: RachelPages, musicInfos: IMusicInfoMap,
             // 若无音源显示未知, 歌曲被删除后仍然可以显示在歌单中
             val name = musicInfo?.name ?: item
             selectedPlaylist?.apply {
-                Dialog.confirm(pages.context, "是否从歌单\"${this.name}\"中删除\"$name\"?") { _, _ ->
+                RachelDialog.confirm(pages.context, "是否从歌单\"${this.name}\"中删除\"$name\"?") { _, _ ->
                     pages.sendMessage(RachelPages.music, RachelMessage.MUSIC_DELETE_MUSIC_FROM_PLAYLIST, this, position)
                     notifyItemRemoved(position)
                 }
@@ -90,19 +89,19 @@ class FragmentPlaylist(pages: RachelPages, musicInfos: IMusicInfoMap,
     override fun init() {
         // 创建歌单
         v.buttonAdd.rachelClick {
-            Dialog.input(pages.context, "请输入新歌单名称", 10) { _, input ->
+            RachelDialog.input(pages.context, "请输入新歌单名称", 10) { _, input ->
                 createPlaylist(input.toString())
             }
         }
 
         // 云备份
         v.buttonUpload.rachelClick {
-            Dialog.confirm(pages.context, "是否将本地所有歌单覆盖云端") { _, _ -> uploadPlaylist() }
+            RachelDialog.confirm(pages.context, "是否将本地所有歌单覆盖云端") { _, _ -> uploadPlaylist() }
         }
 
         // 云还原
         v.buttonDownload.rachelClick {
-            Dialog.confirm(pages.context, "是否从云端覆盖所有本地歌单") { _, _ -> downloadPlaylist() }
+            RachelDialog.confirm(pages.context, "是否从云端覆盖所有本地歌单") { _, _ -> downloadPlaylist() }
         }
 
         // 列表
@@ -146,7 +145,7 @@ class FragmentPlaylist(pages: RachelPages, musicInfos: IMusicInfoMap,
                 pages.sendMessage(RachelPages.music, RachelMessage.MUSIC_START_PLAYER, adapter.selectedPlaylist)
                 pages.pop()
             }
-            "重命名" -> Dialog.input(pages.context, "请输入歌单名称", 10) { _, input ->
+            "重命名" -> RachelDialog.input(pages.context, "请输入歌单名称", 10) { _, input ->
                 val newName = input.toString()
                 if (pages.sendMessageForResult<Boolean>(RachelPages.music, RachelMessage.MUSIC_RENAME_PLAYLIST, adapter.selectedPlaylist, newName)!!) {
                     XToastUtils.success("修改成功")
@@ -155,7 +154,7 @@ class FragmentPlaylist(pages: RachelPages, musicInfos: IMusicInfoMap,
                 }
                 else XToastUtils.warning("歌单已存在或名称不合法")
             }
-            "删除" -> Dialog.confirm(pages.context, "是否删除歌单\"${adapter.selectedPlaylist!!.name}\"") { _, _ ->
+            "删除" -> RachelDialog.confirm(pages.context, "是否删除歌单\"${adapter.selectedPlaylist!!.name}\"") { _, _ ->
                 pages.sendMessage(RachelPages.music, RachelMessage.MUSIC_DELETE_PLAYLIST, adapter.selectedPlaylist)
                 updatePlaylist()
             }

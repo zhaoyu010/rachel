@@ -27,13 +27,13 @@ class TitleView(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : App
         paint.color = context.getColor(R.color.title_dark)
         if (!isInEditMode) paint.bold(context, true)
         paint.textAlign = Paint.Align.CENTER
-        paint.textSize = 10f.toSP(context)
+        paint.textSize = 8f.toSP(context)
         setImageResource(levelMap[1])
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        canvas.drawText(text, width / 2f, height * 0.77f, paint)
+        canvas.drawText(text, width / 2f, height * 0.75f, paint)
     }
 
     fun setTitle(titleGroup: Int, text: String) {

@@ -1,11 +1,9 @@
 package com.yinlin.rachel.fragment
 
-import android.graphics.drawable.ColorDrawable
 import android.view.View
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.yinlin.rachel.Config
 import com.yinlin.rachel.R
 import com.yinlin.rachel.annotation.NewThread
 import com.yinlin.rachel.api.API

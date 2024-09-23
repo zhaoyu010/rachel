@@ -1,8 +1,7 @@
 package com.yinlin.rachel.fragment
 
-import android.graphics.SurfaceTexture
+import android.content.Intent
 import android.net.Uri
-import android.view.TextureView.SurfaceTextureListener
 import android.view.View
 import androidx.annotation.OptIn
 import androidx.lifecycle.lifecycleScope
@@ -17,17 +16,8 @@ import com.yinlin.rachel.Config
 import com.yinlin.rachel.MusicInfoMap
 import com.yinlin.rachel.R
 import com.yinlin.rachel.RachelMessage
-import com.yinlin.rachel.RachelMessage.MUSIC_ADD_MUSIC_INTO_PLAYLIST
-import com.yinlin.rachel.RachelMessage.MUSIC_CREATE_PLAYLIST
-import com.yinlin.rachel.RachelMessage.MUSIC_DELETE_MUSIC
-import com.yinlin.rachel.RachelMessage.MUSIC_DELETE_MUSIC_FROM_PLAYLIST
-import com.yinlin.rachel.RachelMessage.MUSIC_DELETE_PLAYLIST
-import com.yinlin.rachel.RachelMessage.MUSIC_GOTO_MUSIC
-import com.yinlin.rachel.RachelMessage.MUSIC_NOTIFY_ADD_MUSIC
-import com.yinlin.rachel.RachelMessage.MUSIC_RENAME_PLAYLIST
-import com.yinlin.rachel.RachelMessage.MUSIC_START_PLAYER
-import com.yinlin.rachel.RachelMessage.MUSIC_STOP_PLAYER
-import com.yinlin.rachel.RachelMessage.MUSIC_USE_LYRICS_ENGINE
+import com.yinlin.rachel.RachelMessage.*
+import com.yinlin.rachel.activity.MVActivity
 import com.yinlin.rachel.bold
 import com.yinlin.rachel.clear
 import com.yinlin.rachel.data.LyricsInfo
@@ -196,7 +186,17 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
             }
         }
         // MV
-        v.buttonMv.rachelClick { }
+        v.buttonMv.rachelClick {
+            currentMusic?.apply {
+                if (this.video) {
+                    player.pause()
+                    val intent = Intent(pages.context, MVActivity::class.java)
+                    intent.putExtra("uri", this.videoPath.absolutePath)
+                    startActivity(intent)
+                }
+                else XToastUtils.warning("此歌曲不支持MV视频")
+            }
+        }
         // 歌词
         v.buttonLyrics.rachelClick {
             currentMusic?.lyrics?.apply {
@@ -339,12 +339,13 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
                 // 更新UI
                 val ids = playlist.items
                 var num = 0
+                val isPlaying = isLoadPlaylist(playlist)
                 for (id in args[1] as List<*>) {
                     if (!ids.contains(id as String)) { // 重复过滤
                         ++num
                         ids.add(id)
                         // 检查当前是否在播放此列表
-                        if (isLoadPlaylist(playlist)) {
+                        if (isPlaying) {
                             val uri = Uri.fromFile(musicInfos[id]!!.audioPath)
                             player.addMediaItem(MediaItem.Builder().setUri(uri).setMediaId(id).build())
                             loadMusics.add(id)
@@ -470,17 +471,21 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
             v.buttonMv.load(pages.ril, R.drawable.svg_mv_off)
             // 更新已播放进度与进度条
             v.progress.updateProgress(0L, true)
-        } else if (info != savedMusic) { // 只有与之前音乐不同才更新
-            savedMusic = info
-            // 更新歌曲信息
-            v.title.text = info.name
-            v.singer.text = info.singer
-            v.record.load(pages.ril, info.recordPath)
-            v.bg.tag = info.bgd
-            v.bg.load(pages.ril, if (info.bgd) info.bgdPath else info.bgsPath)
-            v.buttonAn.load(pages.ril, if (info.bgd) R.drawable.svg_an_on else R.drawable.svg_an_off)
-            v.buttonMv.load(pages.ril, if (info.video) R.drawable.svg_mv_on else R.drawable.svg_mv_off)
-            // 已播放进度和进度条由onTimeUpdate更新, 不用在此更新
+        }
+        else {
+            v.progress.updateProgress(player.currentPosition, true)
+            if (info != savedMusic) { // 只有与之前音乐不同才更新
+                savedMusic = info
+                // 更新歌曲信息
+                v.title.text = info.name
+                v.singer.text = info.singer
+                v.record.load(pages.ril, info.recordPath)
+                v.bg.tag = info.bgd
+                v.bg.load(pages.ril, if (info.bgd) info.bgdPath else info.bgsPath)
+                v.buttonAn.load(pages.ril, if (info.bgd) R.drawable.svg_an_on else R.drawable.svg_an_off)
+                v.buttonMv.load(pages.ril, if (info.video) R.drawable.svg_mv_on else R.drawable.svg_mv_off)
+                // 已播放进度和进度条由onTimeUpdate更新, 不用在此更新
+            }
         }
     }
 }

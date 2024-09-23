@@ -1,12 +1,13 @@
-package com.yinlin.rachel
+package com.yinlin.rachel.model
 
 import android.content.Context
 import android.text.InputType
 import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog
 import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog.InputCallback
+import com.yinlin.rachel.R
 
 
-object Dialog {
+object RachelDialog {
     fun confirm(context: Context, content: String, callback: MaterialDialog.SingleButtonCallback) {
         MaterialDialog.Builder(context).iconRes(R.mipmap.icon)
             .title("二次确认").content(content)

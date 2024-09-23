@@ -99,10 +99,12 @@ class LineLyricsEngine : LyricsEngine {
     override fun release() = clear()
 
     override fun needUpdate(position: Long): Boolean {
-        val index = findIndex(position)
-        if (index != currentIndex) {
-            currentIndex = index
-            return true
+        if (items.isNotEmpty()) {
+            val index = findIndex(position)
+            if (index != currentIndex) {
+                currentIndex = index
+                return true
+            }
         }
         return false
     }

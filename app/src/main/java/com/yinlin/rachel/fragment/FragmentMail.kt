@@ -7,7 +7,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.xuexiang.xui.utils.XToastUtils
 import com.yinlin.rachel.Config
-import com.yinlin.rachel.Dialog
+import com.yinlin.rachel.model.RachelDialog
 import com.yinlin.rachel.R
 import com.yinlin.rachel.annotation.NewThread
 import com.yinlin.rachel.api.API
@@ -36,7 +36,7 @@ class FragmentMail(pages: RachelPages) : RachelFragment<FragmentMailBinding>(pag
                 val mail = items[position]
                 if (mail.isProcessed) XToastUtils.error("此邮件已处理")
                 else {
-                    Dialog.confirm(pages.context, "处理此邮件?") { _, _ ->
+                    RachelDialog.confirm(pages.context, "处理此邮件?") { _, _ ->
                         processMail(position, mail, true)
                     }
                 }
@@ -46,7 +46,7 @@ class FragmentMail(pages: RachelPages) : RachelFragment<FragmentMailBinding>(pag
                 val mail = items[position]
                 if (mail.isProcessed) XToastUtils.error("此邮件已处理")
                 else {
-                    Dialog.confirm(pages.context, "拒绝此邮件?") { _, _ ->
+                    RachelDialog.confirm(pages.context, "拒绝此邮件?") { _, _ ->
                         processMail(position, mail, false)
                     }
                 }
@@ -55,7 +55,7 @@ class FragmentMail(pages: RachelPages) : RachelFragment<FragmentMailBinding>(pag
                 val position = holder.bindingAdapterPosition
                 val mail = items[position]
                 if (mail.isProcessed) {
-                    Dialog.confirm(pages.context, "删除此邮件?") { _, _ ->
+                    RachelDialog.confirm(pages.context, "删除此邮件?") { _, _ ->
                         deleteMail(position, mail)
                     }
                 }

@@ -55,8 +55,8 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintLeft_toRightOf="@id/avatar"
                 app:layout_constraintRight_toRightOf="parent"
-                android:layout_marginHorizontal="10dp"
-                android:textSize="@dimen/sm"
+                android:layout_marginStart="5dp"
+                android:textSize="@dimen/xs"
                 android:textColor="@color/orange_red" />
             <ImageView
                 android:id="@+id/img_comment"
@@ -77,7 +77,8 @@
                 android:layout_marginTop="5dp"
                 android:layout_marginHorizontal="10dp"
                 android:gravity="center"
-                android:text="0" />
+                android:text="0"
+                android:textSize="@dimen/xs" />
             <ImageView
                 android:id="@+id/img_coin"
                 android:layout_width="0dp"
@@ -97,7 +98,8 @@
                 android:layout_marginTop="5dp"
                 android:layout_marginHorizontal="10dp"
                 android:gravity="center"
-                android:text="0" />
+                android:text="0"
+                android:textSize="@dimen/xs" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

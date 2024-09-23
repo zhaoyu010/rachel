@@ -9,21 +9,30 @@ import androidx.annotation.IdRes
 import androidx.annotation.StringRes
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.lifecycleScope
 import com.chaychan.library.BottomBarLayout
 import com.chaychan.library.TabData
 import com.xuexiang.xui.utils.WidgetUtils
+import com.xuexiang.xui.utils.XToastUtils
 import com.xuexiang.xui.widget.dialog.LoadingDialog
+import com.yinlin.rachel.Config
 import com.yinlin.rachel.RachelMessage
 import com.yinlin.rachel.R
+import com.yinlin.rachel.RachelMessage.ME_UPDATE_USER_INFO
+import com.yinlin.rachel.annotation.NewThread
+import com.yinlin.rachel.api.API
 import com.yinlin.rachel.fragment.FragmentDiscovery
 import com.yinlin.rachel.fragment.FragmentMe
 import com.yinlin.rachel.fragment.FragmentMsg
 import com.yinlin.rachel.fragment.FragmentMusic
 import com.yinlin.rachel.fragment.FragmentRes
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.random.Random
 
 
-class RachelPages(activity: FragmentActivity, private val bbl: BottomBarLayout,
+class RachelPages(private val activity: FragmentActivity, private val bbl: BottomBarLayout,
     private val items: Array<Item>, home: Item, @IdRes val mainFrame: Int) {
     @JvmRecord
     data class Item(val index: Int, val prototype: Class<*>,
@@ -94,15 +103,24 @@ class RachelPages(activity: FragmentActivity, private val bbl: BottomBarLayout,
                 transaction.commit()
             }
         }
+
+        if (Config.isLogin) requestUserInfo()
     }
 
     val isNotMain get() = !isMain
 
+    fun checkBottomLayoutStatus() {
+        if (isNotMain && bbl.visibility == View.VISIBLE) bbl.visibility = View.GONE
+    }
+
     fun isForeground(item: Item) = isMain && currentFragment == fragments[item.index]
 
+    fun isForeground(fragment: RachelFragment<*>) = isMain && currentFragment == fragment
+
     fun navigate(des: RachelFragment<*>) {
-        if (bbl.visibility == View.VISIBLE) bbl.visibility = View.GONE
-        isMain = false
+        if (isMain) {
+            isMain = false
+        }
         val transaction = manager.beginTransaction().hide(currentFragment).add(mainFrame, des).addToBackStack(null)
         currentFragment = des
         transaction.commit()
@@ -124,4 +142,14 @@ class RachelPages(activity: FragmentActivity, private val bbl: BottomBarLayout,
 
     @Suppress("UNCHECKED_CAST")
     fun <T> sendMessageForResult(item: Item, msg: RachelMessage, vararg args: Any?): T? = fragments[item.index]?.messageForResult(msg, *args) as T?
+
+    // 请求用户信息
+    @NewThread
+    fun requestUserInfo() {
+        activity.lifecycleScope.launch {
+            Config.user = withContext(Dispatchers.IO) { API.UserAPI.getInfo(Config.user_id, Config.user_pwd) }
+            if (!Config.user.ok) XToastUtils.error("网络异常")
+            sendMessage(me, ME_UPDATE_USER_INFO)
+        }
+    }
 }

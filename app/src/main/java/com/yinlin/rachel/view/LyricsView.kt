@@ -21,7 +21,6 @@ class LyricsView(context: Context, attrs: AttributeSet?, defStyleAttr: Int)
     constructor(context: Context): this(context, null)
 
     override fun onSurfaceTextureAvailable(surface: SurfaceTexture, width: Int, height: Int) {
-        println("onSurfaceTextureAvailable")
         lyricsEngine?.let {
             if (childCount != 0) {
                 if (it.load(getChildAt(0) as TextureView, surface, width, height, lyricsFileName)) isEngineLoad = true

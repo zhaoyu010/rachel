@@ -4,7 +4,7 @@ import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.xuexiang.xui.utils.XToastUtils
 import com.yinlin.rachel.Config
-import com.yinlin.rachel.Dialog
+import com.yinlin.rachel.model.RachelDialog
 import com.yinlin.rachel.R
 import com.yinlin.rachel.RachelMessage
 import com.yinlin.rachel.annotation.NewThread
@@ -30,15 +30,13 @@ class FragmentSettings(pages: RachelPages) : RachelFragment<FragmentSettingsBind
 
     override fun bindingClass() = FragmentSettingsBinding::class.java
 
-    private val isLogin: Boolean get() = !Config.user_id_meta.isDefault() && !Config.user_pwd_meta.isDefault()
-
     override fun init() {
         /*    ----    账号设置    ----    */
         v.tvAccount.bold = true
 
         // 更换头像
         v.avatar.rachelClick {
-            if (isLogin) {
+            if (Config.isLoginAndUpdate) {
                 RachelPictureSelector.single(pages.context, 256, 256, true) {
                     filename -> updateAvatar(filename)
                 }
@@ -47,14 +45,14 @@ class FragmentSettings(pages: RachelPages) : RachelFragment<FragmentSettingsBind
         }
         // 更新个性签名
         v.signature.rachelClick {
-            if (isLogin) {
-                Dialog.input(pages.context, "请输入个性签名", 64) { _, input -> updateSignature(input.toString()) }
+            if (Config.isLoginAndUpdate) {
+                RachelDialog.input(pages.context, "请输入个性签名", 64) { _, input -> updateSignature(input.toString()) }
             }
             else XToastUtils.warning("请先登录")
         }
         // 更新背景墙
         v.wall.rachelClick {
-            if (isLogin) {
+            if (Config.isLoginAndUpdate) {
                 RachelPictureSelector.single(pages.context, 910, 512, false) {
                     filename -> updateWall(filename)
                 }
@@ -63,8 +61,8 @@ class FragmentSettings(pages: RachelPages) : RachelFragment<FragmentSettingsBind
         }
         // 退出登录
         v.logoff.setOnSuperTextViewClickListener {
-            if (isLogin) {
-                Dialog.confirm(pages.context, "是否退出登录") { _, _ -> logoff() }
+            if (Config.isLoginAndUpdate) {
+                RachelDialog.confirm(pages.context, "是否退出登录") { _, _ -> logoff() }
             }
             else XToastUtils.warning("请先登录")
         }
@@ -73,7 +71,7 @@ class FragmentSettings(pages: RachelPages) : RachelFragment<FragmentSettingsBind
         v.tvMsg.bold = true
         // 添加微博用户
         v.weibo.setOnSuperTextViewClickListener {
-            Dialog.input(pages.context, "请输入微博用户的uid(非昵称)", 20) { _, input ->
+            RachelDialog.input(pages.context, "请输入微博用户的uid(非昵称)", 20) { _, input ->
                 val uid = input.toString()
                 val weiboUser: WeiboUser? = Config.weibo_users[uid]
                 if (weiboUser != null) XToastUtils.warning(weiboUser.name + " 已存在")
@@ -82,7 +80,7 @@ class FragmentSettings(pages: RachelPages) : RachelFragment<FragmentSettingsBind
         }
         // 删除微博用户
         v.weiboList.setOnTagClickListener { text ->
-            Dialog.confirm(pages.context, "是否删除此微博用户") { _, _ ->
+            RachelDialog.confirm(pages.context, "是否删除此微博用户") { _, _ ->
                 val weiboUsers = Config.weibo_users
                 weiboUsers.entries.removeIf { entry -> entry.value.name == text }
                 Config.weibo_users = weiboUsers
@@ -161,7 +159,7 @@ class FragmentSettings(pages: RachelPages) : RachelFragment<FragmentSettingsBind
                 XToastUtils.success(result.value)
                 Config.cache_key_avatar.update()
                 v.avatar.load(rilNet, Config.user.avatarPath, Config.cache_key_avatar.get())
-                pages.sendMessage(RachelPages.me, RachelMessage.ME_REQUEST_USER_INFO)
+                pages.requestUserInfo()
             }
             else XToastUtils.error(result.value)
         }
@@ -180,7 +178,7 @@ class FragmentSettings(pages: RachelPages) : RachelFragment<FragmentSettingsBind
             if (result.ok) {
                 XToastUtils.success(result.value)
                 v.signature.text = signature
-                pages.sendMessage(RachelPages.me, RachelMessage.ME_REQUEST_USER_INFO)
+                pages.requestUserInfo()
             }
             else XToastUtils.error(result.value)
         }
@@ -200,7 +198,7 @@ class FragmentSettings(pages: RachelPages) : RachelFragment<FragmentSettingsBind
                 XToastUtils.success(result.value)
                 Config.cache_key_wall.update()
                 v.wall.load(rilNet, Config.user.wallPath, Config.cache_key_wall.get())
-                pages.sendMessage(RachelPages.me, RachelMessage.ME_REQUEST_USER_INFO)
+                pages.requestUserInfo()
             }
             else XToastUtils.error(result.value)
         }

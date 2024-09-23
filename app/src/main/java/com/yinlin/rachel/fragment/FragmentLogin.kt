@@ -65,7 +65,7 @@ class FragmentLogin(pages: RachelPages) : RachelFragment<FragmentLoginBinding>(p
                     Config.user_id = id
                     Config.user_pwd = pwdMd5
                     pages.pop()
-                    pages.sendMessage(RachelPages.me, RachelMessage.ME_REQUEST_USER_INFO)
+                    pages.requestUserInfo()
                 }
                 else XToastUtils.error(result.value)
             }

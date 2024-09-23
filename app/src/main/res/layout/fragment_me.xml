@@ -100,12 +100,12 @@
                             android:id="@+id/level"
                             style="@style/RachelText"
                             android:text="1"
-                            android:textColor="@color/black"
-                            android:textSize="@dimen/base" />
+                            android:textColor="@color/black" />
                         <TextView
                             android:id="@+id/tv_level"
                             style="@style/RachelText"
                             android:text="等级"
+                            android:textSize="@dimen/xs"
                             android:textColor="@color/black" />
                     </LinearLayout>
                     <LinearLayout
@@ -121,12 +121,12 @@
                             android:id="@+id/coin"
                             style="@style/RachelText"
                             android:text="0"
-                            android:textColor="@color/black"
-                            android:textSize="@dimen/base" />
+                            android:textColor="@color/black" />
                         <TextView
                             android:id="@+id/tv_coin"
                             style="@style/RachelText"
                             android:text="银币"
+                            android:textSize="@dimen/xs"
                             android:textColor="@color/black" />
                     </LinearLayout>
                     <LinearLayout

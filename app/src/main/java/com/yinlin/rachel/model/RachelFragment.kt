@@ -32,7 +32,17 @@ abstract class RachelFragment<Binding : ViewBinding>(val pages: RachelPages) : F
     final override fun onViewCreated(view: View, bundle: Bundle?) {
         super.onViewCreated(view, null)
         init()
-        update()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        pages.checkBottomLayoutStatus()
+        if (pages.isForeground(this)) update()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if (pages.isForeground(this)) hidden()
     }
 
     final override fun onHiddenChanged(isHidden: Boolean) {

@@ -1,6 +1,5 @@
 package com.yinlin.rachel
 
-import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.tencent.mmkv.MMKV
 import com.yinlin.rachel.data.User
@@ -60,10 +59,13 @@ object Config {
         get() = user_pwd_meta.get()
         set(value) { user_pwd_meta.set(value) }
 
-    val user_meta = JsonMeta<User>("user", "{ \"isBroken\": true }", object : TypeToken<User>(){}.type)
+    val user_meta = JsonMeta<User>("user", "{ \"ok\": false }", object : TypeToken<User>(){}.type)
     var user: User
         get() = user_meta.get()
         set(value) { user_meta.set(value) }
+
+    val isLogin: Boolean get() = !user_id_meta.isDefault() && !user_pwd_meta.isDefault()
+    val isLoginAndUpdate: Boolean get() = isLogin && user.ok
 
     // 登录无关
     val playlist_meta = JsonMeta<IPlaylistMap>("playlist", "{}", object : TypeToken<PlaylistMap>(){}.type)

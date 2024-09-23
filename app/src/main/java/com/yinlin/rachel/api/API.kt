@@ -139,7 +139,8 @@ object API {
 
         // 取用户信息
         fun getInfo(id: String, pwd: String): User = try {
-            Net.post("$BASEURL/getInfo", jsonMap("id" to id, "pwd" to pwd)).to()
+            val user = Net.post("$BASEURL/getInfo", jsonMap("id" to id, "pwd" to pwd)).to() as User
+            user
         } catch (ignored: Exception) {
             User(false)
         }
