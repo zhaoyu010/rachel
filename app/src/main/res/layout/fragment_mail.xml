@@ -36,8 +36,8 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:orientation="vertical"
-            app:stf_inAnimation="@android:anim/slide_in_left"
-            app:stf_outAnimation="@android:anim/slide_out_right" >
+            app:stf_inAnimation="@android:anim/fade_in"
+            app:stf_outAnimation="@android:anim/fade_out" >
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/list"
                 android:layout_width="match_parent"

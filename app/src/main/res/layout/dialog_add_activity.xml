@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:layout_marginTop="10dp"
+    tools:context=".dialog.DialogAddActivity">
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:counterEnabled="true"
+        app:counterMaxLength="5" >
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="活动名称"
+            android:inputType="text"
+            android:maxLength="5"
+            android:maxLines="1"
+            android:textSize="@dimen/sm" />
+    </com.google.android.material.textfield.TextInputLayout>
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:counterEnabled="true"
+        app:counterMaxLength="256" >
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="活动内容"
+            android:inputType="textMultiLine"
+            android:gravity="start"
+            android:maxLength="256"
+            android:lines="5"
+            android:maxLines="5"
+            android:textSize="@dimen/sm" />
+    </com.google.android.material.textfield.TextInputLayout>
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:counterEnabled="true"
+        app:counterMaxLength="1024" >
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/showstart"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="秀动ID(可空)"
+            android:inputType="text"
+            android:maxLength="1024"
+            android:maxLines="1"
+            android:textSize="@dimen/sm" />
+        <TextView
+            android:id="@+id/fetch_showstart"
+            style="@style/RachelText.X"
+            android:textAlignment="center"
+            android:text="提取秀动链接"
+            android:textColor="@color/steel_blue" />
+    </com.google.android.material.textfield.TextInputLayout>
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:counterEnabled="true"
+        app:counterMaxLength="16" >
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/damai"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="大麦ID(可空)"
+            android:inputType="text"
+            android:maxLength="16"
+            android:maxLines="1"
+            android:textSize="@dimen/sm" />
+    </com.google.android.material.textfield.TextInputLayout>
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:counterEnabled="true"
+        app:counterMaxLength="16" >
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/maoyan"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="猫眼ID(可空)"
+            android:inputType="text"
+            android:maxLength="16"
+            android:maxLines="1"
+            android:textSize="@dimen/sm" />
+    </com.google.android.material.textfield.TextInputLayout>
+    <TextView
+        style="@style/RachelText"
+        android:text="活动海报"
+        android:layout_marginVertical="5dp" />
+    <com.yinlin.rachel.view.ImageSelectView
+        android:id="@+id/pics"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+</LinearLayout>

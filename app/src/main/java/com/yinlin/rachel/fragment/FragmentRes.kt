@@ -41,10 +41,10 @@ class FragmentRes(pages: RachelPages) : RachelFragment<FragmentResBinding>(pages
         override fun init(holder: RachelViewHolder<ItemResBinding>, v: ItemResBinding) {
             val context = fragment.pages.context
             v.downloadHd.rachelClick {
-                items[holder.bindingAdapterPosition].thumbUrl?.apply { Net.downloadPicture(context, this, ::processDownloadResult) }
+                items[holder.bindingAdapterPosition].thumbUrl?.apply { Net.downloadPicture(context, this) }
             }
             v.download4k.rachelClick {
-                items[holder.bindingAdapterPosition].sourceUrl?.apply { Net.downloadPicture(context, this, ::processDownloadResult) }
+                items[holder.bindingAdapterPosition].sourceUrl?.apply { Net.downloadPicture(context, this) }
             }
         }
 
@@ -86,11 +86,6 @@ class FragmentRes(pages: RachelPages) : RachelFragment<FragmentResBinding>(pages
                 notifyDataSetChanged()
             }
         }
-
-        private fun processDownloadResult(status: Boolean) {
-            if (status) XToastUtils.success("下载成功")
-            else XToastUtils.error("下载失败")
-        }
     }
 
     private var rootRes = ResFolder.emptyRes
@@ -127,10 +122,9 @@ class FragmentRes(pages: RachelPages) : RachelFragment<FragmentResBinding>(pages
     @NewThread
     fun loadRes() {
         lifecycleScope.launch {
-            pages.loadingDialog.show()
+            v.state.showLoading("加载美图中...")
             rootRes = withContext(Dispatchers.IO) { API.ResAPI.getInfo() }
             if (v.container.isRefreshing) v.container.finishRefresh()
-            pages.loadingDialog.dismiss()
             if (rootRes.items.isEmpty()) v.state.showOffline { loadRes() }
             else v.state.showContent()
             while (v.header.itemCount > 0) v.header.back()

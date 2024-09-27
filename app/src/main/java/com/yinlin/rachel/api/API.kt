@@ -9,6 +9,8 @@ import com.yinlin.rachel.data.Comment
 import com.yinlin.rachel.data.Mail
 import com.yinlin.rachel.data.ResFile
 import com.yinlin.rachel.data.ResFolder
+import com.yinlin.rachel.data.ShowActivity
+import com.yinlin.rachel.data.ShowActivityPreview
 import com.yinlin.rachel.data.Topic
 import com.yinlin.rachel.data.TopicPreview
 import com.yinlin.rachel.data.User
@@ -300,6 +302,44 @@ object API {
                 object { val id = id; val pwd = pwd; val tid = tid; val type = type }.json()
             )!!.fetchMsg()
         } catch (ignored: Exception) {
+            errResult
+        }
+
+        // 取活动列表
+        fun getActivities(): List<ShowActivityPreview> = try {
+            Net.get("${BASEURL}/getActivities")!!["activities"].to()
+        }
+        catch (ignored: Exception) {
+            emptyList()
+        }
+
+        // 取活动详情
+        fun getActivityInfo(ts: String): ShowActivity = try {
+            Net.post("$BASEURL/getActivityInfo", jsonMap("ts" to ts)).to()
+        }
+        catch (ignored: Exception) {
+            ShowActivity(false)
+        }
+
+        // 添加活动
+        fun addActivity(id: String, pwd: String, show: ShowActivity) = try {
+            val fileMap = LinkedHashMap<String, String>()
+            for (index in 0 until minOf(show.pics.size, 9)) fileMap["pic${index + 1}"] = show.pics[index]
+            val argMap = mutableMapOf("id" to id, "pwd" to pwd, "ts" to show.ts, "title" to show.title, "content" to show.content)
+            show.showstart?.apply { argMap["showstart"] = this }
+            show.damai?.apply { argMap["damai"] = this }
+            show.maoyan?.apply { argMap["maoyan"] = this }
+            Net.postForm("$BASEURL/addActivity", fileMap, argMap)!!.fetchMsg()
+        }
+        catch (ignored: Exception) {
+            errResult
+        }
+
+        // 删除活动
+        fun deleteActivity(id: String, pwd: String, ts: String) = try {
+            Net.post("$BASEURL/deleteActivity", jsonMap("id" to id, "pwd" to pwd, "ts" to ts))!!.fetchMsg()
+        }
+        catch (ignored: Exception) {
             errResult
         }
     }

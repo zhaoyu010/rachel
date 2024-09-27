@@ -8,4 +8,5 @@
     <dimen name="sm">12sp</dimen>
     <dimen name="xs">10sp</dimen>
     <dimen name="xxs">8sp</dimen>
+    <dimen name="xxxs">6sp</dimen>
 </resources>

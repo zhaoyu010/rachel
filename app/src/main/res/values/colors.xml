@@ -76,17 +76,25 @@
     <color name="green">#008000</color>
     <color name="blue">#0000FF</color>
     <color name="navy">#000080</color>
-    <color name="light_dark">#80000000</color>
     <color name="dark">#C0000000</color>
     <color name="black_gray">#A0313030</color>
     <color name="black">#000000</color>
 
     <color name="hyperlinks">#1C85B4</color>
 
-    <color name="title_dark">#80000000</color>
+    <color name="title_dark">#A0000000</color>
 
     <color name="music_lyrics_main">#4682B4</color>
     <color name="music_lyrics_second">#D3D3D3</color>
     <color name="music_lyrics_fade">#60F6F6F6</color>
-    <color name="music_hotpot">#80FF0000</color>
+    <color name="music_progress_total">#808080</color>
+    <color name="music_progress_played">#854FE6</color>
+    <color name="music_progress_hotpot">#EEE</color>
+
+
+    <color name="calendar_normal">#000000</color>
+    <color name="calendar_other">#D3D3D3</color>
+    <color name="calendar_now">#429589</color>
+    <color name="calendar_weekend">#F4ABCC</color>
+    <color name="calendar_activity">#55A7EB</color>
 </resources>

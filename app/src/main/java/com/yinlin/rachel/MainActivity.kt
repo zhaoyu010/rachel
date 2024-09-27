@@ -53,6 +53,7 @@ class MainActivity : AppCompatActivity() {
     private fun initTextFont() {
         val configuration = resources.configuration
         configuration.fontScale = 1.15f
+        configuration.densityDpi = 480
         @Suppress("DEPRECATION")
         resources.updateConfiguration(configuration, resources.displayMetrics)
     }

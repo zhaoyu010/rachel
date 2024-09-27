@@ -36,7 +36,7 @@ class FragmentMail(pages: RachelPages) : RachelFragment<FragmentMailBinding>(pag
                 val mail = items[position]
                 if (mail.isProcessed) XToastUtils.error("此邮件已处理")
                 else {
-                    RachelDialog.confirm(pages.context, "处理此邮件?") { _, _ ->
+                    RachelDialog.confirm(pages.context, "处理此邮件?") {
                         processMail(position, mail, true)
                     }
                 }
@@ -46,7 +46,7 @@ class FragmentMail(pages: RachelPages) : RachelFragment<FragmentMailBinding>(pag
                 val mail = items[position]
                 if (mail.isProcessed) XToastUtils.error("此邮件已处理")
                 else {
-                    RachelDialog.confirm(pages.context, "拒绝此邮件?") { _, _ ->
+                    RachelDialog.confirm(pages.context, "拒绝此邮件?") {
                         processMail(position, mail, false)
                     }
                 }
@@ -55,7 +55,7 @@ class FragmentMail(pages: RachelPages) : RachelFragment<FragmentMailBinding>(pag
                 val position = holder.bindingAdapterPosition
                 val mail = items[position]
                 if (mail.isProcessed) {
-                    RachelDialog.confirm(pages.context, "删除此邮件?") { _, _ ->
+                    RachelDialog.confirm(pages.context, "删除此邮件?") {
                         deleteMail(position, mail)
                     }
                 }

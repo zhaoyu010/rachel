@@ -1,6 +1,8 @@
 package com.yinlin.rachel
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.util.TypedValue
 import com.google.gson.Gson
 import com.google.gson.JsonElement
@@ -47,4 +49,21 @@ fun <E> MutableCollection<E>.clearAddAll(element: Collection<E>) {
 fun <K,V> MutableMap<K, V>.clearAddAll(element: Map<K, V>) {
     this.clear()
     this.putAll(element)
+}
+
+
+fun gotoQQ(context: Context, id: String) = try {
+    val url = "mqqapi://card/show_pslcard?src_type=internal&version=1&uin=${id}&card_type=person&source=qrcode"
+    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+    true
+} catch (ignored: Exception) {
+    false
+}
+
+fun gotoQQGroup(context: Context, id: String) = try {
+    val url = "mqqapi://card/show_pslcard?src_type=internal&version=1&uin=${id}&card_type=group&source=qrcode"
+    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+    true
+} catch (ignored: Exception) {
+    false
 }

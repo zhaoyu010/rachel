@@ -2,10 +2,12 @@ package com.yinlin.rachel
 
 import android.content.ContentValues
 import android.content.Context
+import android.net.Uri
 import android.os.Environment
 import android.os.Handler
 import android.provider.MediaStore
 import com.google.gson.JsonObject
+import com.xuexiang.xui.utils.XToastUtils
 import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog
 import com.yinlin.rachel.annotation.NewThread
 import okhttp3.Headers.Companion.toHeaders
@@ -79,13 +81,12 @@ object Net {
     }
 
     @NewThread
-    fun downloadPicture(context: Context, url: String, callback: ((Boolean) -> Unit)?) {
+    fun download(context: Context, url: String, mediaUri: Uri, values: ContentValues) {
         val dialog = MaterialDialog.Builder(context).iconRes(R.mipmap.icon)
             .title("下载中...").negativeText(R.string.cancel)
             .progress(false, 0, true).build()
         val handler = Handler(context.mainLooper)
         val thread = Thread {
-            val filename = url.substringAfterLast('/')
             var status = false
             try {
                 client.newCall(Request.Builder().url(url).build()).execute().use { response ->
@@ -94,11 +95,7 @@ object Net {
                         val totalSize = this.contentLength()
                         if (totalSize <= 0) return@apply
                         handler.post { dialog.maxProgress = (totalSize / 1024).toInt() }
-                        val values = ContentValues()
-                        values.put(MediaStore.Images.Media.DISPLAY_NAME, filename)
-                        values.put(MediaStore.Images.Media.MIME_TYPE, "image/webp")
-                        values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
-                        context.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)?.apply {
+                        context.contentResolver.insert(mediaUri, values)?.apply {
                             context.contentResolver.openOutputStream(this).use { outputStream ->
                                 outputStream?.apply {
                                     val buffer = ByteArray(DOWNLOAD_BUFFER_SIZE)
@@ -118,11 +115,32 @@ object Net {
                     }
                 }
             } catch (ignored: Exception) { }
+            handler.post {
+                if (status) XToastUtils.success("下载成功")
+                else XToastUtils.error("下载失败")
+            }
             dialog.dismiss()
-            if (callback != null) handler.post { callback.invoke(status) }
         }
         dialog.setOnCancelListener { thread.interrupt() }
         dialog.show()
         thread.start()
+    }
+
+    @NewThread
+    fun downloadPicture(context: Context, url: String) {
+        val values = ContentValues()
+        values.put(MediaStore.Images.Media.DISPLAY_NAME, url.substringAfterLast('/'))
+        values.put(MediaStore.Images.Media.MIME_TYPE, "image/webp")
+        values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
+        download(context, url, MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+    }
+
+    @NewThread
+    fun downloadVideo(context: Context, url: String) {
+        val values = ContentValues()
+        values.put(MediaStore.Images.Media.DISPLAY_NAME, url.substringAfterLast('/'))
+        values.put(MediaStore.Images.Media.MIME_TYPE, "video/mp4")
+        values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
+        download(context, url, MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values)
     }
 }

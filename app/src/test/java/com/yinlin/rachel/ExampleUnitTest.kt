@@ -1,5 +1,7 @@
 package com.yinlin.rachel
 
+import com.yinlin.rachel.api.WeiboAPI
+import com.yinlin.rachel.data.WeiboComment
 import com.yinlin.rachel.model.RachelMod
 import org.junit.Test
 import java.io.File
@@ -22,6 +24,8 @@ class ExampleUnitTest {
 
     @Test
     fun test() {
-
+        val array = ArrayList<WeiboComment>()
+        WeiboAPI.details("5047764123913350", array)
+        println(array)
     }
 }

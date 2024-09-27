@@ -4,8 +4,10 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Rect
 import android.graphics.drawable.ColorDrawable
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.ColorInt
@@ -14,6 +16,7 @@ import androidx.annotation.RawRes
 import androidx.appcompat.widget.AppCompatTextView
 import com.bumptech.glide.signature.ObjectKey
 import com.google.android.material.textfield.TextInputEditText
+import com.haibin.calendarview.Calendar
 import com.yinlin.rachel.model.RachelImageLoader
 import com.yinlin.rachel.model.RachelOnClickListener
 import java.io.File
@@ -63,6 +66,9 @@ fun Paint.bold(context: Context, isBold: Boolean) {
     typeface = if (isBold) app.fontBold else app.fontNormal
 }
 
+val Paint.textHeight: Float
+    get() = this.fontMetrics.descent - this.fontMetrics.ascent
+
 fun ImageView.load(loader: RachelImageLoader, @RawRes @DrawableRes resourceId: Int) {
     loader.glide.load(resourceId).apply(loader.options).into(this)
 }
@@ -88,3 +94,15 @@ fun ImageView.clear(loader: RachelImageLoader) = loader.glide.clear(this)
 var ImageView.pureColor: Int
     get() = (drawable as? ColorDrawable)?.color ?: Color.TRANSPARENT
     set(value) { setImageDrawable(if (value == Color.TRANSPARENT) null else ColorDrawable(value)) }
+
+fun ImageView.updateNineGridBounds(callback: (Int, Rect) -> Unit) {
+    val view = this.parent as ViewGroup
+    for (i in 0 until view.childCount) {
+        val itemView = view.getChildAt(i)
+        val bounds = Rect()
+        itemView?.getGlobalVisibleRect(bounds)
+        callback(i, bounds)
+    }
+}
+
+val Calendar.date: String get() = "${this.year}-${this.month}-${this.day}"

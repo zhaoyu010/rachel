@@ -1,23 +1,10 @@
 package com.yinlin.rachel.fragment
 
-import android.app.Activity
-import android.content.Context
-import android.graphics.Rect
 import android.view.View
-import android.view.ViewGroup
-import android.widget.ImageView
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.xuexiang.xui.utils.XToastUtils
-import com.xuexiang.xui.widget.imageview.nine.ItemImageClickListener
-import com.xuexiang.xui.widget.imageview.nine.NineGridImageViewAdapter
-import com.xuexiang.xui.widget.imageview.preview.PreviewBuilder
-import com.xuexiang.xui.widget.popupwindow.popup.XUIListPopup
-import com.xuexiang.xui.widget.popupwindow.popup.XUISimplePopup
 import com.yinlin.rachel.Config
-import com.yinlin.rachel.model.RachelDialog
-import com.yinlin.rachel.R
 import com.yinlin.rachel.annotation.NewThread
 import com.yinlin.rachel.api.API
 import com.yinlin.rachel.bold
@@ -27,9 +14,10 @@ import com.yinlin.rachel.databinding.FragmentTopicBinding
 import com.yinlin.rachel.databinding.HeaderTopicBinding
 import com.yinlin.rachel.databinding.ItemCommentBinding
 import com.yinlin.rachel.load
+import com.yinlin.rachel.model.RachelDialog
 import com.yinlin.rachel.model.RachelFragment
 import com.yinlin.rachel.model.RachelHeaderAdapter
-import com.yinlin.rachel.model.RachelImageLoader
+import com.yinlin.rachel.model.RachelNineGridAdapter
 import com.yinlin.rachel.model.RachelNineGridPicture
 import com.yinlin.rachel.model.RachelPages
 import com.yinlin.rachel.model.RachelPopMenu
@@ -41,26 +29,6 @@ import java.util.Collections
 
 
 class FragmentTopic(pages: RachelPages, private val tid: Int) : RachelFragment<FragmentTopicBinding>(pages) {
-    class ImageAdapter(private val rilNet: RachelImageLoader)
-        : NineGridImageViewAdapter<RachelNineGridPicture>(),
-        ItemImageClickListener<RachelNineGridPicture> {
-
-        override fun onDisplayImage(context: Context, view: ImageView, picture: RachelNineGridPicture) = view.load(rilNet, picture.url)
-
-        override fun onItemImageClick(imageView: ImageView, index: Int, list: MutableList<RachelNineGridPicture>) {
-            val view = imageView.parent as ViewGroup
-            for (i in 0 until view.childCount) {
-                val itemView = view.getChildAt(i)
-                val bounds = Rect()
-                itemView?.getGlobalVisibleRect(bounds)
-                list[i].showBounds = bounds
-            }
-            PreviewBuilder.from(imageView.context as Activity)
-                .setImgs(list).setCurrentIndex(index)
-                .setType(PreviewBuilder.IndicatorType.Dot).start()
-        }
-    }
-
     class Adapter(private val fragment: FragmentTopic) : RachelHeaderAdapter<HeaderTopicBinding, ItemCommentBinding, Comment>() {
         private val pages = fragment.pages
 
@@ -75,7 +43,7 @@ class FragmentTopic(pages: RachelPages, private val tid: Int) : RachelFragment<F
                     pages.navigate(FragmentProfile(pages, fragment.topic.id))
                 }
             }
-            v.pics.setAdapter(ImageAdapter(fragment.rilNet))
+            v.pics.setAdapter(RachelNineGridAdapter(pages.context))
 
             // 菜单
             v.more.rachelClick(300) {
@@ -85,12 +53,12 @@ class FragmentTopic(pages: RachelPages, private val tid: Int) : RachelFragment<F
                 if (Config.isLoginAndUpdate) {
                     val topText = if (fragment.topic.isTopTopic) "取消置顶" else "置顶"
                     if (user.canUpdateTopicTop(topicId)) menuList += RachelPopMenu.Item(topText) {
-                        RachelDialog.confirm(pages.context, "${topText}此主题?") { _, _ ->
+                        RachelDialog.confirm(pages.context, "${topText}此主题?") {
                             fragment.updateTopicTop(if (fragment.topic.isTopTopic) 0 else 1)
                         }
                     }
                     if (user.canDeleteTopic(topicId)) menuList += RachelPopMenu.Item("删除") {
-                        RachelDialog.confirm(pages.context, "删除此主题?") { _, _ ->
+                        RachelDialog.confirm(pages.context, "删除此主题?") {
                             fragment.deleteTopic()
                         }
                     }
@@ -101,8 +69,8 @@ class FragmentTopic(pages: RachelPages, private val tid: Int) : RachelFragment<F
             // 评论
             v.buttonSend.rachelClick {
                 if (Config.isLoginAndUpdate) {
-                    RachelDialog.inputMultiLines(pages.context, "快来留下你的足迹~", 256, 5) { _, input ->
-                        fragment.sendComment(input.toString())
+                    RachelDialog.inputMultiLines(pages.context, "快来留下你的足迹~", 256, 5) {
+                        fragment.sendComment(it)
                     }
                 }
                 else XToastUtils.warning("请先登录")
@@ -112,8 +80,8 @@ class FragmentTopic(pages: RachelPages, private val tid: Int) : RachelFragment<F
             v.buttonCoin.rachelClick {
                 if (Config.isLoginAndUpdate) {
                     if (fragment.topic.id == Config.user_id) XToastUtils.warning("不能给自己投币哦")
-                    else RachelDialog.inputNumber(pages.context, "请输入投币数量(1-3)") { _, text ->
-                        val value = text.toString().toIntOrNull() ?: 0
+                    else RachelDialog.inputNumber(pages.context, "请输入投币数量(1-3)") {
+                        val value = it.toIntOrNull() ?: 0
                         if (Config.user.coin < value) XToastUtils.warning("你的银币不够哦")
                         else if (value in 1..3) fragment.sendCoin(value)
                         else XToastUtils.warning("不能投${value}个币哦")
@@ -138,12 +106,12 @@ class FragmentTopic(pages: RachelPages, private val tid: Int) : RachelFragment<F
                     val comment = items[position]
                     val topText = if (comment.isTopComment) "取消置顶" else "置顶"
                     if (user.canUpdateCommentTop(topicId)) menuList += RachelPopMenu.Item(topText) {
-                        RachelDialog.confirm(pages.context, "${topText}此评论?") { _, _ ->
+                        RachelDialog.confirm(pages.context, "${topText}此评论?") {
                             fragment.updateCommentTop(comment.cid, position, if (comment.isTopComment) 0 else 1)
                         }
                     }
                     if (user.canDeleteComment(topicId, comment.id)) menuList += RachelPopMenu.Item("删除") {
-                        RachelDialog.confirm(pages.context, "删除此评论?") { _, _ ->
+                        RachelDialog.confirm(pages.context, "删除此评论?") {
                             fragment.deleteComment(comment.cid, position)
                         }
                     }
@@ -161,8 +129,6 @@ class FragmentTopic(pages: RachelPages, private val tid: Int) : RachelFragment<F
             v.top.visibility = if (item.isTopComment) View.VISIBLE else View.GONE
         }
     }
-
-    private val rilNet = RachelImageLoader(pages.context, R.drawable.placeholder_pic, DiskCacheStrategy.ALL)
 
     private var topic = Topic(true)
     private val adapter = Adapter(this)
@@ -197,9 +163,7 @@ class FragmentTopic(pages: RachelPages, private val tid: Int) : RachelFragment<F
                 header.title.text = topic.title
                 header.content.text = topic.content
                 header.userTitle.setTitle(topic.userTitleGroup, topic.userTitle)
-                val pics = ArrayList<RachelNineGridPicture>(topic.pics.size)
-                for (pic in topic.pics) pics += RachelNineGridPicture(topic.picPath(pic))
-                header.pics.setImagesData(pics)
+                header.pics.setImagesData(RachelNineGridPicture.make(topic.pics){ topic.picPath(it) })
                 adapter.items = topic.comments
                 adapter.notifyChangedEx()
             }

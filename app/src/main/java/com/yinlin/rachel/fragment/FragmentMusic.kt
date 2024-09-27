@@ -16,20 +16,35 @@ import com.yinlin.rachel.Config
 import com.yinlin.rachel.MusicInfoMap
 import com.yinlin.rachel.R
 import com.yinlin.rachel.RachelMessage
-import com.yinlin.rachel.RachelMessage.*
+import com.yinlin.rachel.RachelMessage.MUSIC_ADD_MUSIC_INTO_PLAYLIST
+import com.yinlin.rachel.RachelMessage.MUSIC_CREATE_PLAYLIST
+import com.yinlin.rachel.RachelMessage.MUSIC_DELETE_MUSIC
+import com.yinlin.rachel.RachelMessage.MUSIC_DELETE_MUSIC_FROM_PLAYLIST
+import com.yinlin.rachel.RachelMessage.MUSIC_DELETE_PLAYLIST
+import com.yinlin.rachel.RachelMessage.MUSIC_GOTO_MUSIC
+import com.yinlin.rachel.RachelMessage.MUSIC_NOTIFY_ADD_MUSIC
+import com.yinlin.rachel.RachelMessage.MUSIC_RENAME_PLAYLIST
+import com.yinlin.rachel.RachelMessage.MUSIC_START_PLAYER
+import com.yinlin.rachel.RachelMessage.MUSIC_STOP_PLAYER
+import com.yinlin.rachel.RachelMessage.MUSIC_UPDATE_PLAYLIST
+import com.yinlin.rachel.RachelMessage.MUSIC_USE_LYRICS_ENGINE
 import com.yinlin.rachel.activity.MVActivity
 import com.yinlin.rachel.bold
 import com.yinlin.rachel.clear
+import com.yinlin.rachel.clearAddAll
 import com.yinlin.rachel.data.LyricsInfo
 import com.yinlin.rachel.data.MusicInfo
 import com.yinlin.rachel.data.Playlist
 import com.yinlin.rachel.databinding.FragmentMusicBinding
 import com.yinlin.rachel.deleteFilter
-import com.yinlin.rachel.dialog.DialogCurrentPlaylist
-import com.yinlin.rachel.dialog.DialogLyricsInfo
-import com.yinlin.rachel.dialog.DialogMusicInfo
+import com.yinlin.rachel.dialog.BottomDialogCurrentPlaylist
+import com.yinlin.rachel.dialog.BottomDialogLyricsEngine
+import com.yinlin.rachel.dialog.BottomDialogLyricsInfo
+import com.yinlin.rachel.dialog.BottomDialogMusicInfo
 import com.yinlin.rachel.div
+import com.yinlin.rachel.gotoQQGroup
 import com.yinlin.rachel.load
+import com.yinlin.rachel.model.RachelDialog
 import com.yinlin.rachel.model.RachelFragment
 import com.yinlin.rachel.model.RachelMod
 import com.yinlin.rachel.model.RachelPages
@@ -58,9 +73,10 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
     private lateinit var onTimeUpdate: Runnable
     private val player = ExoPlayer.Builder(pages.context).build()
 
-    private val dialogCurrentPlaylist = DialogCurrentPlaylist(this)
-    private val dialogMusicInfo = DialogMusicInfo(this)
-    private val dialogLyricsInfo = DialogLyricsInfo(this)
+    private val bottomDialogLyricsEngine = BottomDialogLyricsEngine(this)
+    private val bottomDialogCurrentPlaylist = BottomDialogCurrentPlaylist(this)
+    private val bottomDialogMusicInfo = BottomDialogMusicInfo(this)
+    private val bottomDialogLyricsInfo = BottomDialogLyricsInfo(this)
 
     override fun bindingClass() = FragmentMusicBinding::class.java
 
@@ -91,10 +107,11 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
 
     @OptIn(UnstableApi::class)
     private fun initView() {
-        // 对话框
-        dialogCurrentPlaylist.init()
-        dialogMusicInfo.init()
-        dialogLyricsInfo.init()
+        // 底部框
+        bottomDialogLyricsEngine.init()
+        bottomDialogCurrentPlaylist.init()
+        bottomDialogMusicInfo.init()
+        bottomDialogLyricsInfo.init()
 
         // 播放器
         player.addListener(this)
@@ -111,9 +128,23 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
         // 唱片
         recordAnimation = RachelRotateAnimator(v.record, 15000)
         // 曲库
-        v.extra.rachelClick { pages.navigate(FragmentLibrary(pages, musicInfos, playlists)) }
+        v.toolLibrary.rachelClick { pages.navigate(FragmentLibrary(pages, musicInfos, playlists)) }
         // 歌单
-        v.classification.rachelClick { pages.navigate(FragmentPlaylist(pages, musicInfos, playlists, currentPlaylist)) }
+        v.toolPlaylist.rachelClick { pages.navigate(FragmentPlaylist(pages, musicInfos, playlists, currentPlaylist)) }
+        // 歌词引擎
+        v.toolLyricsEngine.rachelClick { bottomDialogLyricsEngine.update().show() }
+        // 工坊
+        v.toolWorkshop.rachelClick {
+            RachelDialog.choice(pages.context, "跳转工坊资源QQ群",
+                listOf("MOD0群", "MOD1群", "MOD2群")) { position, _ ->
+                gotoQQGroup(pages.context, pages.getResString(when (position) {
+                    0 -> R.string.qqgroup_mod0
+                    1 -> R.string.qqgroup_mod1
+                    2 -> R.string.qqgroup_mod2
+                    else -> R.string.qqgroup_main
+                }))
+            }
+        }
         // 样式
         v.title.bold = true
         // 进度条
@@ -171,7 +202,7 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
         // 播放列表
         v.buttonPlaylist.rachelClick {
             if (isLoadMusic && currentPlaylist != null) {
-                dialogCurrentPlaylist.update(currentPlaylist!!, currentMusic!!).show()
+                bottomDialogCurrentPlaylist.update(currentPlaylist!!, currentMusic!!).show()
             }
         }
         // AN
@@ -205,23 +236,26 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
                     val available = LyricsEngineFactory.hasEngine(engineName)
                     for (name in nameList) arr += LyricsInfo(engineName, name, available)
                 }
-                dialogLyricsInfo.update(arr).show()
+                bottomDialogLyricsInfo.update(arr).show()
             }
         }
         // 评论
-        v.buttonComment.rachelClick { }
+        v.buttonComment.rachelClick {
+
+        }
         // 分享
         v.buttonShare.rachelClick { }
         // 信息
         v.buttonInfo.rachelClick {
-            currentMusic?.apply { dialogMusicInfo.update(this).show() }
+            currentMusic?.apply { bottomDialogMusicInfo.update(this).show() }
         }
     }
 
     override fun quit() {
-        dialogLyricsInfo.release()
-        dialogCurrentPlaylist.release()
-        dialogMusicInfo.release()
+        bottomDialogLyricsEngine.release()
+        bottomDialogLyricsInfo.release()
+        bottomDialogCurrentPlaylist.release()
+        bottomDialogMusicInfo.release()
         endTimeUpdate()
         player.removeListener(this)
         player.release()
@@ -252,6 +286,7 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
                 // 数据存储
                 Config.playlist = playlists
             }
+            MUSIC_UPDATE_PLAYLIST -> playlists.clearAddAll(Config.playlist)
             MUSIC_DELETE_MUSIC_FROM_PLAYLIST -> {
                 val playlist = args[0] as Playlist
                 val position = args[1] as Int

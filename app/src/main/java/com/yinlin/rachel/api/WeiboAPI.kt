@@ -1,9 +1,12 @@
 package com.yinlin.rachel.api
 
+import com.google.gson.JsonObject
+import com.yinlin.rachel.IWeiboCommentList
 import com.yinlin.rachel.Net
-import com.yinlin.rachel.IMsgInfoList
+import com.yinlin.rachel.IWeiboList
 import com.yinlin.rachel.IWeiboUserMap
-import com.yinlin.rachel.data.MsgInfo
+import com.yinlin.rachel.data.Weibo
+import com.yinlin.rachel.data.WeiboComment
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -12,11 +15,10 @@ import java.util.Locale
 
 object WeiboAPI {
     const val BASEURL = "https://m.weibo.cn"
-    const val DETAILS_URL = "https://m.weibo.cn/detail/"
 
     fun extractContainerId(uid: String): Array<String>? = try {
         val url = "https://m.weibo.cn/api/container/getIndex?type=uid&value=$uid"
-        val json = Net.get(url, null)
+        val json = Net.get(url)
         val data = json!!.getAsJsonObject("data")
         val name = data.getAsJsonObject("userInfo")["screen_name"].asString
         val tabs = data.getAsJsonObject("tabsInfo").getAsJsonArray("tabs")
@@ -31,10 +33,10 @@ object WeiboAPI {
         arr
     } catch (ignored: Exception) { null }
 
-    private fun extractSingle(uid: String, containerId: String, array: IMsgInfoList) {
+    private fun extractSingle(uid: String, containerId: String, array: IWeiboList) {
         try {
             val url = "https://m.weibo.cn/api/container/getIndex?type=uid&value=$uid&containerid=$containerId"
-            val json = Net.get(url, null)
+            val json = Net.get(url)
             val cards = json!!.getAsJsonObject("data").getAsJsonArray("cards")
             for (item in cards) {
                 val card = item.asJsonObject
@@ -65,7 +67,7 @@ object WeiboAPI {
                 }
                 // 提取内容
                 val text = blogs["text"].asString
-                val info = MsgInfo(userName, avatar, text, formattedTime, location, blogId)
+                val info = Weibo(userName, avatar, text, formattedTime, location, blogId)
                 if (blogs.has("retweeted_status")) {
                     blogs = blogs.get("retweeted_status").asJsonObject // 转发微博
                 }
@@ -73,8 +75,8 @@ object WeiboAPI {
                 if (blogs.has("pics")) {
                     for (picItem in blogs.getAsJsonArray("pics")) {
                         val pic = picItem.asJsonObject
-                        info.pictures += MsgInfo.Picture(
-                            MsgInfo.MsgType.PICTURE,
+                        info.pictures += Weibo.Picture(
+                            Weibo.MsgType.PICTURE,
                             pic["url"].asString,
                             pic.getAsJsonObject("large")["url"].asString
                         )
@@ -86,8 +88,8 @@ object WeiboAPI {
                         val videoUrl = if (urls.has("mp4_720p_mp4")) urls["mp4_720p_mp4"].asString
                         else if (urls.has("mp4_hd_mp4")) urls["mp4_hd_mp4"].asString
                         else urls["mp4_ld_mp4"].asString
-                        info.pictures += MsgInfo.Picture(
-                            MsgInfo.MsgType.VIDEO,
+                        info.pictures += Weibo.Picture(
+                            Weibo.MsgType.VIDEO,
                             pageInfo.getAsJsonObject("page_pic")["url"].asString,
                             videoUrl
                         )
@@ -99,13 +101,59 @@ object WeiboAPI {
         catch (ignored: Exception) { }
     }
 
-    fun extract(weiboUsers: IWeiboUserMap, array: IMsgInfoList) {
+    fun extract(weiboUsers: IWeiboUserMap, array: IWeiboList) {
         for ((key, value) in weiboUsers) extractSingle(key, value.containerId, array)
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-        array.sortWith { o1: MsgInfo, o2: MsgInfo ->
+        array.sortWith { o1: Weibo, o2: Weibo ->
             val dateTime1 = LocalDateTime.parse(o1.time, formatter)
             val dateTime2 = LocalDateTime.parse(o2.time, formatter)
             dateTime1.compareTo(dateTime2) * -1
         }
+    }
+
+    private fun extractComment(card: JsonObject, type: WeiboComment.Type): WeiboComment {
+        // 提取名称和头像
+        val user = card.getAsJsonObject("user")
+        val userName = user["screen_name"].asString
+        val avatar = user["avatar_hd"].asString
+        // 提取时间
+        val inputFormat = SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", Locale.ENGLISH)
+        val outputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA)
+        var formattedTime = "未知时间"
+        try {
+            val date = inputFormat.parse(card["created_at"].asString)
+            formattedTime = outputFormat.format(date!!)
+        } catch (ignored: Exception) { }
+        // 提取IP
+        val location = if (card.has("source")) card["source"].asString.removePrefix("来自") else "IP未知"
+        // 提取内容
+        val text = card["text"].asString
+        return WeiboComment(type, userName, avatar, text, formattedTime, location)
+    }
+
+    fun details(id: String, array: IWeiboCommentList) {
+        try {
+            val url = "https://m.weibo.cn/comments/hotflow?id=${id}&mid=${id}"
+            val json = Net.get(url)
+            val cards = json!!.getAsJsonObject("data").getAsJsonArray("data")
+            for (item in cards) {
+                val card = item.asJsonObject
+                val comment = extractComment(card, WeiboComment.Type.Comment)
+                // 带图片
+                if (card.has("pic")) {
+                    comment.pic = card.getAsJsonObject("pic").getAsJsonObject("large").get("url").asString
+                }
+                array += comment
+                // 楼中楼
+                val comments = card.get("comments")
+                if (comments.isJsonArray) {
+                    for (subCard in comments.asJsonArray) {
+                        val subComment = extractComment(subCard.asJsonObject, WeiboComment.Type.SubComment)
+                        array += subComment
+                    }
+                }
+            }
+        }
+        catch (ignored: Exception) { }
     }
 }

@@ -9,6 +9,19 @@ class RachelNineGridPicture(private var picUrl: String = "") : IPreviewInfo {
     var showBounds: Rect = Rect()
 
     companion object CREATOR : Parcelable.Creator<RachelNineGridPicture> {
+        fun <T> make(collection: Collection<T>, fetch: ((T) -> String)? = null): List<RachelNineGridPicture> {
+            val pics = ArrayList<RachelNineGridPicture>(collection.size)
+            if (fetch == null) {
+                for (item in collection) {
+                    if (item is String) pics += RachelNineGridPicture(item)
+                }
+            }
+            else {
+                for (item in collection) pics += RachelNineGridPicture(fetch(item))
+            }
+            return pics
+        }
+
         override fun createFromParcel(parcel: Parcel) = RachelNineGridPicture(parcel)
         override fun newArray(size: Int) = arrayOfNulls<RachelNineGridPicture>(size)
     }

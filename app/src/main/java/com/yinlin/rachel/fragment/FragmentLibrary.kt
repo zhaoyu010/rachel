@@ -116,12 +116,11 @@ class FragmentLibrary(pages: RachelPages,
         if (playlists.isNotEmpty()) {
             val selectIds = adapter.checkIds // 获得所有歌单名供选择
             if (selectIds.isNotEmpty()) {
-                RachelDialog.choice(pages.context, "添加到歌单", playlists.keys) { _, _, _, text ->
+                RachelDialog.choice(pages.context, "添加到歌单", playlists.keys) { _, text ->
                     pages.pop()
-                    val playlist = playlists[text.toString()]
+                    val playlist = playlists[text]
                     val num: Int = pages.sendMessageForResult(RachelPages.music, RachelMessage.MUSIC_ADD_MUSIC_INTO_PLAYLIST, playlist, selectIds)!!
                     XToastUtils.success("已添加${num}首歌曲")
-                    true
                 }
             }
             else XToastUtils.warning("请至少选择一首歌曲")
@@ -133,7 +132,7 @@ class FragmentLibrary(pages: RachelPages,
     private fun deleteMusic() {
         val selectIds = adapter.checkIds
         if (selectIds.isNotEmpty()) {
-            RachelDialog.confirm(pages.context, "是否从曲库中卸载指定歌曲?") { _, _ ->
+            RachelDialog.confirm(pages.context, "是否从曲库中卸载指定歌曲?") {
                 pages.pop()
                 pages.sendMessage(RachelPages.music, RachelMessage.MUSIC_DELETE_MUSIC, selectIds)
                 XToastUtils.success("已卸载${selectIds.size}首歌曲")

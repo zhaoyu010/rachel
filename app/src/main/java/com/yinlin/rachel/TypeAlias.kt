@@ -1,12 +1,14 @@
 package com.yinlin.rachel
 
 import com.yinlin.rachel.data.LyricsInfo
-import com.yinlin.rachel.data.MsgInfo
+import com.yinlin.rachel.data.Weibo
 import com.yinlin.rachel.data.MusicInfo
 import com.yinlin.rachel.data.Playlist
+import com.yinlin.rachel.data.WeiboComment
 import com.yinlin.rachel.data.WeiboUser
 
-typealias IMsgInfoList = MutableList<MsgInfo>
+typealias IWeiboList = MutableList<Weibo>
+typealias IWeiboCommentList = MutableList<WeiboComment>
 
 typealias WeiboUserMap = LinkedHashMap<String, WeiboUser>
 typealias IWeiboUserMap = MutableMap<String, WeiboUser>

@@ -11,11 +11,11 @@ android {
         applicationId = "com.yinlin.rachel"
         minSdk = 29
         targetSdk = 34
-        versionCode = 122
-        versionName = "1.2.2-alpha"
+        versionCode = 126
+        versionName = "1.2.6-alpha"
 
         ndk {
-            abiFilters += "arm64-v8a"
+            abiFilters.addAll(mutableSetOf("arm64-v8a"))
         }
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -85,7 +85,6 @@ dependencies {
     implementation("com.github.bumptech.glide:glide:4.16.0")
     implementation("com.github.CarGuo.GSYVideoPlayer:gsyVideoPlayer-java:v9.0.0-release-jitpack")
     implementation("com.github.CarGuo.GSYVideoPlayer:gsyVideoPlayer-arm64:v9.0.0-release-jitpack")
-
     implementation("com.github.chaychan:BottomBarLayout:3.0.0")
     implementation("com.github.forJrking:KLuban:1.1.0")
     implementation("com.github.xuexiangjys:XUI:1.2.1")

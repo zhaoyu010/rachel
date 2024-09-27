@@ -27,7 +27,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class FragmentDiscovery(pages: RachelPages) : RachelFragment<FragmentDiscoveryBinding>(pages), OnQueryTextListener {
-    class Adapter(private val fragment: FragmentDiscovery) : RachelAdapter<ItemTopicUserBinding, TopicPreview>() {
+    class Adapter(fragment: FragmentDiscovery) : RachelAdapter<ItemTopicUserBinding, TopicPreview>() {
         private val pages = fragment.pages
         private val rilNet = RachelImageLoader(pages.context, R.drawable.placeholder_loading, DiskCacheStrategy.ALL)
 
@@ -59,7 +59,6 @@ class FragmentDiscovery(pages: RachelPages) : RachelFragment<FragmentDiscoveryBi
 
     private var topicUpper: Int = 2147483647
     private var topicOffset: Int = 0
-    private var isLoading: Boolean = false
 
     private val adapter = Adapter(this)
 
@@ -88,21 +87,19 @@ class FragmentDiscovery(pages: RachelPages) : RachelFragment<FragmentDiscoveryBi
             pages.navigate(FragmentCreateTopic(pages))
         }
 
+        v.container.setEnableAutoLoadMore(true)
+        v.container.setEnableOverScrollDrag(false)
+        v.container.setEnableOverScrollBounce(false)
         v.container.setOnRefreshListener {
-            if (!isLoading) {
-                isLoading = true
-                v.container.resetNoMoreData()
-                if (v.tvLatest.active) requestLatestTopic()
-                else requestHotTopic()
-            }
+            v.container.resetNoMoreData()
+            if (v.tvLatest.active) requestLatestTopic()
+            else requestHotTopic()
         }
         v.container.setEnableLoadMore(true)
         v.container.setOnLoadMoreListener {
-            if (!isLoading) {
-                isLoading = true
-                if (v.tvLatest.active) requestLatestTopicMore()
-                else requestHotTopicMore()
-            }
+            println("上拉")
+            if (v.tvLatest.active) requestLatestTopicMore()
+            else requestHotTopicMore()
         }
 
         v.list.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
@@ -125,6 +122,9 @@ class FragmentDiscovery(pages: RachelPages) : RachelFragment<FragmentDiscoveryBi
 
     override fun back(): Boolean {
         if (v.search.isSearchOpen) v.search.closeSearch()
+        else {
+            v.list.smoothScrollToPosition(0)
+        }
         return false
     }
 
@@ -139,15 +139,11 @@ class FragmentDiscovery(pages: RachelPages) : RachelFragment<FragmentDiscoveryBi
     private fun requestLatestTopic() {
         lifecycleScope.launch {
             v.list.scrollToPosition(0)
-            val topics = withContext(Dispatchers.IO) {
-                val topics = API.UserAPI.getLatestTopic()
-                withContext(Dispatchers.Main) { v.container.finishRefresh() }
-                topics
-            }
+            val topics = withContext(Dispatchers.IO) { API.UserAPI.getLatestTopic() }
             topicUpper = if (topics.isEmpty()) 2147483647 else topics.last().tid
             adapter.items.clearAddAll(topics)
             adapter.notifyDataSetChanged()
-            isLoading = false
+            v.container.finishRefresh()
         }
     }
 
@@ -155,56 +151,41 @@ class FragmentDiscovery(pages: RachelPages) : RachelFragment<FragmentDiscoveryBi
     private fun requestHotTopic() {
         lifecycleScope.launch {
             v.list.scrollToPosition(0)
-            val topics = withContext(Dispatchers.IO) {
-                val topics = API.UserAPI.getHotTopic()
-                withContext(Dispatchers.Main) { v.container.finishRefresh() }
-                topics
-            }
+            val topics = withContext(Dispatchers.IO) { API.UserAPI.getHotTopic() }
             topicOffset = if (topics.isEmpty()) 0 else topics.size
             adapter.items.clearAddAll(topics)
             adapter.notifyDataSetChanged()
-            isLoading = false
+            v.container.finishRefresh()
         }
     }
 
     @NewThread @SuppressLint("NotifyDataSetChanged")
     private fun requestLatestTopicMore() {
         lifecycleScope.launch {
-            val topics = withContext(Dispatchers.IO) {
-                val topics = API.UserAPI.getLatestTopic(topicUpper)
-                withContext(Dispatchers.Main) {
-                    if (topics.isEmpty()) v.container.finishLoadMoreWithNoMoreData()
-                    else v.container.finishLoadMore()
-                }
-                topics
-            }
-            if (topics.isNotEmpty()) {
+            val topics = withContext(Dispatchers.IO) { API.UserAPI.getLatestTopic(topicUpper) }
+            if (topics.isEmpty()) v.container.finishLoadMoreWithNoMoreData()
+            else {
+                val newCount = topics.size
                 topicUpper = topics.last().tid
                 adapter.items.addAll(topics)
-                adapter.notifyDataSetChanged()
+                adapter.notifyItemRangeInserted(adapter.items.size - newCount, newCount)
+                v.container.finishLoadMore()
             }
-            isLoading = false
         }
     }
 
-    @NewThread @SuppressLint("NotifyDataSetChanged")
+    @NewThread
     private fun requestHotTopicMore() {
         lifecycleScope.launch {
-            val topics = withContext(Dispatchers.IO) {
-                val topics = API.UserAPI.getHotTopic(topicOffset)
-                withContext(Dispatchers.Main) {
-                    if (topics.isEmpty()) v.container.finishLoadMoreWithNoMoreData()
-                    else v.container.finishLoadMore()
-                }
-                topics
-            }
-            if (topics.isNotEmpty()) {
+            val topics = withContext(Dispatchers.IO) { API.UserAPI.getHotTopic(topicOffset) }
+            if (topics.isEmpty()) v.container.finishLoadMoreWithNoMoreData()
+            else {
+                val newCount = topics.size
                 topicOffset += topics.size
                 adapter.items.addAll(topics)
-                adapter.notifyDataSetChanged()
+                adapter.notifyItemRangeInserted(adapter.items.size - newCount, newCount)
+                v.container.finishLoadMore()
             }
-            else XToastUtils.warning("没有更多主题啦")
-            isLoading = false
         }
     }
 }

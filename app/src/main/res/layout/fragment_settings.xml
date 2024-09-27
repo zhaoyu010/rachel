@@ -90,6 +90,7 @@
             android:id="@+id/weibo_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
+
         <TextView
             android:id="@+id/tv_res"
             style="@style/RachelText"
@@ -105,5 +106,29 @@
             android:text=" - 听歌设置"
             android:textColor="@color/steel_blue"
             android:textSize="@dimen/base" />
+        <com.xuexiang.xui.widget.textview.supertextview.SuperTextView
+            style="@style/RachelSettingsItem"
+            app:sLeftTextString="歌单云备份"
+            app:sRightIconRes="@null" >
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_toStartOf="@id/sRightImgId"
+                android:layout_centerVertical="true" >
+                <ImageView
+                    android:id="@+id/button_upload_playlist"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="10dp"
+                    android:src="@drawable/svg_upload_blue" />
+                <ImageView
+                    android:id="@+id/button_download_playlist"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="10dp"
+                    android:src="@drawable/svg_download_blue" />
+            </LinearLayout>
+        </com.xuexiang.xui.widget.textview.supertextview.SuperTextView>
     </LinearLayout>
 </ScrollView>

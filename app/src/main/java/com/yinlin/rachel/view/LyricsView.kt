@@ -57,7 +57,7 @@ class LyricsView(context: Context, attrs: AttributeSet?, defStyleAttr: Int)
             // 寻找可以使用的歌词引擎
             for ((engineName, _) in lyrics) {
                 if (LyricsEngineFactory.hasEngine(engineName)) {
-                    lyricsEngine = LyricsEngineFactory.newEngine(engineName)
+                    lyricsEngine = LyricsEngineFactory.newEngine(context, engineName)
                     break
                 }
             }
@@ -79,7 +79,7 @@ class LyricsView(context: Context, attrs: AttributeSet?, defStyleAttr: Int)
             if (lyricsEngine?.name != engineName) releaseEngine()
             else lyricsEngine?.clear()
         }
-        if (lyricsEngine == null) lyricsEngine = LyricsEngineFactory.newEngine(engineName)
+        if (lyricsEngine == null) lyricsEngine = LyricsEngineFactory.newEngine(context, engineName)
         if (lyricsEngine == null) return false
         else {
             lyricsFileName = (pathMusic / "${musicInfo.id}${if(name.isEmpty()) "" else "_"}${name}${lyricsEngine?.ext}").absolutePath

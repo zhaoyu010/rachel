@@ -4,7 +4,6 @@ import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.xuexiang.xui.utils.XToastUtils
 import com.yinlin.rachel.Config
-import com.yinlin.rachel.model.RachelDialog
 import com.yinlin.rachel.R
 import com.yinlin.rachel.RachelMessage
 import com.yinlin.rachel.annotation.NewThread
@@ -15,6 +14,7 @@ import com.yinlin.rachel.clear
 import com.yinlin.rachel.data.WeiboUser
 import com.yinlin.rachel.databinding.FragmentSettingsBinding
 import com.yinlin.rachel.load
+import com.yinlin.rachel.model.RachelDialog
 import com.yinlin.rachel.model.RachelFragment
 import com.yinlin.rachel.model.RachelImageLoader
 import com.yinlin.rachel.model.RachelPages
@@ -46,7 +46,7 @@ class FragmentSettings(pages: RachelPages) : RachelFragment<FragmentSettingsBind
         // 更新个性签名
         v.signature.rachelClick {
             if (Config.isLoginAndUpdate) {
-                RachelDialog.input(pages.context, "请输入个性签名", 64) { _, input -> updateSignature(input.toString()) }
+                RachelDialog.input(pages.context, "请输入个性签名", 64) { updateSignature(it) }
             }
             else XToastUtils.warning("请先登录")
         }
@@ -62,7 +62,7 @@ class FragmentSettings(pages: RachelPages) : RachelFragment<FragmentSettingsBind
         // 退出登录
         v.logoff.setOnSuperTextViewClickListener {
             if (Config.isLoginAndUpdate) {
-                RachelDialog.confirm(pages.context, "是否退出登录") { _, _ -> logoff() }
+                RachelDialog.confirm(pages.context, "是否退出登录") { logoff() }
             }
             else XToastUtils.warning("请先登录")
         }
@@ -71,16 +71,15 @@ class FragmentSettings(pages: RachelPages) : RachelFragment<FragmentSettingsBind
         v.tvMsg.bold = true
         // 添加微博用户
         v.weibo.setOnSuperTextViewClickListener {
-            RachelDialog.input(pages.context, "请输入微博用户的uid(非昵称)", 20) { _, input ->
-                val uid = input.toString()
-                val weiboUser: WeiboUser? = Config.weibo_users[uid]
+            RachelDialog.input(pages.context, "请输入微博用户的uid(非昵称)", 20) {
+                val weiboUser: WeiboUser? = Config.weibo_users[it]
                 if (weiboUser != null) XToastUtils.warning(weiboUser.name + " 已存在")
-                else addWeiboUser(uid)
+                else addWeiboUser(it)
             }
         }
         // 删除微博用户
         v.weiboList.setOnTagClickListener { text ->
-            RachelDialog.confirm(pages.context, "是否删除此微博用户") { _, _ ->
+            RachelDialog.confirm(pages.context, "是否删除此微博用户") {
                 val weiboUsers = Config.weibo_users
                 weiboUsers.entries.removeIf { entry -> entry.value.name == text }
                 Config.weibo_users = weiboUsers
@@ -93,6 +92,22 @@ class FragmentSettings(pages: RachelPages) : RachelFragment<FragmentSettingsBind
 
         /*    ----    听歌设置    ----    */
         v.tvMusic.bold = true
+
+        // 歌单云备份
+        v.buttonUploadPlaylist.rachelClick {
+            if (Config.isLogin) {
+                RachelDialog.confirm(pages.context, "是否将本地所有歌单覆盖云端") { uploadPlaylist() }
+            }
+            else XToastUtils.warning("请先登录")
+        }
+
+        // 歌单云还原
+        v.buttonDownloadPlaylist.rachelClick {
+            if (Config.isLogin) {
+                RachelDialog.confirm(pages.context, "是否从云端覆盖所有本地歌单") { downloadPlaylist() }
+            }
+            else XToastUtils.warning("请先登录")
+        }
 
         updateInfo()
     }
@@ -201,6 +216,33 @@ class FragmentSettings(pages: RachelPages) : RachelFragment<FragmentSettingsBind
                 pages.requestUserInfo()
             }
             else XToastUtils.error(result.value)
+        }
+    }
+
+    @NewThread
+    private fun uploadPlaylist() {
+        lifecycleScope.launch {
+            val result = withContext(Dispatchers.IO) {
+                API.UserAPI.uploadPlaylist(Config.user_id, Config.user_pwd, Config.playlist)
+            }
+            if (result.ok) XToastUtils.success(result.value)
+            else XToastUtils.error(result.value)
+        }
+    }
+
+    @NewThread
+    private fun downloadPlaylist() {
+        lifecycleScope.launch {
+            val result = withContext(Dispatchers.IO) {
+                API.UserAPI.downloadPlaylist(Config.user_id, Config.user_pwd)
+            }
+            if (result.ok) {
+                pages.sendMessage(RachelPages.music, RachelMessage.MUSIC_STOP_PLAYER)
+                Config.playlist = result.value2
+                pages.sendMessage(RachelPages.music, RachelMessage.MUSIC_UPDATE_PLAYLIST)
+                XToastUtils.success(result.value1)
+            }
+            else XToastUtils.error(result.value1)
         }
     }
 }

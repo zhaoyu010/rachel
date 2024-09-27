@@ -8,8 +8,6 @@ import android.graphics.Typeface
 import android.view.Gravity
 import com.tencent.mmkv.MMKV
 import com.xuexiang.xui.XUI
-import com.xuexiang.xui.widget.popupwindow.popup.XUIBasePopup
-import com.xuexiang.xui.widget.popupwindow.popup.XUIPopup
 import com.xuexiang.xui.widget.toast.XToast
 import java.io.PrintWriter
 import java.io.StringWriter
@@ -17,7 +15,7 @@ import java.io.StringWriter
 
 class RachelApplication : Application() {
     companion object {
-        const val DEFAULT_FONT_PATH = "fonts/SourceHanSans.otf"
+        const val DEFAULT_FONT_PATH = "fonts/XWWK.ttf"
     }
 
     class CrashHandler(val context: Context) : Thread.UncaughtExceptionHandler {

@@ -16,8 +16,8 @@ import com.xuexiang.xui.utils.WidgetUtils
 import com.xuexiang.xui.utils.XToastUtils
 import com.xuexiang.xui.widget.dialog.LoadingDialog
 import com.yinlin.rachel.Config
-import com.yinlin.rachel.RachelMessage
 import com.yinlin.rachel.R
+import com.yinlin.rachel.RachelMessage
 import com.yinlin.rachel.RachelMessage.ME_UPDATE_USER_INFO
 import com.yinlin.rachel.annotation.NewThread
 import com.yinlin.rachel.api.API

@@ -39,7 +39,14 @@ data class User(
     fun hasPrivilege(mask: Int) = (privilege and mask) != 0
 
     fun canUpdateTopicTop(topicId: String) = id == topicId
-    fun canDeleteTopic(topicId: String) = id == topicId || hasPrivilege(PRIVILEGE_VIP_ACCOUNT)
-    fun canUpdateCommentTop(topicId: String) = id == topicId || hasPrivilege(PRIVILEGE_VIP_ACCOUNT)
-    fun canDeleteComment(topicId: String, commentId: String) = id == topicId || id == commentId || hasPrivilege(PRIVILEGE_VIP_ACCOUNT)
+    fun canDeleteTopic(topicId: String) = id == topicId || hasPrivilege(PRIVILEGE_VIP_TOPIC)
+    fun canUpdateCommentTop(topicId: String) = id == topicId || hasPrivilege(PRIVILEGE_VIP_TOPIC)
+    fun canDeleteComment(topicId: String, commentId: String) = id == topicId || id == commentId || hasPrivilege(PRIVILEGE_VIP_TOPIC)
+
+    fun hasPrivilegeBackup() = hasPrivilege(PRIVILEGE_BACKUP)
+    fun hasPrivilegeRes() = hasPrivilege(PRIVILEGE_RES)
+    fun hasPrivilegeTopic() = hasPrivilege(PRIVILEGE_TOPIC)
+    fun hasPrivilegeVIPAccount() = hasPrivilege(PRIVILEGE_VIP_ACCOUNT)
+    fun hasPrivilegeVIPTopic() = hasPrivilege(PRIVILEGE_VIP_TOPIC)
+    fun hasPrivilegeVIPCalendar() = hasPrivilege(PRIVILEGE_VIP_CALENDAR)
 }

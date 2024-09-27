@@ -100,12 +100,12 @@
                             android:id="@+id/level"
                             style="@style/RachelText"
                             android:text="1"
+                            android:textSize="@dimen/base"
                             android:textColor="@color/black" />
                         <TextView
                             android:id="@+id/tv_level"
                             style="@style/RachelText"
                             android:text="等级"
-                            android:textSize="@dimen/xs"
                             android:textColor="@color/black" />
                     </LinearLayout>
                     <LinearLayout
@@ -121,12 +121,12 @@
                             android:id="@+id/coin"
                             style="@style/RachelText"
                             android:text="0"
+                            android:textSize="@dimen/base"
                             android:textColor="@color/black" />
                         <TextView
                             android:id="@+id/tv_coin"
                             style="@style/RachelText"
                             android:text="银币"
-                            android:textSize="@dimen/xs"
                             android:textColor="@color/black" />
                     </LinearLayout>
                     <LinearLayout
@@ -257,31 +257,43 @@
                 app:layout_constraintTop_toBottomOf="@id/account_container"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:contentPadding="10dp"
-                android:layout_margin="10dp" >
+                android:layout_margin="10dp"
+                android:minHeight="300dp" >
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" >
                     <TextView
-                        android:id="@+id/tv_show"
+                        android:id="@+id/calendar_month"
                         style="@style/RachelText"
                         app:layout_constraintLeft_toLeftOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toTopOf="@id/calendar"
+                        app:layout_constraintBottom_toTopOf="@id/calendar_state"
+                        android:layout_marginStart="10dp"
                         android:layout_marginBottom="10dp"
-                        android:text="演出活动" />
-                    <com.haibin.calendarview.CalendarView
-                        android:id="@+id/calendar"
+                        android:text="1991年12月"
+                        android:textSize="@dimen/lg" />
+                    <ImageView
+                        android:id="@+id/button_activity_refresh"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintRight_toRightOf="parent"
+                        android:src="@drawable/svg_refresh_blue" />
+                    <com.xuexiang.xui.widget.statelayout.StatefulLayout
+                        android:id="@+id/calendar_state"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         app:layout_constraintLeft_toLeftOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        android:background="@color/white"
-                        app:month_view="com.yinlin.rachel.view.RachelMonthView"
-                        app:month_view_show_mode="mode_all"
-                        app:week_start_with="mon"
-                        app:week_bar_height="24dp"
-                        app:week_text_size="@dimen/xs"
-                        app:select_mode="single_mode" />
+                        app:stf_inAnimation="@anim/ps_anim_fade_in"
+                        app:stf_outAnimation="@anim/ps_anim_fade_out" >
+                        <com.yinlin.rachel.view.ActivityCalendarView
+                            android:id="@+id/calendar"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:week_bar_height="24dp"
+                            app:week_text_size="@dimen/xs" />
+                    </com.xuexiang.xui.widget.statelayout.StatefulLayout>
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.cardview.widget.CardView>
         </androidx.constraintlayout.widget.ConstraintLayout>

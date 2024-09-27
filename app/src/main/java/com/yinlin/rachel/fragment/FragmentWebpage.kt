@@ -18,6 +18,10 @@ class FragmentWebpage(pages: RachelPages, private val url: String) : RachelFragm
         v.web.loadUrl(url)
     }
 
+    override fun quit() {
+        v.web.destroy()
+    }
+
     override fun back(): Boolean {
         if (v.web.canGoBack()) {
             v.web.goBack()

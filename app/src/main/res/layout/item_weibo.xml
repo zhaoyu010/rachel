@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    android:id="@+id/weibo_card"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/RachelCard"
+    app:contentPadding="10dp" >
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+        <com.xuexiang.xui.widget.imageview.RadiusImageView
+            android:id="@+id/avatar"
+            style="@style/RachelRoundImage"
+            app:layout_constraintTop_toTopOf="@id/name"
+            app:layout_constraintBottom_toBottomOf="@id/time"
+            app:layout_constraintLeft_toLeftOf="parent" />
+        <TextView
+            android:id="@+id/name"
+            style="@style/RachelText.X0"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toRightOf="@id/avatar"
+            app:layout_constraintRight_toRightOf="parent"
+            android:layout_marginHorizontal="10dp"
+            android:textSize="@dimen/base"
+            android:textColor="@color/orange_red" />
+        <TextView
+            android:id="@+id/time"
+            style="@style/RachelText"
+            app:layout_constraintLeft_toLeftOf="@id/name"
+            app:layout_constraintTop_toBottomOf="@id/name"
+            android:layout_marginTop="3dp"
+            android:textColor="@color/dark_gray" />
+        <TextView
+            android:id="@+id/location"
+            style="@style/RachelText"
+            android:layout_width="0dp"
+            app:layout_constraintLeft_toRightOf="@id/time"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="@id/time"
+            android:layout_marginHorizontal="10dp"
+            android:textAlignment="textEnd"
+            android:textColor="@color/dark_gray" />
+        <org.sufficientlysecure.htmltextview.HtmlTextView
+            android:id="@+id/text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/avatar"
+            app:layout_constraintLeft_toLeftOf="parent"
+            android:layout_marginTop="10dp"
+            android:textSize="@dimen/base"
+            android:textColor="@color/black" />
+        <com.xuexiang.xui.widget.imageview.nine.NineGridImageView
+            android:id="@+id/pics"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/text"
+            app:layout_constraintLeft_toLeftOf="parent"
+            android:layout_marginTop="10dp"
+            app:ngiv_imgGap="3dp"
+            app:ngiv_showStyle="fill" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>

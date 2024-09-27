@@ -38,9 +38,9 @@ class HotpotProgressView(context: Context, attrs: AttributeSet?, defStyleAttr: I
     constructor(context: Context): this(context, null)
 
     init {
-        paintTotal.color = context.getColor(R.color.gray)
-        paintPlayed.color = context.getColor(R.color.steel_blue)
-        paintHotpot.color = context.getColor(R.color.music_hotpot)
+        paintTotal.color = context.getColor(R.color.music_progress_total)
+        paintPlayed.color = context.getColor(R.color.music_progress_played)
+        paintHotpot.color = context.getColor(R.color.music_progress_hotpot)
         paintText.color = context.getColor(R.color.white)
         paintText.textSize = 12f.toSP(context)
         if (!isInEditMode) paintText.bold(context, false)
@@ -56,22 +56,22 @@ class HotpotProgressView(context: Context, attrs: AttributeSet?, defStyleAttr: I
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        val canvasWidth = width
-        val canvasHeight = height
-        val playedWidth = if (duration == 0L) 0f else played.toFloat() * canvasWidth / duration
-        val radius = progressHeight / 2f
+        val canvasWidth = width.toFloat()
+        val canvasHeight = height.toFloat()
+        val playedWidth = if (duration == 0L) 0f else played * canvasWidth / duration
         val progressTop = textHeight + gap
         val playedText = played.toStringTime()
         val totalText = duration.toStringTime()
         canvas.drawText(playedText, 0f, textHeight, paintText)
         canvas.drawText(totalText, canvasWidth - paintText.measureText(totalText), textHeight, paintText)
-        canvas.drawRoundRect(0f, progressTop, canvasWidth.toFloat(), canvasHeight.toFloat(), radius, radius, paintTotal)
-        canvas.drawRoundRect(0f, progressTop, playedWidth, canvasHeight.toFloat(), radius, radius, paintPlayed)
+        val centerProgressY = progressTop + (canvasHeight - progressTop) / 2
+        val progressHeightHalf = (canvasHeight - progressTop) / 6
+        val radius = progressHeightHalf * 2
+        canvas.drawRoundRect(0f, centerProgressY + progressHeightHalf, canvasWidth, centerProgressY - progressHeightHalf, radius, radius, paintTotal)
+        canvas.drawRoundRect(0f, centerProgressY + progressHeightHalf, playedWidth, centerProgressY - progressHeightHalf, radius, radius, paintPlayed)
         if (duration != 0L) {
-            val radiusX = progressHeight / 5f
             for (position in items) {
-                val posX = position.toFloat() * canvasWidth / duration
-                canvas.drawRect(posX - radiusX, progressTop, posX + radiusX, canvasHeight.toFloat(), paintHotpot)
+                canvas.drawCircle(position * canvasWidth / duration, centerProgressY, radius, paintHotpot)
             }
         }
     }

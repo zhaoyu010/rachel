@@ -16,7 +16,7 @@ abstract class RachelBottomDialog<Binding : ViewBinding, F : RachelFragment<*>>
     private val maxDialogHeight = (context.resources.displayMetrics.heightPixels * maxHeightPercent).toInt()
 
     protected abstract fun bindingClass(): Class<Binding>
-
+    protected open fun quit() {}
     @CallSuper
     open fun init() {
         val cls: Class<Binding> = bindingClass()
@@ -45,6 +45,7 @@ abstract class RachelBottomDialog<Binding : ViewBinding, F : RachelFragment<*>>
 
     fun release() {
         dialog?.dismiss()
+        quit()
         _binding = null
     }
 }

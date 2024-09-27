@@ -1,7 +1,9 @@
 package com.yinlin.rachel.model.engine
 
+import android.content.Context
 import android.graphics.SurfaceTexture
 import android.view.TextureView
+import com.yinlin.rachel.R
 import org.libpag.PAGFile
 import org.libpag.PAGPlayer
 import org.libpag.PAGScaleMode
@@ -9,8 +11,12 @@ import org.libpag.PAGSurface
 
 
 // PAG动态歌词引擎
-class PAGLyricsEngine : LyricsEngine {
-    companion object { const val NAME = "pag" }
+class PAGLyricsEngine(private val context: Context) : LyricsEngine {
+    companion object {
+        const val NAME = "pag"
+        const val DESCRIPTION = "腾讯自研完整动画工作流解决方案, 以AE动效为基础渲染动画，具有高支持度、高可用性、高性能的特点"
+        val ICON: Int = R.drawable.lyrics_engine_pag
+    }
     override val name: String = NAME
     override val ext: String = ".pag"
 

@@ -2,33 +2,25 @@ package com.yinlin.rachel.fragment
 
 import android.annotation.SuppressLint
 import android.graphics.Paint
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.xuexiang.xui.utils.XToastUtils
 import com.xuexiang.xui.widget.dialog.materialdialog.MaterialDialog
 import com.xuexiang.xui.widget.dialog.materialdialog.simplelist.MaterialSimpleListAdapter
 import com.xuexiang.xui.widget.dialog.materialdialog.simplelist.MaterialSimpleListItem
 import com.xuexiang.xui.widget.tabbar.TabSegment
-import com.yinlin.rachel.Config
-import com.yinlin.rachel.model.RachelDialog
 import com.yinlin.rachel.IMusicInfoMap
 import com.yinlin.rachel.IPlaylistMap
 import com.yinlin.rachel.R
 import com.yinlin.rachel.RachelMessage
-import com.yinlin.rachel.annotation.NewThread
-import com.yinlin.rachel.api.API
-import com.yinlin.rachel.clearAddAll
 import com.yinlin.rachel.data.Playlist
 import com.yinlin.rachel.databinding.FragmentPlaylistBinding
 import com.yinlin.rachel.databinding.ItemPlaylistBinding
 import com.yinlin.rachel.model.RachelAdapter
+import com.yinlin.rachel.model.RachelDialog
 import com.yinlin.rachel.model.RachelFragment
 import com.yinlin.rachel.model.RachelPages
 import com.yinlin.rachel.rachelClick
 import com.yinlin.rachel.textColor
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 
 class FragmentPlaylist(pages: RachelPages, musicInfos: IMusicInfoMap,
@@ -62,7 +54,7 @@ class FragmentPlaylist(pages: RachelPages, musicInfos: IMusicInfoMap,
             // 若无音源显示未知, 歌曲被删除后仍然可以显示在歌单中
             val name = musicInfo?.name ?: item
             selectedPlaylist?.apply {
-                RachelDialog.confirm(pages.context, "是否从歌单\"${this.name}\"中删除\"$name\"?") { _, _ ->
+                RachelDialog.confirm(pages.context, "是否从歌单\"${this.name}\"中删除\"$name\"?") {
                     pages.sendMessage(RachelPages.music, RachelMessage.MUSIC_DELETE_MUSIC_FROM_PLAYLIST, this, position)
                     notifyItemRemoved(position)
                 }
@@ -89,19 +81,7 @@ class FragmentPlaylist(pages: RachelPages, musicInfos: IMusicInfoMap,
     override fun init() {
         // 创建歌单
         v.buttonAdd.rachelClick {
-            RachelDialog.input(pages.context, "请输入新歌单名称", 10) { _, input ->
-                createPlaylist(input.toString())
-            }
-        }
-
-        // 云备份
-        v.buttonUpload.rachelClick {
-            RachelDialog.confirm(pages.context, "是否将本地所有歌单覆盖云端") { _, _ -> uploadPlaylist() }
-        }
-
-        // 云还原
-        v.buttonDownload.rachelClick {
-            RachelDialog.confirm(pages.context, "是否从云端覆盖所有本地歌单") { _, _ -> downloadPlaylist() }
+            RachelDialog.input(pages.context, "请输入新歌单名称", 10) { createPlaylist(it) }
         }
 
         // 列表
@@ -145,16 +125,15 @@ class FragmentPlaylist(pages: RachelPages, musicInfos: IMusicInfoMap,
                 pages.sendMessage(RachelPages.music, RachelMessage.MUSIC_START_PLAYER, adapter.selectedPlaylist)
                 pages.pop()
             }
-            "重命名" -> RachelDialog.input(pages.context, "请输入歌单名称", 10) { _, input ->
-                val newName = input.toString()
-                if (pages.sendMessageForResult<Boolean>(RachelPages.music, RachelMessage.MUSIC_RENAME_PLAYLIST, adapter.selectedPlaylist, newName)!!) {
+            "重命名" -> RachelDialog.input(pages.context, "请输入歌单名称", 10) {
+                if (pages.sendMessageForResult<Boolean>(RachelPages.music, RachelMessage.MUSIC_RENAME_PLAYLIST, adapter.selectedPlaylist, it)!!) {
                     XToastUtils.success("修改成功")
-                    v.tab.getTab(v.tab.selectedIndex).text = newName
+                    v.tab.getTab(v.tab.selectedIndex).text = it
                     v.tab.notifyDataChanged()
                 }
                 else XToastUtils.warning("歌单已存在或名称不合法")
             }
-            "删除" -> RachelDialog.confirm(pages.context, "是否删除歌单\"${adapter.selectedPlaylist!!.name}\"") { _, _ ->
+            "删除" -> RachelDialog.confirm(pages.context, "是否删除歌单\"${adapter.selectedPlaylist!!.name}\"") {
                 pages.sendMessage(RachelPages.music, RachelMessage.MUSIC_DELETE_PLAYLIST, adapter.selectedPlaylist)
                 updatePlaylist()
             }
@@ -186,33 +165,5 @@ class FragmentPlaylist(pages: RachelPages, musicInfos: IMusicInfoMap,
             v.tab.selectTab(playlists.size - 1)
         }
         else XToastUtils.warning("歌单已存在或名称不合法")
-    }
-
-    @NewThread
-    private fun uploadPlaylist() {
-        lifecycleScope.launch {
-            val result = withContext(Dispatchers.IO) {
-                API.UserAPI.uploadPlaylist(Config.user_id, Config.user_pwd, playlists)
-            }
-            if (result.ok) XToastUtils.success(result.value)
-            else XToastUtils.error(result.value)
-        }
-    }
-
-    @NewThread
-    private fun downloadPlaylist() {
-        lifecycleScope.launch {
-            val result = withContext(Dispatchers.IO) {
-                API.UserAPI.downloadPlaylist(Config.user_id, Config.user_pwd)
-            }
-            if (result.ok) {
-                pages.sendMessage(RachelPages.music, RachelMessage.MUSIC_STOP_PLAYER)
-                Config.playlist = result.value2
-                playlists.clearAddAll(result.value2)
-                updatePlaylist()
-                XToastUtils.success(result.value1)
-            }
-            else XToastUtils.error(result.value1)
-        }
     }
 }

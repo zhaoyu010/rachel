@@ -2,6 +2,7 @@ package com.yinlin.rachel.model.engine
 
 import android.content.Context
 import android.graphics.BlendMode
+import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.SurfaceTexture
@@ -10,65 +11,82 @@ import androidx.annotation.ColorRes
 import com.yinlin.rachel.R
 import com.yinlin.rachel.bold
 import com.yinlin.rachel.readText
+import com.yinlin.rachel.textHeight
 import com.yinlin.rachel.toDP
 import java.io.File
 import java.util.regex.Pattern
 
 
 // 多行文本歌词引擎
-class LineLyricsEngine : LyricsEngine {
+class LineLyricsEngine(context: Context) : LyricsEngine {
     @JvmRecord
     data class LineItem(val position: Long, val text: String)
 
-    class LinePaint(private val maxTextHeight: Int = 100) : Paint(ANTI_ALIAS_FLAG) {
-        var textHeight: Float
+    class TextPaints(context: Context) {
+        private var canvasWidth: Float = 512f
+        private var canvasHeight: Float = 512f
+        private val maxTextHeight: Float = 30f.toDP(context)
 
-        constructor(context: Context, isBold: Boolean, @ColorRes textColor: Int) : this(36.toDP(context)) {
-            bold(context, isBold)
-            color = context.getColor(textColor)
-            setShadowLayer(1f, 1f, 1f, context.getColor(R.color.black))
+        private val main = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = context.getColor(R.color.music_lyrics_main)
+            textAlign = Paint.Align.CENTER
+            setShadowLayer(2f, 2f, 2f, context.getColor(R.color.dark))
+            bold(context, true)
         }
 
-        init {
-            style = Style.FILL_AND_STROKE
-            strokeWidth = 1f
-            textSize = 18f
-            textAlign = Align.CENTER
-            textHeight = fontMetrics.descent - fontMetrics.ascent
+        private val second = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = context.getColor(R.color.music_lyrics_second)
+            textAlign = Paint.Align.CENTER
+            setShadowLayer(1f, 1f, 1f, context.getColor(R.color.dark))
+            bold(context, false)
         }
 
-        fun setTextSizeAndTextHeight(size: Float) {
-            textSize = size
-            textHeight = fontMetrics.descent - fontMetrics.ascent
+        private val fade = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = context.getColor(R.color.music_lyrics_fade)
+            textAlign = Paint.Align.CENTER
+            bold(context, false)
         }
 
-        fun adjustTextSizeAndTextHeight(maxWidth: Float, maxLengthText: String) {
-            setTextSizeAndTextHeight(18f)
-            setShadowLayer(1f, 1f, 1f, shadowLayerColor)
-            var detectWidth = measureText(maxLengthText)
-            while (detectWidth < maxWidth && textHeight <= maxTextHeight) {
-                textSize += 5f
-                textHeight = fontMetrics.descent - fontMetrics.ascent
-                adjustShadow(this) { value -> value + 0.3f }
-                detectWidth = measureText(maxLengthText)
+        fun adjustPaint(maxWidth: Float, maxHeight: Float, maxLengthText: String) {
+            canvasWidth = maxWidth
+            canvasHeight = maxHeight
+            val availableWidth = maxWidth * MAX_WIDTH_RATIO
+            main.textSize = 18f
+            var detectWidth = main.measureText(maxLengthText)
+            while (detectWidth < availableWidth) {
+                main.textSize += 5f
+                if (main.textHeight > maxTextHeight) break
+                detectWidth = main.measureText(maxLengthText)
             }
+            second.textSize = main.textSize * 0.85f
+            fade.textSize = main.textSize * 0.8f
         }
 
-        fun adjustShadow(target: LinePaint, opt: (Float) -> Float) {
-            setShadowLayer(opt(target.shadowLayerRadius), opt(target.shadowLayerDx), opt(target.shadowLayerDy), target.shadowLayerColor)
+        fun draw(canvas: Canvas, str1: String, str2: String, str3: String, str4: String, str5: String) {
+            val x = canvasWidth / 2f
+            val y = canvasHeight / 2f
+            val gap = maxTextHeight * 1.2f
+
+            canvas.drawColor(Color.TRANSPARENT, BlendMode.CLEAR)
+            canvas.drawText(str3, x, y, main)
+            canvas.drawText(str2, x, y - gap, second)
+            canvas.drawText(str4, x, y + gap, second)
+            canvas.drawText(str1, x, y - gap * 2, fade)
+            canvas.drawText(str5, x, y + gap * 2, fade)
         }
     }
 
-    companion object { const val NAME = "line" }
+    companion object {
+        const val MAX_WIDTH_RATIO = 0.8f
+        const val NAME = "line"
+        const val DESCRIPTION = "原生逐行歌词渲染引擎, 自适应字体大小, 自内向外渐隐"
+        val ICON: Int = R.drawable.lyrics_engine_line
+    }
     override val name: String = NAME
     override val ext: String = ".lrc"
 
-    private var paintMain = LinePaint()
-    private var paintSecond = LinePaint()
-    private var paintFade = LinePaint()
+    private val paints = TextPaints(context)
     private var currentIndex: Int = -1
-    private var canvasWidth: Int = 0
-    private var canvasHeight: Int = 0
     private var texture: TextureView? = null
     private val items = ArrayList<LineItem>()
 
@@ -76,11 +94,12 @@ class LineLyricsEngine : LyricsEngine {
         try {
             items.clear()
             this.texture = texture
-            canvasWidth = width
-            canvasHeight = height
             currentIndex = -1
-            parseLrcText(texture.context, File(file).readText())
-            return items.isNotEmpty()
+            val maxLengthText = parseLrcText(File(file).readText())
+            if (items.isNotEmpty()) {
+                paints.adjustPaint(texture.measuredWidth.toFloat(), texture.measuredHeight.toFloat(), maxLengthText)
+                return true
+            }
         }
         catch (ignored: Exception) {
             clear()
@@ -91,8 +110,6 @@ class LineLyricsEngine : LyricsEngine {
     override fun clear() {
         items.clear()
         texture = null
-        canvasWidth = 0
-        canvasHeight = 0
         currentIndex = -1
     }
 
@@ -119,25 +136,14 @@ class LineLyricsEngine : LyricsEngine {
                     val item3 = items[currentIndex]
                     val item4 = items[currentIndex + 1]
                     val item5 = items[currentIndex + 2]
-
-                    val x = canvasWidth / 2f
-                    val y = canvasHeight / 2f - paintMain.textHeight
-                    val dy1 = paintMain.textHeight * 1.2f
-                    val dy2 = dy1 + paintSecond.textHeight * 1.2f
-
-                    canvas.drawColor(Color.TRANSPARENT, BlendMode.CLEAR)
-                    canvas.drawText(item3.text, x, y, paintMain)
-                    canvas.drawText(item2.text, x, y - dy1, paintSecond)
-                    canvas.drawText(item4.text, x, y + dy1, paintSecond)
-                    canvas.drawText(item1.text, x, y - dy2, paintFade)
-                    canvas.drawText(item5.text, x, y + dy2, paintFade)
+                    paints.draw(canvas, item1.text, item2.text, item3.text, item4.text, item5.text)
                     unlockCanvasAndPost(canvas)
                 }
             }
         }
     }
 
-    private fun parseLrcText(context: Context, source: String) {
+    private fun parseLrcText(source: String): String {
         try {
             var maxLengthText = ""
             // 解析歌词文件
@@ -169,17 +175,10 @@ class LineLyricsEngine : LyricsEngine {
             // 排序歌词时间顺序
             if (items.size < 11) throw Exception()
             items.sortWith { o1, o2 -> o1.position.compareTo(o2.position) }
-            // 根据歌词最大宽度来调整字体大小
-            paintMain = LinePaint(context, true, R.color.music_lyrics_main)
-            paintSecond = LinePaint(context, false, R.color.music_lyrics_second)
-            paintFade = LinePaint(context, false, R.color.music_lyrics_fade)
-            paintMain.adjustTextSizeAndTextHeight(canvasWidth * 0.85f, maxLengthText)
-            paintSecond.setTextSizeAndTextHeight(paintMain.textSize * 0.8f)
-            paintSecond.adjustShadow(paintMain) { value -> value * 0.75f }
-            paintFade.setTextSizeAndTextHeight(paintMain.textSize * 0.7f)
-            paintFade.adjustShadow(paintMain) { value -> value * 0.5f }
+            return maxLengthText
         } catch (e: Exception) {
             items.clear()
+            return ""
         }
     }
 

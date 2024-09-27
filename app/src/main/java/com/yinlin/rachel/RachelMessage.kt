@@ -7,6 +7,7 @@ enum class RachelMessage {
     MUSIC_CREATE_PLAYLIST,  // String -> boolean
     MUSIC_RENAME_PLAYLIST,  // Playlist, String -> boolean
     MUSIC_DELETE_PLAYLIST,  // Playlist
+    MUSIC_UPDATE_PLAYLIST, // void
     MUSIC_DELETE_MUSIC_FROM_PLAYLIST,  // Playlist, int
     MUSIC_ADD_MUSIC_INTO_PLAYLIST,  // Playlist, List<String> -> int
     MUSIC_DELETE_MUSIC,  // List<String>
@@ -18,4 +19,5 @@ enum class RachelMessage {
 
     // FragmentMe
     ME_UPDATE_USER_INFO, // void
+    ME_ADD_ACTIVITY, // Calendar, ShowActivity
 }
