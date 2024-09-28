@@ -1,6 +1,8 @@
 package com.yinlin.rachel.model
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Handler
 import android.view.View
 import androidx.annotation.ColorRes
@@ -22,9 +24,11 @@ import com.yinlin.rachel.RachelMessage.ME_UPDATE_USER_INFO
 import com.yinlin.rachel.annotation.NewThread
 import com.yinlin.rachel.api.API
 import com.yinlin.rachel.fragment.FragmentDiscovery
+import com.yinlin.rachel.fragment.FragmentImportMod
 import com.yinlin.rachel.fragment.FragmentMe
 import com.yinlin.rachel.fragment.FragmentMsg
 import com.yinlin.rachel.fragment.FragmentMusic
+import com.yinlin.rachel.fragment.FragmentProfile
 import com.yinlin.rachel.fragment.FragmentRes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -130,6 +134,48 @@ class RachelPages(private val activity: FragmentActivity, private val bbl: Botto
         if (isNotMain && manager.backStackEntryCount > 0) {
             manager.popBackStackImmediate()
         }
+    }
+
+    private fun processSchemeContent(uri: Uri) {
+        navigate(FragmentImportMod(this, uri))
+    }
+
+    private fun processSchemeRachel(uri: Uri, args: HashMap<String, String>) {
+        when (uri.path) {
+            "/openProfile" -> {
+                args["id"]?.apply { navigate(FragmentProfile(this@RachelPages, this)) }
+            }
+            else -> XToastUtils.warning("未能识别此数据")
+        }
+    }
+
+    private fun processActionView(uri: Uri) {
+        val args = HashMap<String, String>()
+        for (name in uri.queryParameterNames) uri.getQueryParameter(name)?.apply { args[name] = this }
+        when (uri.scheme) {
+            "content" -> processSchemeContent(uri)
+            "rachel" -> processSchemeRachel(uri, args)
+        }
+    }
+
+    private fun processActionMain() { }
+
+    fun processUri(uri: Uri) {
+        val args = HashMap<String, String>()
+        for (name in uri.queryParameterNames) uri.getQueryParameter(name)?.apply { args[name] = this }
+        processSchemeRachel(uri, args)
+    }
+
+    fun processIntent(intent: Intent) {
+        try {
+            intent.data?.apply {
+                when (intent.action) {
+                    Intent.ACTION_MAIN -> processActionMain()
+                    Intent.ACTION_VIEW -> processActionView(this)
+                }
+            }
+        }
+        catch (ignored: Exception) { }
     }
 
     fun goBack(): Boolean = currentFragment.back()

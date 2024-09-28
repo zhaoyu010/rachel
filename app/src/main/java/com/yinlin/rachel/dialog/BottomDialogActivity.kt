@@ -10,7 +10,7 @@ import com.yinlin.rachel.fragment.FragmentMe
 import com.yinlin.rachel.fragment.FragmentWebpage
 import com.yinlin.rachel.model.RachelBottomDialog
 import com.yinlin.rachel.model.RachelNineGridAdapter
-import com.yinlin.rachel.model.RachelNineGridPicture
+import com.yinlin.rachel.model.RachelPreview
 import com.yinlin.rachel.rachelClick
 
 class BottomDialogActivity(fragment: FragmentMe) : RachelBottomDialog<BottomDialogActivityBinding, FragmentMe>(fragment, 0.8f) {
@@ -59,7 +59,7 @@ class BottomDialogActivity(fragment: FragmentMe) : RachelBottomDialog<BottomDial
         maoyanUrl = activity.maoyan
         v.title.text = activity.title
         v.content.text = activity.content
-        v.pics.setImagesData(RachelNineGridPicture.make(activity.pics) { activity.picPath(it) })
+        v.pics.setImagesData(RachelPreview.fromSingleUri(activity.pics) { activity.picPath(it) })
         return this
     }
 }

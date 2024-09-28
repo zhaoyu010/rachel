@@ -2,10 +2,8 @@ package com.yinlin.rachel.fragment
 
 import android.annotation.SuppressLint
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.xuexiang.xui.utils.XToastUtils
 import com.xuexiang.xui.widget.searchview.MaterialSearchView.OnQueryTextListener
 import com.yinlin.rachel.R
 import com.yinlin.rachel.annotation.NewThread
@@ -68,6 +66,7 @@ class FragmentDiscovery(pages: RachelPages) : RachelFragment<FragmentDiscoveryBi
         v.search.setVoiceSearch(false)
         v.search.setEllipsize(true)
         v.search.setOnQueryTextListener(this)
+
         v.tvLatest.active = true
         v.tvLatest.rachelClick {
             v.tvLatest.active = true
@@ -87,17 +86,17 @@ class FragmentDiscovery(pages: RachelPages) : RachelFragment<FragmentDiscoveryBi
             pages.navigate(FragmentCreateTopic(pages))
         }
 
+        // 刷新与加载
         v.container.setEnableAutoLoadMore(true)
         v.container.setEnableOverScrollDrag(false)
         v.container.setEnableOverScrollBounce(false)
+        v.container.setEnableLoadMore(true)
         v.container.setOnRefreshListener {
-            v.container.resetNoMoreData()
+            v.container.setNoMoreData(false)
             if (v.tvLatest.active) requestLatestTopic()
             else requestHotTopic()
         }
-        v.container.setEnableLoadMore(true)
         v.container.setOnLoadMoreListener {
-            println("上拉")
             if (v.tvLatest.active) requestLatestTopicMore()
             else requestHotTopicMore()
         }
@@ -108,11 +107,10 @@ class FragmentDiscovery(pages: RachelPages) : RachelFragment<FragmentDiscoveryBi
         v.list.setItemViewCacheSize(4)
         v.list.adapter = adapter
 
-        v.container.autoRefresh()
+        requestLatestTopic()
     }
 
     override fun quit() {
-        v.list.clearOnScrollListeners()
         if (v.search.isSearchOpen) v.search.closeSearch()
     }
 
@@ -140,10 +138,16 @@ class FragmentDiscovery(pages: RachelPages) : RachelFragment<FragmentDiscoveryBi
         lifecycleScope.launch {
             v.list.scrollToPosition(0)
             val topics = withContext(Dispatchers.IO) { API.UserAPI.getLatestTopic() }
-            topicUpper = if (topics.isEmpty()) 2147483647 else topics.last().tid
+            if (topics.isEmpty()) {
+                topicUpper = 2147483647
+                v.container.finishRefreshWithNoMoreData()
+            }
+            else {
+                topicUpper = topics.last().tid
+                v.container.finishRefresh()
+            }
             adapter.items.clearAddAll(topics)
             adapter.notifyDataSetChanged()
-            v.container.finishRefresh()
         }
     }
 
@@ -152,14 +156,15 @@ class FragmentDiscovery(pages: RachelPages) : RachelFragment<FragmentDiscoveryBi
         lifecycleScope.launch {
             v.list.scrollToPosition(0)
             val topics = withContext(Dispatchers.IO) { API.UserAPI.getHotTopic() }
-            topicOffset = if (topics.isEmpty()) 0 else topics.size
+            topicOffset = topics.size
+            if (topics.isEmpty()) v.container.finishRefreshWithNoMoreData()
+            else v.container.finishRefresh()
             adapter.items.clearAddAll(topics)
             adapter.notifyDataSetChanged()
-            v.container.finishRefresh()
         }
     }
 
-    @NewThread @SuppressLint("NotifyDataSetChanged")
+    @NewThread
     private fun requestLatestTopicMore() {
         lifecycleScope.launch {
             val topics = withContext(Dispatchers.IO) { API.UserAPI.getLatestTopic(topicUpper) }

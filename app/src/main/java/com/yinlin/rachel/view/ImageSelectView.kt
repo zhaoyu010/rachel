@@ -1,6 +1,5 @@
 package com.yinlin.rachel.view
 
-import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.Build
@@ -20,11 +19,10 @@ import com.luck.picture.lib.engine.CompressFileEngine
 import com.luck.picture.lib.entity.LocalMedia
 import com.luck.picture.lib.interfaces.OnResultCallbackListener
 import com.xuexiang.xui.utils.XToastUtils
-import com.xuexiang.xui.widget.imageview.preview.PreviewBuilder
 import com.yinlin.rachel.R
 import com.yinlin.rachel.databinding.ItemImageSelectBinding
 import com.yinlin.rachel.model.RachelPictureSelector.RachelImageEngine
-import com.yinlin.rachel.model.RachelPreviewInfo
+import com.yinlin.rachel.model.RachelPreview
 import com.yinlin.rachel.rachelClick
 
 
@@ -89,11 +87,9 @@ class ImageSelectView(context: Context, attrs: AttributeSet?, defStyleAttr: Int)
                     }
                 }
                 else { // 是图片
-                    val pics = ArrayList<RachelPreviewInfo>()
-                    for (pic in items) pics += RachelPreviewInfo(pic)
-                    PreviewBuilder.from(context as Activity)
-                        .setImgs(pics).setCurrentIndex(position)
-                        .setType(PreviewBuilder.IndicatorType.Dot).start()
+                    val previews = RachelPreview.fromSingleUri(items)
+                    RachelPreview.updateRect(parent, previews)
+                    RachelPreview.show(context, previews, position)
                 }
             }
             return holder

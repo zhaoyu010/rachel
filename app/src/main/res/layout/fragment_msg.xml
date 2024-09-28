@@ -8,29 +8,40 @@
     android:layout_height="match_parent"
     android:background="@color/micro_gray"
     tools:context=".fragment.FragmentMsg" >
-    <com.scwang.smart.refresh.header.ClassicsHeader
+    <com.yinlin.rachel.view.RachelRefreshHeader
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:srlClassicsSpinnerStyle="FixedBehind"
-        app:srlDrawableArrowSize="20dp"
-        app:srlDrawableMarginRight="20dp"
-        app:srlDrawableProgressSize="20dp"
-        app:srlEnableLastTime="true"
-        app:srlFinishDuration="500"
-        app:srlTextSizeTime="@dimen/sm"
-        app:srlTextSizeTitle="@dimen/base"
-        app:srlTextTimeMarginTop="2dp" />
+        android:layout_height="wrap_content" />
     <com.scwang.smart.refresh.footer.ClassicsFooter
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
+        <LinearLayout
+            android:id="@+id/header_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="5dp" >
+            <com.yinlin.rachel.view.ActiveTextView
+                android:id="@+id/tv_weibo"
+                style="@style/RachelText"
+                android:layout_marginHorizontal="10dp"
+                android:text="微博"
+                android:textSize="@dimen/lg" />
+            <com.yinlin.rachel.view.ActiveTextView
+                android:id="@+id/tv_chaohua"
+                style="@style/RachelText"
+                android:layout_marginHorizontal="10dp"
+                android:text="超话"
+                android:textSize="@dimen/lg" />
+        </LinearLayout>
         <com.xuexiang.xui.widget.statelayout.StatefulLayout
             android:id="@+id/state"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             app:stf_inAnimation="@anim/ps_anim_fade_in"
             app:stf_outAnimation="@anim/ps_anim_fade_out" >
             <androidx.recyclerview.widget.RecyclerView
@@ -38,5 +49,5 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
         </com.xuexiang.xui.widget.statelayout.StatefulLayout>
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
 </com.scwang.smart.refresh.layout.SmartRefreshLayout>

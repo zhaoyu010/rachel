@@ -1,15 +1,9 @@
 package com.yinlin.rachel.fragment
 
 import android.annotation.SuppressLint
-import android.app.Activity
-import android.content.Context
-import android.widget.ImageView
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.xuexiang.xui.widget.imageview.nine.ItemImageClickListener
-import com.xuexiang.xui.widget.imageview.nine.NineGridImageViewAdapter
-import com.xuexiang.xui.widget.imageview.preview.PreviewBuilder
 import com.yinlin.rachel.Config
 import com.yinlin.rachel.Net
 import com.yinlin.rachel.R
@@ -23,10 +17,11 @@ import com.yinlin.rachel.load
 import com.yinlin.rachel.model.RachelAdapter
 import com.yinlin.rachel.model.RachelFragment
 import com.yinlin.rachel.model.RachelImageLoader
+import com.yinlin.rachel.model.RachelNineGridAdapter
 import com.yinlin.rachel.model.RachelOnClickListener
 import com.yinlin.rachel.model.RachelPages
+import com.yinlin.rachel.model.RachelPreview
 import com.yinlin.rachel.rachelClick
-import com.yinlin.rachel.updateNineGridBounds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -34,19 +29,6 @@ import org.sufficientlysecure.htmltextview.HtmlHttpImageGetter
 
 
 class FragmentMsg(pages: RachelPages) : RachelFragment<FragmentMsgBinding>(pages) {
-    class ImageAdapter(private val rilNet: RachelImageLoader)
-        : NineGridImageViewAdapter<Weibo.Picture>(), ItemImageClickListener<Weibo.Picture> {
-
-        override fun onDisplayImage(context: Context, view: ImageView, picture: Weibo.Picture) = view.load(rilNet, picture.getThumb())
-
-        override fun onItemImageClick(imageView: ImageView, index: Int, list: List<Weibo.Picture>) {
-            imageView.updateNineGridBounds { i, bounds -> list[i].showBounds = bounds }
-            PreviewBuilder.from(imageView.context as Activity)
-                .setImgs(list).setCurrentIndex(index)
-                .setType(PreviewBuilder.IndicatorType.Dot).start()
-        }
-    }
-
     class Adapter(private val pages: RachelPages) : RachelAdapter<ItemWeiboBinding, Weibo>() {
         private val rilNet = RachelImageLoader(pages.context, R.drawable.placeholder_pic, DiskCacheStrategy.ALL)
 
@@ -54,7 +36,7 @@ class FragmentMsg(pages: RachelPages) : RachelFragment<FragmentMsgBinding>(pages
 
         override fun init(holder: RachelViewHolder<ItemWeiboBinding>, v: ItemWeiboBinding) {
             v.name.bold = true
-            v.pics.setAdapter(ImageAdapter(rilNet))
+            v.pics.setAdapter(RachelNineGridAdapter(pages.context))
             v.text.setOnClickATagListener { _, _, href ->
                 href?.apply {
                     val url = if (href.startsWith("http") || href.startsWith("www")) href
@@ -72,9 +54,9 @@ class FragmentMsg(pages: RachelPages) : RachelFragment<FragmentMsgBinding>(pages
             v.time.rachelClick(detailsListener)
             v.location.rachelClick(detailsListener)
             v.pics.setItemImageLongClickListener { _, index, items ->
-                val item = items[index] as Weibo.Picture
-                if (item.type == Weibo.MsgType.VIDEO) Net.downloadVideo(pages.context, item.source)
-                else Net.downloadPicture(pages.context, item.source)
+                val item = items[index] as RachelPreview
+                if (item.isVideo) Net.downloadVideo(pages.context, item.mVideoUrl)
+                else Net.downloadPicture(pages.context, item.mSourceUrl)
                 true
             }
         }
@@ -90,22 +72,45 @@ class FragmentMsg(pages: RachelPages) : RachelFragment<FragmentMsgBinding>(pages
     }
 
     private val adapter = Adapter(pages)
+    private var sinceId: Long = 0L
 
     override fun bindingClass() = FragmentMsgBinding::class.java
 
     override fun init() {
+        v.tvWeibo.active = true
+        v.tvWeibo.rachelClick {
+            v.tvWeibo.active = true
+            v.tvChaohua.active = false
+            v.container.autoRefresh()
+        }
+        v.tvChaohua.rachelClick {
+            v.tvWeibo.active = false
+            v.tvChaohua.active = true
+            v.container.autoRefresh()
+        }
+
+        // 刷新与加载
+        v.container.setEnableAutoLoadMore(true)
+        v.container.setEnableOverScrollDrag(false)
+        v.container.setEnableOverScrollBounce(false)
+        v.container.setOnRefreshListener {
+            v.container.setNoMoreData(false)
+            if (v.tvWeibo.active) requestWeibo()
+            else requestChaohua()
+        }
+        v.container.setOnLoadMoreListener {
+            if (v.tvChaohua.active) requestChaohuaMore()
+        }
+
         // 列表
         v.list.layoutManager = LinearLayoutManager(pages.context)
         v.list.setHasFixedSize(true)
-        v.list.recycledViewPool.setMaxRecycledViews(0, 8)
+        v.list.recycledViewPool.setMaxRecycledViews(0, 16)
         v.list.setItemViewCacheSize(4)
         v.list.adapter = adapter
 
-        // 下拉刷新
-        v.container.setOnRefreshListener { loadMsg() }
-
         // 首次刷新
-        loadMsg()
+        requestWeibo()
     }
 
     override fun back(): Boolean {
@@ -114,15 +119,48 @@ class FragmentMsg(pages: RachelPages) : RachelFragment<FragmentMsgBinding>(pages
     }
 
     @NewThread @SuppressLint("NotifyDataSetChanged")
-    fun loadMsg() {
+    fun requestWeibo() {
         lifecycleScope.launch {
+            v.list.scrollToPosition(0)
             v.state.showLoading("加载资讯中...")
             adapter.items.clear()
-            withContext(Dispatchers.IO) { WeiboAPI.extract(Config.weibo_users, adapter.items) }
-            if (v.container.isRefreshing) v.container.finishRefresh()
-            if (adapter.items.isEmpty()) v.state.showOffline { loadMsg() }
+            withContext(Dispatchers.IO) { WeiboAPI.getAllWeibo(Config.weibo_users, adapter.items) }
+            if (adapter.items.isEmpty()) v.state.showOffline { requestWeibo() }
             else v.state.showContent()
             adapter.notifyDataSetChanged()
+            v.container.finishRefreshWithNoMoreData()
+        }
+    }
+
+    @NewThread @SuppressLint("NotifyDataSetChanged")
+    fun requestChaohua() {
+        lifecycleScope.launch {
+            v.list.scrollToPosition(0)
+            v.state.showLoading("加载资讯中...")
+            adapter.items.clear()
+            sinceId = withContext(Dispatchers.IO) { WeiboAPI.getChaohua(0, adapter.items) }
+            if (sinceId == 0L) {
+                v.state.showOffline { requestChaohua() }
+                v.container.finishRefreshWithNoMoreData()
+            }
+            else {
+                v.state.showContent()
+                v.container.finishRefresh()
+            }
+            adapter.notifyDataSetChanged()
+        }
+    }
+
+    @NewThread
+    fun requestChaohuaMore() {
+        lifecycleScope.launch {
+            val oldSize = adapter.items.size
+            sinceId = withContext(Dispatchers.IO) { WeiboAPI.getChaohua(sinceId, adapter.items) }
+            if (sinceId == 0L) v.container.finishLoadMoreWithNoMoreData()
+            else {
+                adapter.notifyItemRangeInserted(oldSize, adapter.items.size - oldSize)
+                v.container.finishLoadMore()
+            }
         }
     }
 }

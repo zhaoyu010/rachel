@@ -162,20 +162,6 @@
                             android:text="设置"
                             android:textSize="@dimen/xs"
                             app:drawableTopCompat="@drawable/svg_me_settings" />
-                        <TextView
-                            android:id="@+id/button_update"
-                            style="@style/RachelText.Image"
-                            android:layout_weight="1"
-                            android:text="更新"
-                            android:textSize="@dimen/xs"
-                            app:drawableTopCompat="@drawable/svg_me_update" />
-                        <TextView
-                            android:id="@+id/button_about"
-                            style="@style/RachelText.Image"
-                            android:layout_weight="1"
-                            android:text="关于"
-                            android:textSize="@dimen/xs"
-                            app:drawableTopCompat="@drawable/svg_me_about" />
                     </LinearLayout>
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.cardview.widget.CardView>

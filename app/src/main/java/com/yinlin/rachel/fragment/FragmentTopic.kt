@@ -18,9 +18,9 @@ import com.yinlin.rachel.model.RachelDialog
 import com.yinlin.rachel.model.RachelFragment
 import com.yinlin.rachel.model.RachelHeaderAdapter
 import com.yinlin.rachel.model.RachelNineGridAdapter
-import com.yinlin.rachel.model.RachelNineGridPicture
 import com.yinlin.rachel.model.RachelPages
 import com.yinlin.rachel.model.RachelPopMenu
+import com.yinlin.rachel.model.RachelPreview
 import com.yinlin.rachel.rachelClick
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -163,7 +163,7 @@ class FragmentTopic(pages: RachelPages, private val tid: Int) : RachelFragment<F
                 header.title.text = topic.title
                 header.content.text = topic.content
                 header.userTitle.setTitle(topic.userTitleGroup, topic.userTitle)
-                header.pics.setImagesData(RachelNineGridPicture.make(topic.pics){ topic.picPath(it) })
+                header.pics.setImagesData(RachelPreview.fromSingleUri(topic.pics){ topic.picPath(it) })
                 adapter.items = topic.comments
                 adapter.notifyChangedEx()
             }

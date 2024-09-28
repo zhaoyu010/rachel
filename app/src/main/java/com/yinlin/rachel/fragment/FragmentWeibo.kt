@@ -5,7 +5,6 @@ import android.view.View
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.xuexiang.xui.utils.XToastUtils
 import com.yinlin.rachel.Net
 import com.yinlin.rachel.R
 import com.yinlin.rachel.annotation.NewThread
@@ -15,13 +14,14 @@ import com.yinlin.rachel.data.Weibo
 import com.yinlin.rachel.data.WeiboComment
 import com.yinlin.rachel.databinding.FragmentWeiboBinding
 import com.yinlin.rachel.databinding.ItemWeiboCommentBinding
-import com.yinlin.rachel.fragment.FragmentMsg.ImageAdapter
 import com.yinlin.rachel.load
 import com.yinlin.rachel.model.RachelAdapter
 import com.yinlin.rachel.model.RachelFragment
 import com.yinlin.rachel.model.RachelImageLoader
+import com.yinlin.rachel.model.RachelNineGridAdapter
 import com.yinlin.rachel.model.RachelOnClickListener
 import com.yinlin.rachel.model.RachelPages
+import com.yinlin.rachel.model.RachelPreview
 import com.yinlin.rachel.pureColor
 import com.yinlin.rachel.rachelClick
 import kotlinx.coroutines.Dispatchers
@@ -65,7 +65,7 @@ class FragmentWeibo(pages: RachelPages, private val weibo: Weibo) : RachelFragme
     override fun init() {
         // 微博
         v.name.bold = true
-        v.pics.setAdapter(ImageAdapter(rilNet))
+        v.pics.setAdapter(RachelNineGridAdapter(pages.context))
         v.text.setOnClickATagListener { _, _, _ -> true }
         val expandListener = RachelOnClickListener {
             if (v.expander.isExpanded) v.expander.collapse(true)
@@ -84,9 +84,9 @@ class FragmentWeibo(pages: RachelPages, private val weibo: Weibo) : RachelFragme
         v.text.setHtml(weibo.text, HtmlHttpImageGetter(v.text))
         v.pics.setImagesData(weibo.pictures)
         v.pics.setItemImageLongClickListener { _, index, items ->
-            val item = items[index] as Weibo.Picture
-            if (item.type == Weibo.MsgType.VIDEO) Net.downloadVideo(pages.context, item.source)
-            else Net.downloadPicture(pages.context, item.source)
+            val item = items[index] as RachelPreview
+            if (item.isVideo) Net.downloadVideo(pages.context, item.mVideoUrl)
+            else Net.downloadPicture(pages.context, item.mSourceUrl)
             true
         }
 
@@ -104,7 +104,7 @@ class FragmentWeibo(pages: RachelPages, private val weibo: Weibo) : RachelFragme
     fun requestComment() {
         lifecycleScope.launch {
             val comments = ArrayList<WeiboComment>()
-            withContext(Dispatchers.IO) { WeiboAPI.details(weibo.id, comments) }
+            withContext(Dispatchers.IO) { WeiboAPI.getDetails(weibo.id, comments) }
             if (comments.isNotEmpty()) {
                 adapter.items = comments
                 adapter.notifyDataSetChanged()

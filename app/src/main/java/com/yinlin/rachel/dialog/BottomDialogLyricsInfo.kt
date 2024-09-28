@@ -63,9 +63,9 @@ class BottomDialogLyricsInfo(fragment: FragmentMusic) : RachelBottomDialog<Botto
 
     @SuppressLint("NotifyDataSetChanged")
     fun update(engineNames: LyricsInfoList): BottomDialogLyricsInfo {
+        v.list.scrollToPosition(0)
         adapter.items.clearAddAll(engineNames)
         adapter.notifyDataSetChanged()
-        v.list.scrollToPosition(0)
         return this
     }
 }

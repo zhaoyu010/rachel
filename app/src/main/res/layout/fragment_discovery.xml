@@ -48,7 +48,7 @@
                 style="@style/RachelText"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                android:layout_marginHorizontal="10dp"
+                android:layout_marginStart="10dp"
                 android:text="最新"
                 android:textSize="@dimen/lg" />
             <com.yinlin.rachel.view.ActiveTextView
@@ -56,7 +56,7 @@
                 style="@style/RachelText"
                 app:layout_constraintLeft_toRightOf="@id/tv_latest"
                 app:layout_constraintTop_toTopOf="parent"
-                android:layout_marginHorizontal="20dp"
+                android:layout_marginStart="20dp"
                 android:text="热门"
                 android:textSize="@dimen/lg" />
             <ImageView

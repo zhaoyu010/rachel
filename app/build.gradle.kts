@@ -87,6 +87,7 @@ dependencies {
     implementation("com.github.CarGuo.GSYVideoPlayer:gsyVideoPlayer-arm64:v9.0.0-release-jitpack")
     implementation("com.github.chaychan:BottomBarLayout:3.0.0")
     implementation("com.github.forJrking:KLuban:1.1.0")
+    implementation("com.github.xuexiangjys:XQRCode:1.1.1")
     implementation("com.github.xuexiangjys:XUI:1.2.1")
 
     implementation("com.squareup.okhttp3:okhttp:4.12.0")

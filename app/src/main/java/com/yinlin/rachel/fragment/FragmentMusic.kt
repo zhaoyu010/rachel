@@ -244,7 +244,9 @@ class FragmentMusic(pages: RachelPages) : RachelFragment<FragmentMusicBinding>(p
 
         }
         // 分享
-        v.buttonShare.rachelClick { }
+        v.buttonShare.rachelClick {
+
+        }
         // 信息
         v.buttonInfo.rachelClick {
             currentMusic?.apply { bottomDialogMusicInfo.update(this).show() }

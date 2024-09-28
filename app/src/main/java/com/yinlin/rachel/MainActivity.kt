@@ -2,6 +2,7 @@ package com.yinlin.rachel
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -9,6 +10,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.yinlin.rachel.databinding.ActivityMainBinding
 import com.yinlin.rachel.fragment.FragmentImportMod
+import com.yinlin.rachel.fragment.FragmentProfile
 import com.yinlin.rachel.model.RachelPages
 import io.github.inflationx.viewpump.ViewPumpContextWrapper
 
@@ -35,12 +37,12 @@ class MainActivity : AppCompatActivity() {
             RachelPages.msg, RachelPages.res, RachelPages.music, RachelPages.discovery, RachelPages.me
         ), RachelPages.msg, R.id.frame)
 
-        runOnUiThread { detectImportMod(intent) } // 延迟响应MOD
+        runOnUiThread { pages.processIntent(intent) }
     }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        detectImportMod(intent)
+        intent?.apply { pages.processIntent(this) }
     }
 
     override fun attachBaseContext(newBase: Context) = super.attachBaseContext(ViewPumpContextWrapper.wrap(newBase))
@@ -56,11 +58,5 @@ class MainActivity : AppCompatActivity() {
         configuration.densityDpi = 480
         @Suppress("DEPRECATION")
         resources.updateConfiguration(configuration, resources.displayMetrics)
-    }
-
-    private fun detectImportMod(intent: Intent?) {
-        if (intent?.action?.equals(Intent.ACTION_VIEW) == true) {
-            intent.data?.apply { pages.navigate(FragmentImportMod(pages, this)) }
-        }
     }
 }

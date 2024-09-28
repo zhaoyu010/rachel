@@ -13,6 +13,7 @@ import com.yinlin.rachel.bold
 import com.yinlin.rachel.clear
 import com.yinlin.rachel.data.WeiboUser
 import com.yinlin.rachel.databinding.FragmentSettingsBinding
+import com.yinlin.rachel.dialog.BottomDialogAbout
 import com.yinlin.rachel.load
 import com.yinlin.rachel.model.RachelDialog
 import com.yinlin.rachel.model.RachelFragment
@@ -28,9 +29,13 @@ import kotlinx.coroutines.withContext
 class FragmentSettings(pages: RachelPages) : RachelFragment<FragmentSettingsBinding>(pages) {
     private val rilNet = RachelImageLoader(pages.context, R.drawable.placeholder_pic, DiskCacheStrategy.ALL)
 
+    private val bottomDialogAbout = BottomDialogAbout(this)
+
     override fun bindingClass() = FragmentSettingsBinding::class.java
 
     override fun init() {
+        bottomDialogAbout.init()
+
         /*    ----    账号设置    ----    */
         v.tvAccount.bold = true
 
@@ -43,6 +48,7 @@ class FragmentSettings(pages: RachelPages) : RachelFragment<FragmentSettingsBind
             }
             else XToastUtils.warning("请先登录")
         }
+
         // 更新个性签名
         v.signature.rachelClick {
             if (Config.isLoginAndUpdate) {
@@ -50,6 +56,7 @@ class FragmentSettings(pages: RachelPages) : RachelFragment<FragmentSettingsBind
             }
             else XToastUtils.warning("请先登录")
         }
+
         // 更新背景墙
         v.wall.rachelClick {
             if (Config.isLoginAndUpdate) {
@@ -109,7 +116,27 @@ class FragmentSettings(pages: RachelPages) : RachelFragment<FragmentSettingsBind
             else XToastUtils.warning("请先登录")
         }
 
+        /*    ----    其他    ----    */
+        v.tvOther.bold = true
+
+        v.checkUpdate.rachelClick { checkUpdate() }
+
+        v.about.rachelClick { bottomDialogAbout.update().show() }
+
+        v.feedback.rachelClick {
+            if (Config.isLogin) {
+                RachelDialog.inputMultiLines(pages.context, "请给出您宝贵的建议! 被采纳后将赠送银币!", 256, 10) {
+                    sendFeedback(it)
+                }
+            }
+            else XToastUtils.warning("请先登录")
+        }
+
         updateInfo()
+    }
+
+    override fun quit() {
+        bottomDialogAbout.release()
     }
 
     override fun back(): Boolean = true
@@ -243,6 +270,41 @@ class FragmentSettings(pages: RachelPages) : RachelFragment<FragmentSettingsBind
                 XToastUtils.success(result.value1)
             }
             else XToastUtils.error(result.value1)
+        }
+    }
+
+    // 检查更新
+    @NewThread
+    private fun checkUpdate() {
+        val srcVersion = pages.context.packageManager.getPackageInfo(pages.context.packageName, 0).longVersionCode
+        lifecycleScope.launch {
+            pages.loadingDialog.show()
+            val result = withContext(Dispatchers.IO) {
+                val result = API.SysAPI.getServerVersionCode()
+                withContext(Dispatchers.Main) { pages.loadingDialog.dismiss() }
+                result
+            }
+            val content = "APP版本:${srcVersion}\n服务器版本:${result.value1}\n最低兼容版本:${result.value2}"
+            if (result.ok) {
+                if (srcVersion == result.value1) XToastUtils.success(content)
+                else XToastUtils.warning(content)
+            }
+            else XToastUtils.error(content)
+        }
+    }
+
+    // 提交反馈
+    @NewThread
+    private fun sendFeedback(content: String) {
+        lifecycleScope.launch {
+            pages.loadingDialog.show()
+            val result = withContext(Dispatchers.IO) {
+                val result = API.UserAPI.sendFeedback(Config.user_id, Config.user_pwd, content)
+                withContext(Dispatchers.Main) { pages.loadingDialog.dismiss() }
+                result
+            }
+            if (result.ok) XToastUtils.success(result.value)
+            else XToastUtils.error(result.value)
         }
     }
 }

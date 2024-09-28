@@ -94,6 +94,14 @@ object API {
     object UserAPI {
         private val BASEURL: String = "${API.BASEURL}/user"
 
+        // 提交反馈
+        fun sendFeedback(id: String, pwd: String, content: String) = try {
+            Net.post("$BASEURL/sendFeedback", jsonMap("id" to id, "pwd" to pwd, "content" to content))!!.fetchMsg()
+        }
+        catch (ignored: Exception) {
+            errResult
+        }
+
         // 登录
         fun login(id: String, pwd: String) = try {
             Net.post("$BASEURL/login", jsonMap("id" to id, "pwd" to pwd))!!.fetchMsg()

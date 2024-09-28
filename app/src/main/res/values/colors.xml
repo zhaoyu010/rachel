@@ -88,7 +88,7 @@
     <color name="music_lyrics_second">#D3D3D3</color>
     <color name="music_lyrics_fade">#60F6F6F6</color>
     <color name="music_progress_total">#808080</color>
-    <color name="music_progress_played">#854FE6</color>
+    <color name="music_progress_played">#4682B4</color>
     <color name="music_progress_hotpot">#EEE</color>
 
 

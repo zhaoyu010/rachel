@@ -64,9 +64,9 @@ class MVActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         GSYVideoManager.releaseAllVideos()
         player.setVideoAllCallBack(null)
         player.release()
+        super.onDestroy()
     }
 }

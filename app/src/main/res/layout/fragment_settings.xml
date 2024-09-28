@@ -17,14 +17,16 @@
         android:orientation="vertical" >
         <TextView
             android:id="@+id/tv_account"
-            style="@style/RachelText"
+            style="@style/RachelText.X"
             android:layout_marginVertical="10dp"
-            android:text=" - 账号设置"
+            android:text="账号设置"
             android:textColor="@color/steel_blue"
-            android:textSize="@dimen/base" />
+            android:textSize="@dimen/base"
+            android:textAlignment="center" />
         <com.xuexiang.xui.widget.textview.supertextview.SuperTextView
             style="@style/RachelSettingsItem"
-            app:sLeftTextString="头像" >
+            app:sLeftTextString="头像"
+            app:sRightIconRes="@null" >
             <com.xuexiang.xui.widget.imageview.RadiusImageView
                 android:id="@+id/avatar"
                 android:layout_width="48dp"
@@ -37,10 +39,12 @@
         <com.xuexiang.xui.widget.textview.supertextview.SuperTextView
             android:id="@+id/id"
             style="@style/RachelSettingsItem"
-            app:sLeftTextString="ID" />
+            app:sLeftTextString="ID"
+            app:sRightIconRes="@null" />
         <com.xuexiang.xui.widget.textview.supertextview.SuperTextView
             style="@style/RachelSettingsItem"
-            app:sLeftTextString="个性签名" >
+            app:sLeftTextString="个性签名"
+            app:sRightIconRes="@null" >
             <com.xuexiang.xui.widget.textview.autofit.AutoFitTextView
                 android:id="@+id/signature"
                 style="@style/RachelText.X"
@@ -54,7 +58,8 @@
         </com.xuexiang.xui.widget.textview.supertextview.SuperTextView>
         <com.xuexiang.xui.widget.textview.supertextview.SuperTextView
             style="@style/RachelSettingsItem"
-            app:sLeftTextString="背景墙" >
+            app:sLeftTextString="背景墙"
+            app:sRightIconRes="@null" >
             <com.xuexiang.xui.widget.imageview.RadiusImageView
                 android:id="@+id/wall"
                 android:layout_width="80dp"
@@ -77,11 +82,12 @@
 
         <TextView
             android:id="@+id/tv_msg"
-            style="@style/RachelText"
+            style="@style/RachelText.X"
             android:layout_marginVertical="10dp"
-            android:text=" - 资讯设置"
+            android:text="资讯设置"
             android:textColor="@color/steel_blue"
-            android:textSize="@dimen/base" />
+            android:textSize="@dimen/base"
+            android:textAlignment="center" />
         <com.xuexiang.xui.widget.textview.supertextview.SuperTextView
             android:id="@+id/weibo"
             style="@style/RachelSettingsItem"
@@ -93,19 +99,21 @@
 
         <TextView
             android:id="@+id/tv_res"
-            style="@style/RachelText"
+            style="@style/RachelText.X"
             android:layout_marginVertical="10dp"
-            android:text=" - 美图设置"
+            android:text="美图设置"
             android:textColor="@color/steel_blue"
-            android:textSize="@dimen/base" />
+            android:textSize="@dimen/base"
+            android:textAlignment="center" />
 
         <TextView
             android:id="@+id/tv_music"
-            style="@style/RachelText"
+            style="@style/RachelText.X"
             android:layout_marginVertical="10dp"
-            android:text=" - 听歌设置"
+            android:text="听歌设置"
             android:textColor="@color/steel_blue"
-            android:textSize="@dimen/base" />
+            android:textSize="@dimen/base"
+            android:textAlignment="center" />
         <com.xuexiang.xui.widget.textview.supertextview.SuperTextView
             style="@style/RachelSettingsItem"
             app:sLeftTextString="歌单云备份"
@@ -130,5 +138,30 @@
                     android:src="@drawable/svg_download_blue" />
             </LinearLayout>
         </com.xuexiang.xui.widget.textview.supertextview.SuperTextView>
+
+        <TextView
+            android:id="@+id/tv_other"
+            style="@style/RachelText.X"
+            android:layout_marginVertical="10dp"
+            android:text="其他"
+            android:textColor="@color/steel_blue"
+            android:textSize="@dimen/base"
+            android:textAlignment="center" />
+        <com.xuexiang.xui.widget.textview.supertextview.SuperTextView
+            android:id="@+id/check_update"
+            style="@style/RachelSettingsItem"
+            app:sLeftTextString="检查更新"
+            app:sLeftTextColor="@color/orange_red"
+            app:sRightIconRes="@drawable/svg_settings_update" />
+        <com.xuexiang.xui.widget.textview.supertextview.SuperTextView
+            android:id="@+id/feedback"
+            style="@style/RachelSettingsItem"
+            app:sLeftTextString="反馈与建议"
+            app:sRightIconRes="@drawable/svg_settings_feedback" />
+        <com.xuexiang.xui.widget.textview.supertextview.SuperTextView
+            android:id="@+id/about"
+            style="@style/RachelSettingsItem"
+            app:sLeftTextString="关于茶舍"
+            app:sRightIconRes="@drawable/svg_settings_about" />
     </LinearLayout>
 </ScrollView>

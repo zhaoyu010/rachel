@@ -52,13 +52,13 @@ abstract class RachelFragment<Binding : ViewBinding>(val pages: RachelPages) : F
     }
 
     final override fun onDestroyView() {
-        super.onDestroyView()
         quit()
+        super.onDestroyView()
     }
 
     final override fun onDestroy() {
-        super.onDestroy()
         _binding = null
+        super.onDestroy()
     }
 
     fun post(r: Runnable) = pages.handler.post(r)

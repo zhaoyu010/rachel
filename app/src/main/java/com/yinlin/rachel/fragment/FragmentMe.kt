@@ -1,8 +1,17 @@
 package com.yinlin.rachel.fragment
 
+import android.R.attr.fragment
+import android.R.attr.theme
+import android.app.Activity
+import android.content.Intent
+import android.net.Uri
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.haibin.calendarview.Calendar
+import com.xuexiang.xqrcode.XQRCode
+import com.xuexiang.xqrcode.ui.CaptureActivity
+import com.xuexiang.xqrcode.ui.CaptureActivity.KEY_CAPTURE_THEME
 import com.xuexiang.xui.utils.XToastUtils
 import com.yinlin.rachel.Config
 import com.yinlin.rachel.R
@@ -15,8 +24,8 @@ import com.yinlin.rachel.bold
 import com.yinlin.rachel.data.ShowActivity
 import com.yinlin.rachel.databinding.FragmentMeBinding
 import com.yinlin.rachel.date
-import com.yinlin.rachel.dialog.BottomDialogAbout
 import com.yinlin.rachel.dialog.BottomDialogActivity
+import com.yinlin.rachel.dialog.BottomDialogUserCard
 import com.yinlin.rachel.dialog.DialogAddActivity
 import com.yinlin.rachel.load
 import com.yinlin.rachel.model.RachelDialog
@@ -34,13 +43,27 @@ import kotlinx.coroutines.withContext
 class FragmentMe(pages: RachelPages) : RachelFragment<FragmentMeBinding>(pages) {
     private val rilNet = RachelImageLoader(pages.context, R.drawable.placeholder_pic, DiskCacheStrategy.ALL)
 
-    override fun bindingClass() = FragmentMeBinding::class.java
-
-    private val bottomDialogAbout = BottomDialogAbout(this)
+    private val bottomDialogUserCard = BottomDialogUserCard(this)
     private val bottomDialogActivity = BottomDialogActivity(this)
 
+    private val scanQRCodeLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        if (it.resultCode == Activity.RESULT_OK) {
+            it.data?.extras?.apply {
+                val type = this.getInt(XQRCode.RESULT_TYPE)
+                val data = this.getString(XQRCode.RESULT_DATA)
+                if (type == XQRCode.RESULT_SUCCESS && data != null) {
+                    pages.processUri(Uri.parse(data))
+                    return@registerForActivityResult
+                }
+                else XToastUtils.warning("扫描二维码失败, 请稍后再试")
+            }
+        }
+    }
+
+    override fun bindingClass() = FragmentMeBinding::class.java
+
     override fun init() {
-        bottomDialogAbout.init()
+        bottomDialogUserCard.init()
         bottomDialogActivity.init()
 
         v.id.bold = true
@@ -49,24 +72,31 @@ class FragmentMe(pages: RachelPages) : RachelFragment<FragmentMeBinding>(pages) 
         v.tvAccount.bold = true
         v.calendarMonth.bold = true
 
+        v.id.rachelClick {
+            if (!Config.isLogin) {
+                XToastUtils.warning("请先登录")
+                pages.navigate(FragmentLogin(pages))
+            }
+        }
+
         // 扫码
         v.buttonScan.rachelClick {
-
+            val intent = Intent(pages.context, CaptureActivity::class.java)
+            intent.putExtra(KEY_CAPTURE_THEME, theme)
+            scanQRCodeLauncher.launch(intent)
         }
 
         // 名片
         v.buttonProfile.rachelClick {
-
+            if (Config.isLoginAndUpdate) bottomDialogUserCard.update().show()
+            else {
+                XToastUtils.warning("请先登录")
+                pages.navigate(FragmentLogin(pages))
+            }
         }
 
         // 设置
         v.buttonSettings.rachelClick { pages.navigate(FragmentSettings(pages)) }
-
-        // 更新
-        v.buttonUpdate.rachelClick { checkUpdate() }
-
-        // 关于
-        v.buttonAbout.rachelClick { bottomDialogAbout.update().show() }
 
         // 签到
         v.buttonSignIn.rachelClick {
@@ -135,7 +165,7 @@ class FragmentMe(pages: RachelPages) : RachelFragment<FragmentMeBinding>(pages) 
     }
 
     override fun quit() {
-        bottomDialogAbout.release()
+        bottomDialogUserCard.release()
         bottomDialogActivity.release()
     }
 
@@ -219,23 +249,6 @@ class FragmentMe(pages: RachelPages) : RachelFragment<FragmentMeBinding>(pages) 
                 XToastUtils.success(result.value)
             }
             else XToastUtils.error(result.value)
-        }
-    }
-
-    // 检查更新
-    @NewThread
-    private fun checkUpdate() {
-        val srcVersion = pages.context.packageManager.getPackageInfo(pages.context.packageName, 0).longVersionCode
-        lifecycleScope.launch {
-            pages.loadingDialog.show()
-            val result = withContext(Dispatchers.IO) { API.SysAPI.getServerVersionCode() }
-            pages.loadingDialog.dismiss()
-            val content = "APP版本:${srcVersion}\n服务器版本:${result.value1}\n最低兼容版本:${result.value2}"
-            if (result.ok) {
-                if (srcVersion == result.value1) XToastUtils.success(content)
-                else XToastUtils.warning(content)
-            }
-            else XToastUtils.error(content)
         }
     }
 

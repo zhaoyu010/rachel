@@ -1,16 +1,12 @@
 package com.yinlin.rachel.fragment
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.view.View
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.abdshammout.UBV.OnClickListenerBreadcrumbs
 import com.abdshammout.UBV.model.PathItem
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.xuexiang.xui.utils.XToastUtils
-import com.xuexiang.xui.widget.imageview.preview.PreviewBuilder
-import com.xuexiang.xui.widget.imageview.preview.enitity.IPreviewInfo
 import com.yinlin.rachel.Net
 import com.yinlin.rachel.R
 import com.yinlin.rachel.annotation.NewThread
@@ -24,7 +20,7 @@ import com.yinlin.rachel.model.RachelAdapter
 import com.yinlin.rachel.model.RachelFragment
 import com.yinlin.rachel.model.RachelImageLoader
 import com.yinlin.rachel.model.RachelPages
-import com.yinlin.rachel.model.RachelPreviewInfo
+import com.yinlin.rachel.model.RachelPreview
 import com.yinlin.rachel.rachelClick
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -68,10 +64,10 @@ class FragmentRes(pages: RachelPages) : RachelFragment<FragmentResBinding>(pages
                 fragment.v.header.addToPath(PathItem(item.name))
                 setRes(currentPos + 1, item)
             } else {
-                item.thumbUrl?.apply {
-                    PreviewBuilder.from((fragment.pages.context as Activity))
-                        .setImg<IPreviewInfo>(RachelPreviewInfo(this))
-                        .setType(PreviewBuilder.IndicatorType.Dot).start()
+                if (item.thumbUrl != null) {
+                    val preview = RachelPreview(item.thumbUrl!!, item.sourceUrl!!)
+                    preview.updateRect(v.pic)
+                    RachelPreview.show(fragment.pages.context, preview)
                 }
             }
         }

@@ -95,14 +95,4 @@ var ImageView.pureColor: Int
     get() = (drawable as? ColorDrawable)?.color ?: Color.TRANSPARENT
     set(value) { setImageDrawable(if (value == Color.TRANSPARENT) null else ColorDrawable(value)) }
 
-fun ImageView.updateNineGridBounds(callback: (Int, Rect) -> Unit) {
-    val view = this.parent as ViewGroup
-    for (i in 0 until view.childCount) {
-        val itemView = view.getChildAt(i)
-        val bounds = Rect()
-        itemView?.getGlobalVisibleRect(bounds)
-        callback(i, bounds)
-    }
-}
-
 val Calendar.date: String get() = "${this.year}-${this.month}-${this.day}"

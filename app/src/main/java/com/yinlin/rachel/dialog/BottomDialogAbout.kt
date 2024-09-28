@@ -5,7 +5,7 @@ import com.xuexiang.xui.utils.XToastUtils
 import com.yinlin.rachel.R
 import com.yinlin.rachel.bold
 import com.yinlin.rachel.databinding.BottomDialogAboutBinding
-import com.yinlin.rachel.fragment.FragmentMe
+import com.yinlin.rachel.fragment.FragmentSettings
 import com.yinlin.rachel.gotoQQ
 import com.yinlin.rachel.gotoQQGroup
 import com.yinlin.rachel.interceptScroll
@@ -13,7 +13,7 @@ import com.yinlin.rachel.model.RachelBottomDialog
 import com.yinlin.rachel.rachelClick
 
 
-class BottomDialogAbout(fragment: FragmentMe) : RachelBottomDialog<BottomDialogAboutBinding, FragmentMe>(fragment, 0.9f) {
+class BottomDialogAbout(fragment: FragmentSettings) : RachelBottomDialog<BottomDialogAboutBinding, FragmentSettings>(fragment, 0.9f) {
     private val pages = root.pages
 
     override fun bindingClass() = BottomDialogAboutBinding::class.java
